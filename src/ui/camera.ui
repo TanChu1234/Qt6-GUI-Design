@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1320</width>
+    <height>830</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>1301</width>
+     <height>801</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="horizontalSpacing">
+     <number>8</number>
+    </property>
+    <property name="verticalSpacing">
+     <number>0</number>
+    </property>
+    <item row="2" column="3" rowspan="2">
+     <widget class="QPushButton" name="run_once">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>RUN AI 
+ONCE TIME</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6" rowspan="2">
+     <widget class="QListWidget" name="log_list"/>
+    </item>
+    <item row="2" column="4" rowspan="2">
+     <widget class="QPushButton" name="run_continuous">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>RUN AI 
+REAL TIME</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1" rowspan="5" colspan="6">
+     <widget class="QLabel" name="label">
+      <property name="minimumSize">
+       <size>
+        <width>1080</width>
+        <height>720</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(0, 0, 127);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2" rowspan="2">
+     <widget class="QPushButton" name="stop_cam">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>STOP</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" rowspan="2">
+     <widget class="QPushButton" name="start_cam">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>START</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" rowspan="5">
+     <widget class="QListWidget" name="listWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="flow">
+       <enum>QListView::TopToBottom</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>Camera </string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="5" rowspan="2">
+     <widget class="QLabel" name="label_2">
+      <property name="minimumSize">
+       <size>
+        <width>70</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>LOG:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="indent">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="search_cam">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Search Camera</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="add_cam">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Add Cam</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="remove_cam">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Remove Cam</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
