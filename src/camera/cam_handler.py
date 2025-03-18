@@ -34,7 +34,7 @@ class CameraThread(QThread):
         self.log_signal.emit(f"🔄 Connecting to {self.protocol}://{self.ip_address}:{self.port}")
         
         cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-
+        # cap.set(cv2.CAP_PROP_FPS, 10)  # Try lowering FPS
         if not cap.isOpened():
             self.log_signal.emit(f"❌ Failed to open camera {self.camera_name or self.ip_address}. Exiting.")
             return  # Exit the thread immediately
@@ -47,7 +47,6 @@ class CameraThread(QThread):
         
         while self.running:
             ret, frame = cap.read()
-            
             if not ret:
                 frame_failure_count += 1
                 self.log_signal.emit(f"⚠️ Frame read failed ({frame_failure_count}/{max_failures})")

@@ -23,36 +23,37 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1320, 830)
+        Form.resize(1315, 830)
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(10, 20, 1301, 801))
+        self.layoutWidget.setGeometry(QRect(9, 20, 1301, 801))
         self.gridLayout = QGridLayout(self.layoutWidget)
+        self.gridLayout.setSpacing(8)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setHorizontalSpacing(8)
-        self.gridLayout.setVerticalSpacing(0)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.run_once = QPushButton(self.layoutWidget)
-        self.run_once.setObjectName(u"run_once")
-        self.run_once.setMinimumSize(QSize(100, 60))
+        self.gridLayout_2 = QGridLayout()
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.gridLayout_2.setHorizontalSpacing(8)
+        self.gridLayout_2.setVerticalSpacing(0)
+        self.add_cam = QPushButton(self.layoutWidget)
+        self.add_cam.setObjectName(u"add_cam")
+        self.add_cam.setMinimumSize(QSize(100, 60))
         font = QFont()
         font.setPointSize(12)
         font.setBold(True)
-        self.run_once.setFont(font)
+        self.add_cam.setFont(font)
 
-        self.gridLayout.addWidget(self.run_once, 2, 3, 2, 1)
+        self.gridLayout_2.addWidget(self.add_cam, 0, 0, 1, 1)
 
-        self.log_list = QListWidget(self.layoutWidget)
-        self.log_list.setObjectName(u"log_list")
+        self.remove_cam = QPushButton(self.layoutWidget)
+        self.remove_cam.setObjectName(u"remove_cam")
+        self.remove_cam.setMinimumSize(QSize(100, 60))
+        self.remove_cam.setFont(font)
 
-        self.gridLayout.addWidget(self.log_list, 2, 6, 2, 1)
+        self.gridLayout_2.addWidget(self.remove_cam, 0, 1, 1, 1)
 
-        self.run_continuous = QPushButton(self.layoutWidget)
-        self.run_continuous.setObjectName(u"run_continuous")
-        self.run_continuous.setMinimumSize(QSize(100, 60))
-        self.run_continuous.setFont(font)
 
-        self.gridLayout.addWidget(self.run_continuous, 2, 4, 2, 1)
+        self.gridLayout.addLayout(self.gridLayout_2, 9, 0, 1, 1)
 
         self.label = QLabel(self.layoutWidget)
         self.label.setObjectName(u"label")
@@ -61,21 +62,7 @@ class Ui_Form(object):
         self.label.setStyleSheet(u"background-color: rgb(0, 0, 127);")
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addWidget(self.label, 4, 1, 5, 6)
-
-        self.stop_cam = QPushButton(self.layoutWidget)
-        self.stop_cam.setObjectName(u"stop_cam")
-        self.stop_cam.setMinimumSize(QSize(100, 60))
-        self.stop_cam.setFont(font)
-
-        self.gridLayout.addWidget(self.stop_cam, 2, 2, 2, 1)
-
-        self.start_cam = QPushButton(self.layoutWidget)
-        self.start_cam.setObjectName(u"start_cam")
-        self.start_cam.setMinimumSize(QSize(100, 60))
-        self.start_cam.setFont(font)
-
-        self.gridLayout.addWidget(self.start_cam, 2, 1, 2, 1)
+        self.gridLayout.addWidget(self.label, 4, 1, 5, 12)
 
         self.listWidget = QListWidget(self.layoutWidget)
         QListWidgetItem(self.listWidget)
@@ -94,37 +81,55 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.listWidget, 4, 0, 5, 1)
 
+        self.start_cam = QPushButton(self.layoutWidget)
+        self.start_cam.setObjectName(u"start_cam")
+        self.start_cam.setMinimumSize(QSize(100, 60))
+        self.start_cam.setFont(font)
+
+        self.gridLayout.addWidget(self.start_cam, 9, 1, 1, 1)
+
+        self.stop_cam = QPushButton(self.layoutWidget)
+        self.stop_cam.setObjectName(u"stop_cam")
+        self.stop_cam.setMinimumSize(QSize(100, 60))
+        self.stop_cam.setFont(font)
+
+        self.gridLayout.addWidget(self.stop_cam, 9, 2, 1, 1)
+
+        self.display = QPushButton(self.layoutWidget)
+        self.display.setObjectName(u"display")
+        self.display.setMinimumSize(QSize(100, 60))
+        self.display.setFont(font)
+
+        self.gridLayout.addWidget(self.display, 9, 3, 1, 1)
+
+        self.run_once = QPushButton(self.layoutWidget)
+        self.run_once.setObjectName(u"run_once")
+        self.run_once.setMinimumSize(QSize(100, 60))
+        self.run_once.setFont(font)
+
+        self.gridLayout.addWidget(self.run_once, 9, 4, 1, 1)
+
+        self.run_continuous = QPushButton(self.layoutWidget)
+        self.run_continuous.setObjectName(u"run_continuous")
+        self.run_continuous.setMinimumSize(QSize(100, 60))
+        self.run_continuous.setFont(font)
+
+        self.gridLayout.addWidget(self.run_continuous, 9, 5, 1, 1)
+
         self.label_2 = QLabel(self.layoutWidget)
         self.label_2.setObjectName(u"label_2")
-        self.label_2.setMinimumSize(QSize(70, 0))
+        self.label_2.setMinimumSize(QSize(70, 60))
         self.label_2.setFont(font)
         self.label_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.label_2.setIndent(5)
 
-        self.gridLayout.addWidget(self.label_2, 2, 5, 2, 1)
+        self.gridLayout.addWidget(self.label_2, 9, 6, 1, 1)
 
-        self.search_cam = QPushButton(self.layoutWidget)
-        self.search_cam.setObjectName(u"search_cam")
-        self.search_cam.setFont(font1)
+        self.log_list = QListWidget(self.layoutWidget)
+        self.log_list.setObjectName(u"log_list")
+        self.log_list.setMinimumSize(QSize(0, 60))
 
-        self.gridLayout.addWidget(self.search_cam, 2, 0, 1, 1)
-
-        self.gridLayout_2 = QGridLayout()
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.add_cam = QPushButton(self.layoutWidget)
-        self.add_cam.setObjectName(u"add_cam")
-        self.add_cam.setFont(font1)
-
-        self.gridLayout_2.addWidget(self.add_cam, 0, 0, 1, 1)
-
-        self.remove_cam = QPushButton(self.layoutWidget)
-        self.remove_cam.setObjectName(u"remove_cam")
-        self.remove_cam.setFont(font1)
-
-        self.gridLayout_2.addWidget(self.remove_cam, 0, 1, 1, 1)
-
-
-        self.gridLayout.addLayout(self.gridLayout_2, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.log_list, 9, 7, 1, 6)
 
 
         self.retranslateUi(Form)
@@ -134,13 +139,9 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.run_once.setText(QCoreApplication.translate("Form", u"RUN AI \n"
-"ONCE TIME", None))
-        self.run_continuous.setText(QCoreApplication.translate("Form", u"RUN AI \n"
-"REAL TIME", None))
+        self.add_cam.setText(QCoreApplication.translate("Form", u"ADD CAM", None))
+        self.remove_cam.setText(QCoreApplication.translate("Form", u"DEL CAM", None))
         self.label.setText("")
-        self.stop_cam.setText(QCoreApplication.translate("Form", u"STOP", None))
-        self.start_cam.setText(QCoreApplication.translate("Form", u"START", None))
 
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
@@ -148,9 +149,13 @@ class Ui_Form(object):
         ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"Camera ", None));
         self.listWidget.setSortingEnabled(__sortingEnabled)
 
+        self.start_cam.setText(QCoreApplication.translate("Form", u"START", None))
+        self.stop_cam.setText(QCoreApplication.translate("Form", u"STOP", None))
+        self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
+        self.run_once.setText(QCoreApplication.translate("Form", u"RUN AI \n"
+"ONCE TIME", None))
+        self.run_continuous.setText(QCoreApplication.translate("Form", u"RUN AI \n"
+"REAL TIME", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"LOG:", None))
-        self.search_cam.setText(QCoreApplication.translate("Form", u"Search Camera", None))
-        self.add_cam.setText(QCoreApplication.translate("Form", u"Add Cam", None))
-        self.remove_cam.setText(QCoreApplication.translate("Form", u"Remove Cam", None))
     # retranslateUi
 

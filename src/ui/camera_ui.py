@@ -1,13 +1,11 @@
-from PySide6.QtWidgets import QWidget, QListWidgetItem
+from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox
 from PySide6.QtGui import QIcon
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
-from camera.cam_handler import CameraThread   # Import CameraHandler
+from camera.cam_handler import CameraThread
 from camera.check_ping import PingThread
+from camera.camera_configuration_manerger import CameraConfigManager  # Import the new class
 
-
-
-            
 class CameraWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -17,16 +15,41 @@ class CameraWidget(QWidget):
         self.camera_threads = {}  # Store running threads
         self.camera_properties = {}  # Store all camera properties
         self.current_camera = None  # Track which camera is currently displayed
+        
+        # Initialize config manager
+        self.config_manager = CameraConfigManager()
             
         # ✅ Connect UI buttons
         self.ui.add_cam.clicked.connect(self.add_camera)
-        self.ui.search_cam.clicked.connect(self.search_camera)
         self.ui.start_cam.clicked.connect(self.start_camera)
         self.ui.stop_cam.clicked.connect(self.stop_camera)
+        self.ui.display.clicked.connect(self.display)
         self.ui.run_once.clicked.connect(self.run_ai_once)
         self.ui.run_continuous.clicked.connect(self.run_ai_continuous)
         self.ui.listWidget.itemClicked.connect(self.select_camera)  # Handle camera selection
+        self.ui.remove_cam.clicked.connect(self.remove_camera)
         
+        # Load saved camera configurations
+        self.load_saved_cameras()
+        
+    def load_saved_cameras(self):
+        """Load saved camera configurations from file"""
+        cameras = self.config_manager.load_config()
+        self.log_message(f"📋 Loaded {len(cameras)} saved cameras")
+        
+        # Add cameras to the list and properties dictionary
+        for camera in cameras:
+            camera_name = camera["camera_name"]
+            if not camera_name:  # If name is empty, generate default
+                camera_name = f"Camera {self.ui.listWidget.count()}"
+                camera["camera_name"] = camera_name
+                
+            item = QListWidgetItem(QIcon("D:/Qt6 GUI Design/src/asset/images/icons8-camera-48.png"), camera_name)
+            self.ui.listWidget.addItem(item)
+            
+            # Store camera properties
+            self.camera_properties[camera_name] = camera
+            
     def log_message(self, message):
         """Append log messages to the log listWidget."""
         self.ui.log_list.addItem(message)  # Ensure log_listWidget exists in UI
@@ -63,15 +86,95 @@ class CameraWidget(QWidget):
             camera_name = self.temp_camera_info["camera_name"]
             if not camera_name:  # If name is empty, generate default
                 camera_name = f"Camera {self.ui.listWidget.count()}"
+                self.temp_camera_info["camera_name"] = camera_name  # Update the name in properties
 
+            # Check if camera already exists in list
+            for i in range(self.ui.listWidget.count()):
+                item = self.ui.listWidget.item(i)
+                props = self.camera_properties.get(item.text())
+                if props and props["ip_address"] == camera_ip:
+                    # Update existing camera
+                    item.setText(camera_name)
+                    self.camera_properties[camera_name] = self.temp_camera_info
+                    
+                    # Save to config
+                    self.config_manager.add_camera(self.temp_camera_info)
+                    
+                    self.log_message(f"🔄 Updated {camera_name} with IP {camera_ip}")
+                    return
+
+            # Add new camera
             item = QListWidgetItem(QIcon("D:/Qt6 GUI Design/src/asset/images/icons8-camera-48.png"), camera_name)
             self.ui.listWidget.addItem(item)
 
             # Store all camera properties
             self.camera_properties[camera_name] = self.temp_camera_info
+            
+            # Save to config
+            self.config_manager.add_camera(self.temp_camera_info)
+            
             self.log_message(f"✅ Added {camera_name} with IP {camera_ip}")
         else:
             self.log_message(f"❌ Camera at {camera_ip} is unreachable!")
+    
+    def remove_camera(self):
+        """Remove the selected camera from the list and configuration."""
+        item = self.ui.listWidget.currentItem()
+        if not item:
+            self.log_message("⚠️ No camera selected to remove!")
+            return
+
+        camera_name = item.text()
+        
+        # Check if the camera is currently streaming
+        if camera_name in self.camera_threads:
+            # Ask the user to confirm stopping and removing
+            reply = QMessageBox.question(
+                self,
+                "Remove Active Camera",
+                f"Camera '{camera_name}' is currently streaming. Stop and remove it?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.No:
+                return
+                
+            # Stop the camera thread first
+            self.stop_camera()
+        else:
+            # Just confirm removal for inactive cameras
+            reply = QMessageBox.question(
+                self,
+                "Remove Camera",
+                f"Are you sure you want to remove camera '{camera_name}'?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            
+            if reply == QMessageBox.No:
+                return
+                
+        # Remove camera from list widget
+        row = self.ui.listWidget.row(item)
+        self.ui.listWidget.takeItem(row)
+        
+        # Remove from our properties dictionary
+        if camera_name in self.camera_properties:
+            del self.camera_properties[camera_name]
+            
+        # Remove from configuration manager
+        success = self.config_manager.remove_camera(camera_name)
+        if success:
+            self.log_message(f"🗑️ Removed camera '{camera_name}'")
+        else:
+            self.log_message(f"⚠️ Failed to remove camera '{camera_name}' from configuration")
+        
+        # Clear display if this was the current camera
+        if self.current_camera == camera_name:
+            self.ui.label.clear()
+            self.current_camera = None
+            
     def select_camera(self, item):
         """Handle camera selection from listWidget."""
         camera_name = item.text()
@@ -86,7 +189,7 @@ class CameraWidget(QWidget):
         else:
             self.log_message(f"⚠️ No properties found for {camera_name}")
             
-    def search_camera(self):
+    def display(self):
         self.log_message("🔍 Searching for cameras...")
     
     def start_camera(self):
@@ -172,6 +275,9 @@ class CameraWidget(QWidget):
         """Ensure all camera threads stop when closing the window."""
         for thread in self.camera_threads.values():
             thread.stop()
+        # Save configuration on close - though this shouldn't be necessary
+        # as we save after each add/remove/update
+        self.config_manager.save_config()
         event.accept()
         
     def run_ai_once(self):
