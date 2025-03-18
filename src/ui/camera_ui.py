@@ -1,10 +1,11 @@
 from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox
 from PySide6.QtGui import QIcon
+from PySide6.QtCore import QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread
 from camera.check_ping import PingThread
-from camera.camera_configuration_manerger import CameraConfigManager
+from camera.camera_configuration_manager import CameraConfigManager
 
 class CameraWidget(QWidget):
     def __init__(self):
@@ -16,10 +17,11 @@ class CameraWidget(QWidget):
         self.camera_properties = {}  # Store all camera properties
         self.current_camera = None  # Track which camera is currently displayed
         self.displaying = False  # Track if we're currently displaying any camera
-        
+        # Set placeholder text for the lineEdit
+        self.ui.lineEdit.setPlaceholderText("Enter camera command (e.g., cam1, trigger cam2)")
         # Initialize config manager
         self.config_manager = CameraConfigManager()
-        
+        self.trigger_results = {}  # Store results from triggers
         # Define icon paths
         self.icon_offline = "src/asset/images/red.png"
         self.icon_online = "src/asset/images/green.png"
@@ -38,25 +40,7 @@ class CameraWidget(QWidget):
         
         # Load saved camera configurations
         self.load_saved_cameras()
-        
-    def load_saved_cameras(self):
-        """Load saved camera configurations from file"""
-        cameras = self.config_manager.load_config()
-        self.log_message(f"📋 Loaded {len(cameras)} saved cameras")
-        
-        # Add cameras to the list and properties dictionary
-        for camera in cameras:
-            camera_name = camera["camera_name"]
-            if not camera_name:  # If name is empty, generate default
-                camera_name = f"Camera {self.ui.listWidget.count()}"
-                camera["camera_name"] = camera_name
-                
-            item = QListWidgetItem(QIcon("D:/Qt6 GUI Design/src/asset/images/icons8-camera-48.png"), camera_name)
-            self.ui.listWidget.addItem(item)
-            
-            # Store camera properties
-            self.camera_properties[camera_name] = camera
-            
+    
     def log_message(self, message):
         """Append log messages to the log listWidget."""
         self.ui.log_list.addItem(message)  # Ensure log_listWidget exists in UI
@@ -66,7 +50,7 @@ class CameraWidget(QWidget):
     
     def add_camera(self):
         """Show the custom camera dialog and get user input."""
-        dialog = CameraDialog(self)
+        dialog = CameraDialog()
         if dialog.exec():  # If user clicks OK
             camera_info = dialog.get_camera_info()
             ip_address = camera_info["ip_address"]
@@ -412,19 +396,7 @@ class CameraWidget(QWidget):
             if not camera_name:  # If name is empty, generate default
                 camera_name = f"Camera {self.ui.listWidget.count()}"
                 camera["camera_name"] = camera_name
-            
-            # Set default status if not saved
-            if "status" not in camera:
-                camera["status"] = "offline"
-                
-            # Choose icon based on last known status
-            icon_path = self.icon_offline  # Default to offline
-            if camera["status"] == "online":
-                icon_path = self.icon_online
-            elif camera["status"] == "connecting":
-                icon_path = self.icon_connecting
-                
-            item = QListWidgetItem(QIcon(icon_path), camera_name)
+            item = QListWidgetItem(QIcon(self.icon_offline), camera_name)
             self.ui.listWidget.addItem(item)
             
             # Store camera properties
@@ -444,7 +416,127 @@ class CameraWidget(QWidget):
         event.accept()
         
     def run_ai_once(self):
-        self.log_message("🤖 Running AI once...")
+        """Process the command from the lineEdit to trigger specific cameras."""
+        # Get the command from lineEdit
+        command = self.ui.lineEdit.text().strip()
+        
+        if not command:
+            self.log_message("⚠️ Please enter a camera command in the text field")
+            return
+            
+        self.log_message(f"🤖 Running AI once with command: {command}")
+        
+        # Parse the command
+        parts = command.split()
+        
+        # Check for trigger command
+        if len(parts) >= 2 and parts[0].lower() == "trigger":
+            # Format: trigger cam1 [action]
+            cam_part = parts[1]
+            action = parts[2] if len(parts) > 2 else "capture"
+            
+            # Find the camera
+            target_camera = self.find_camera(cam_part)
+            if not target_camera:
+                return
+            
+            # Trigger the camera
+            self.trigger_camera(target_camera, action)
+            return
+        
+        # Check if the command is for a specific camera
+        if parts[0].startswith("cam"):
+            # Extract camera number or name
+            target_camera = self.find_camera(parts[0])
+            if not target_camera:
+                return
+            
+            # Start and display the camera
+            self.activate_camera(target_camera)
+        else:
+            self.log_message(f"⚠️ Unknown command: {command}")
+            self.log_message("ℹ️ Use 'cam1', 'trigger cam2', etc.")
+
+    def find_camera(self, cam_identifier):
+        """Find a camera by number or name."""
+        if cam_identifier.startswith("cam"):
+            cam_identifier = cam_identifier[3:]  # Remove "cam" prefix
+        
+        # If it's a number, try to find by index
+        if cam_identifier.isdigit():
+            cam_index = int(cam_identifier) - 1  # Convert to 0-based index
+            if 0 <= cam_index < self.ui.listWidget.count():
+                return self.ui.listWidget.item(cam_index).text()
+            else:
+                self.log_message(f"❌ Camera {cam_identifier} not found in the list")
+                return None
+        else:
+            # Try to find by name
+            for i in range(self.ui.listWidget.count()):
+                camera_name = self.ui.listWidget.item(i).text()
+                if cam_identifier.lower() in camera_name.lower():
+                    return camera_name
+            
+            self.log_message(f"❌ Camera matching '{cam_identifier}' not found")
+            return None
+
+    def activate_camera(self, camera_name):
+        """Start and display a camera."""
+        # Check if the camera is already running
+        if camera_name in self.camera_threads and self.camera_threads[camera_name].isRunning():
+            self.log_message(f"✅ Using camera: {camera_name}")
+        else:
+            # Start the camera
+            self.log_message(f"🔄 Starting camera: {camera_name}")
+            self.start_camera(camera_name)
+        
+        # Set this as the current camera to display
+        self.current_camera = camera_name
+        self.displaying = True
+        self.ui.display.setText("Hide")
+        self.log_message(f"🖥️ Now displaying {camera_name}")
+
+    def trigger_camera(self, camera_name, action="capture"):
+        """Trigger an action on a specific camera."""
+        # Check if camera is running
+        if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
+            # Try to start the camera first
+            self.log_message(f"🔄 Starting camera {camera_name} before triggering...")
+            self.start_camera(camera_name)
+            
+            # Wait a bit for the camera to connect
+            QThread.msleep(300)
+            
+            # Check again
+            if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
+                self.log_message(f"❌ Failed to start camera {camera_name} for triggering")
+                return
+        
+        # Connect to the trigger_completed signal if not already connected
+        if not hasattr(self.camera_threads[camera_name], "_trigger_connected"):
+            self.camera_threads[camera_name].trigger_completed_signal.connect(
+                lambda result, cam=camera_name: self.handle_trigger_result(result, cam)
+            )
+            self.camera_threads[camera_name]._trigger_connected = True
+        
+        # Trigger the camera
+        self.camera_threads[camera_name].trigger(action)
+        self.log_message(f"🔔 Triggered {camera_name} with action: {action}")
+
+    def handle_trigger_result(self, result, camera_name):
+        """Handle the result of a camera trigger."""
+        if result == "error":
+            self.log_message(f"❌ Trigger failed for {camera_name}")
+            return
+        
+        # Store the result
+        self.trigger_results[camera_name] = result
+        
+        # Log the result
+        if result.endswith(".jpg"):
+            self.log_message(f"📸 Image captured from {camera_name}: {result}")
+        else:
+            self.log_message(f"✅ Trigger result for {camera_name}: {result}")
 
     def run_ai_continuous(self):
         self.log_message("♻️ Running AI continuously...")

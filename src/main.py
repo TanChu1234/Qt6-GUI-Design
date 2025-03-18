@@ -1,24 +1,31 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QSizePolicy
-from ui.camera_ui import CameraWidget  # ✅ Corrected import
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QSizePolicy
+from ui.camera_ui import CameraWidget  # ✅ Import CameraWidget
+from ui.main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Camera Management")
         self.resize(1330, 830)
-         # ✅ Allow resizing
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # ✅ Create a central widget and layout
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
 
-        layout = QVBoxLayout()
-        central_widget.setLayout(layout)
+        # ✅ Initialize UI
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
-        # ✅ Add CameraWidget
-        self.ui = CameraWidget()
-        layout.addWidget(self.ui)  # ✅ Corrected: Add to layout instead of calling setupUi(central_widget)
+        # ✅ Create CameraWidget instance
+        self.camera_widget = CameraWidget()
+
+        # ✅ Add CameraWidget to stackedWidget
+        self.ui.stackedWidget.addWidget(self.camera_widget)
+
+        # ✅ Optionally, connect a button to switch to CameraWidget page
+        self.ui.camera_page.clicked.connect(self.show_camera_page)
+
+    def show_camera_page(self):
+        """Switches to the CameraWidget page."""
+        self.ui.stackedWidget.setCurrentWidget(self.camera_widget)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

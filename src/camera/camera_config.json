@@ -15,5 +15,23 @@
         "password": "",
         "protocol": "HTTP",
         "status": "connecting"
+    },
+    {
+        "camera_name": "new",
+        "ip_address": "192.168.198.217",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "protocol": "HTTP",
+        "status": "connecting"
+    },
+    {
+        "camera_name": "nha",
+        "ip_address": "192.168.198.189",
+        "port": "554",
+        "username": "chunhattan",
+        "password": "12345678",
+        "protocol": "RTSP",
+        "status": "connecting"
     }
 ]
