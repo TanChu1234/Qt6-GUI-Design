@@ -62,3 +62,17 @@ class CameraConfigManager:
                 return True
                 
         return False  # Camera not found
+        
+    def remove_camera_by_name(self, camera_name):
+        """Remove a camera from the configuration by name"""
+        # Load latest configuration
+        self.load_config()
+        
+        # Find and remove camera based on name
+        for i, camera in enumerate(self.cameras):
+            if camera["camera_name"] == camera_name:
+                del self.cameras[i]
+                self.save_config()
+                return True
+                
+        return False  # Camera not found

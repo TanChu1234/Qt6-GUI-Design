@@ -1,86 +1,89 @@
+from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
+from PySide6.QtGui import QPixmap, QImage
 import cv2
-from PySide6.QtCore import QThread, Signal
-from PySide6.QtGui import QImage, QPixmap
+import time
 
 class CameraThread(QThread):
-    frame_signal = Signal(QPixmap)  # Signal to send frames
-    log_signal = Signal(str)  # Signal for log messages
-
-    def __init__(self, ip_address, port="", username="", password="", camera_name="", protocol="rtsp"):
+    frame_signal = Signal(QPixmap, str)
+    log_signal = Signal(str)
+    connection_status_signal = Signal(str, str)  # New signal: status, camera_name
+    
+    def __init__(self, ip, port, username, password, camera_name, protocol):
         super().__init__()
-        self.ip_address = ip_address
+        self.ip = ip
         self.port = port
         self.username = username
         self.password = password
         self.camera_name = camera_name
-        self.protocol = protocol.lower()
-        self.running = True  # Control flag
-
-    
+        self.protocol = protocol
+        self.active = False
+        self.mutex = QMutex()
+        self.condition = QWaitCondition()
+        
     def run(self):
-        """Capture video from the IP camera and handle sudden disconnections."""
-        # Build URL with authentication if provided
-        if self.protocol == "rtsp":
-            url = f"rtsp://"
-            if self.username and self.password:
-                url += f"{self.username}:{self.password}@"
-            url += f"{self.ip_address}:{self.port}/stream1"
-        else:  # http
-            url = f"http://"
-            if self.username and self.password:
-                url += f"{self.username}:{self.password}@"
-            url += f"{self.ip_address}:{self.port}/video"
+        self.active = True
         
-        self.log_signal.emit(f"🔄 Connecting to {self.protocol}://{self.ip_address}:{self.port}")
+        # Build camera URL based on protocol
+        if self.protocol == "RTSP":
+            url = f"rtsp://{self.username}:{self.password}@{self.ip}:{self.port}/Streaming/Channels/101"
+        elif self.protocol == "HTTP":
+            url = f"http://{self.username}:{self.password}@{self.ip}:{self.port}/video"
+        else:  # Default or local camera
+            try:
+                url = int(self.ip)  # Try to convert to int for local cameras
+            except ValueError:
+                url = f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
         
-        cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-        # cap.set(cv2.CAP_PROP_FPS, 10)  # Try lowering FPS
+        # Log that we're connecting
+        self.log_signal.emit(f"🔌 Connecting to {self.camera_name} at {self.ip}...")
+        self.connection_status_signal.emit("connecting", self.camera_name)
+        
+        # Attempt to connect to camera
+        cap = cv2.VideoCapture(url)
+        
         if not cap.isOpened():
-            self.log_signal.emit(f"❌ Failed to open camera {self.camera_name or self.ip_address}. Exiting.")
-            return  # Exit the thread immediately
-
-        self.log_signal.emit(f"✅ Camera {self.camera_name or self.ip_address} started streaming.")
-
-        # Add counter for consecutive frame failures
-        frame_failure_count = 0
-        max_failures = 3  # Number of consecutive failures before giving up
-        
-        while self.running:
+            self.log_signal.emit(f"❌ Failed to connect to {self.camera_name}")
+            self.connection_status_signal.emit("disconnected", self.camera_name)
+            self.active = False
+            return
+            
+        self.log_signal.emit(f"✅ Connected to {self.camera_name}")
+        self.connection_status_signal.emit("connected", self.camera_name)     
+        # Main loop for capturing frames
+        while self.active:
             ret, frame = cap.read()
             if not ret:
-                frame_failure_count += 1
-                self.log_signal.emit(f"⚠️ Frame read failed ({frame_failure_count}/{max_failures})")
-                
-                # If we've had too many consecutive failures, stop the thread
-                if frame_failure_count >= max_failures:
-                    self.log_signal.emit(f"❌ Lost connection to {self.camera_name or self.ip_address}. Stopping thread.")
-                    break
-                    
-                # Short sleep to avoid tight loop when camera is having issues
-                self.msleep(100)
-                continue
+                self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
+                self.connection_status_signal.emit("disconnected", self.camera_name)
+                break
+
+            # Convert to RGB format
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
-            # Reset failure counter on successful frame
-            frame_failure_count = 0
-            
-            # Convert frame to QPixmap
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, ch = frame.shape
+            # Convert to QImage
+            h, w, ch = rgb_frame.shape
             bytes_per_line = ch * w
-            qt_img = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(qt_img)
-
-            self.frame_signal.emit(pixmap)  # Send frame to UI
-
-        # Clean up
+            qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            
+            # Convert to pixmap and emit signal
+            pixmap = QPixmap.fromImage(qt_image)
+            self.frame_signal.emit(pixmap, self.camera_name)
+            
+            # Prevent high CPU usage
+            # time.sleep(0.033)  # Approx 30 fps
+            
+            # Check if we should stop - thread-safe way
+            self.mutex.lock()
+            if not self.active:
+                self.mutex.unlock()
+                break
+            self.mutex.unlock()
+                
+        # Cleanup
         cap.release()
-        self.log_signal.emit(f"🛑 Camera {self.camera_name or self.ip_address} stopped.")
         
-        # Signal camera stopped to main thread
-        self.running = False
-
     def stop(self):
-        """Stop the camera thread safely and exit immediately."""
-        self.running = False
-        self.quit()  # Request thread to exit immediately
-        self.wait()  # Wait for thread to finish
+        self.mutex.lock()
+        self.active = False
+        self.mutex.unlock()
+        self.condition.wakeAll()
