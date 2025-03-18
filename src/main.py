@@ -16,10 +16,10 @@ class MainWindow(QMainWindow):
 
         # ✅ Create CameraWidget instance
         self.camera_widget = CameraWidget()
-
+        
         # ✅ Add CameraWidget to stackedWidget
         self.ui.stackedWidget.addWidget(self.camera_widget)
-
+        self.ui.stackedWidget.setCurrentWidget(self.camera_widget)
         # ✅ Optionally, connect a button to switch to CameraWidget page
         self.ui.camera_page.clicked.connect(self.show_camera_page)
 

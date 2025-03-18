@@ -189,7 +189,7 @@ QPushButton:pressed {
      </size>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Box</enum>
+     <enum>QFrame::NoFrame</enum>
     </property>
     <property name="lineWidth">
      <number>1</number>

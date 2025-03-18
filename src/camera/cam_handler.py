@@ -5,24 +5,38 @@ import time
 import os
 
 class CameraThread(QThread):
-    frame_signal = Signal(QPixmap, str)
-    log_signal = Signal(str)
-    connection_status_signal = Signal(str, str)  # status, camera_name
-    trigger_completed_signal = Signal(str, str)  # result, camera_name
+    """Thread class for handling camera streaming and operations."""
+    
+    # Define signals
+    frame_signal = Signal(QPixmap, str)  # For UI updates (pixmap, camera_name)
+    log_signal = Signal(str)  # For logging messages
+    connection_status_signal = Signal(str, str)  # (status, camera_name)
+    trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
     def __init__(self, ip, port, username, password, camera_name, protocol):
+        """Initialize the camera thread with connection details."""
         super().__init__()
+        # Connection parameters
         self.ip = ip
         self.port = port
         self.username = username
         self.password = password
         self.camera_name = camera_name
         self.protocol = protocol
-        self.active = False
-        self.triggered = False
+        
+        # State variables
+        self.active = False  # Controls thread main loop
+        self.triggered = False  # Flag for trigger operations
+        self.trigger_action = None  # What action to perform when triggered
+        
+        # Thread synchronization
         self.mutex = QMutex()
         self.condition = QWaitCondition()
+        
+        # Frame buffer
         self.last_frame = None
+        
+        # Output configuration
         self.save_path = "captures"  # Default path for saved images
         
         # Create the save directory if it doesn't exist
@@ -30,65 +44,133 @@ class CameraThread(QThread):
             os.makedirs(self.save_path)
         
     def run(self):
+        """Main thread execution method."""
         self.active = True
         
         # Build camera URL based on protocol
-        if self.protocol == "RTSP":
-            url = f"rtsp://{self.username}:{self.password}@{self.ip}:{self.port}/stream1"
-        elif self.protocol == "HTTP":
-            url = f"http://{self.username}:{self.password}@{self.ip}:{self.port}/video"
-        else:  # Default or local camera
-            try:
-                url = int(self.ip)  # Try to convert to int for local cameras
-            except ValueError:
-                url = f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
+        url = self._build_camera_url()
         
         # Log that we're connecting
         self.log_signal.emit(f"🔌 Connecting to {self.camera_name} at {self.ip}...")
         self.connection_status_signal.emit("connecting", self.camera_name)
         
-        # Attempt to connect to camera with timeout logic
-        cap = cv2.VideoCapture(url)
-        start_time = time.time()
-        timeout = 5  # Set timeout to 5 seconds
-
-        while time.time() - start_time < timeout:
-            if cap.isOpened():
-                break
-            time.sleep(0.5)  # Avoid busy-waiting
-
-        if not cap.isOpened():
+        # Initialize capture object
+        cap = cv2.VideoCapture()
+        
+        # Set buffer size to reduce latency
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        
+        # Attempt to connect to camera with timeout
+        if not self._connect_with_timeout(cap, url, timeout=1):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False
-            cap.release()  # Ensure the resource is released
+            cap.release()
             return
             
         self.log_signal.emit(f"✅ Connected to {self.camera_name}")
         self.connection_status_signal.emit("connected", self.camera_name)     
         
-        # Main loop for capturing frames
+        # Main frame capture loop
+        try:
+            self._process_frames(cap)
+        except Exception as e:
+            self.log_signal.emit(f"❌ Error in {self.camera_name}: {str(e)}")
+        finally:
+            # Ensure proper cleanup
+            cap.release()
+    
+    def _build_camera_url(self):
+        """Build the camera URL string based on protocol."""
+        if self.protocol == "RTSP":
+            return f"rtsp://{self.username}:{self.password}@{self.ip}:{self.port}/stream1"
+        elif self.protocol == "HTTP":
+            return f"http://{self.username}:{self.password}@{self.ip}:{self.port}/video"
+        else:
+            # Try to use as local camera index
+            try:
+                return int(self.ip)  # Local camera
+            except ValueError:
+                # Default to generic URL format
+                return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
+    
+    def _connect_with_timeout(self, cap, url, timeout=5):
+        """Try to connect to the camera with a timeout."""
+        cap.open(url)
+        start_time = time.time()
+        
+        # Check connection with timeout
+        while time.time() - start_time < timeout:
+            if cap.isOpened():
+                return True
+            time.sleep(0.5)  # Avoid busy-waiting
+            
+            # Try again
+            cap.open(url)
+            
+            # Check if we should still be trying
+            self.mutex.lock()
+            if not self.active:
+                self.mutex.unlock()
+                return False
+            self.mutex.unlock()
+            
+        return False
+            
+    def _process_frames(self, cap):
+        """Process frames from the camera in a loop."""
+        frame_count = 0
+        last_log_time = time.time()
+        frame_rate = 0
+        
         while self.active:
+            # Read frame with timeout handling
             ret, frame = cap.read()
+            
             if not ret:
-                self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
-                self.connection_status_signal.emit("disconnected", self.camera_name)
-                break
+                # Try a couple more times before giving up
+                retries = 0
+                while retries > 0 and self.active:
+                    time.sleep(0.1)
+                    ret, frame = cap.read()
+                    if ret:
+                        break
+                    retries -= 1
+                
+                if not ret:
+                    self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
+                    self.connection_status_signal.emit("disconnected", self.camera_name)
+                    break
 
-            # Convert to RGB format
+            # FPS calculation and logging
+            frame_count += 1
+            current_time = time.time()
+            time_diff = current_time - last_log_time
+            
+            if time_diff >= 5.0:  # Log FPS every 5 seconds
+                frame_rate = frame_count / time_diff
+                self.log_signal.emit(f"📊 {self.camera_name} FPS: {frame_rate:.1f}")
+                frame_count = 0
+                last_log_time = current_time
+
+            # Convert to RGB format for display
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
-            # Store the last frame for trigger processing
+            # Thread-safe operations on shared state
             self.mutex.lock()
-            self.last_frame = frame.copy()  # Store BGR format for processing
+            
+            # Store the last frame for trigger processing (in BGR format)
+            self.last_frame = frame.copy()
             
             # Check if we've been triggered
             if self.triggered:
-                self.process_trigger()
+                self._process_trigger()
                 self.triggered = False
+                
+            # Can release the lock before UI operations
             self.mutex.unlock()
             
-            # Convert to QImage
+            # Convert to QImage - this can be slow so do it outside the lock
             h, w, ch = rgb_frame.shape
             bytes_per_line = ch * w
             qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
@@ -97,20 +179,19 @@ class CameraThread(QThread):
             pixmap = QPixmap.fromImage(qt_image)
             self.frame_signal.emit(pixmap, self.camera_name)
             
-            # Reduce CPU usage
-            time.sleep(0.03)  # Approx 30 fps
+            # Reduce CPU usage - adjust based on desired frame rate
+            time.sleep(0.03)  # ~30 fps max
             
             # Check if we should stop - thread-safe way
             self.mutex.lock()
-            if not self.active:
-                self.mutex.unlock()
-                break
+            should_continue = self.active
             self.mutex.unlock()
-                
-        # Cleanup
-        cap.release()
-        
+            
+            if not should_continue:
+                break
+    
     def stop(self):
+        """Stop the camera thread safely."""
         self.mutex.lock()
         self.active = False
         self.mutex.unlock()
@@ -126,39 +207,4 @@ class CameraThread(QThread):
         self.mutex.lock()
         self.triggered = True
         self.trigger_action = action
-        self.mutex.unlock()
-        self.log_signal.emit(f"🔔 Triggered {self.camera_name} - Action: {action}")
-        return True
-    
-    def process_trigger(self):
-        """Process the trigger action on the current frame."""
-        if self.last_frame is None:
-            self.log_signal.emit(f"⚠️ Cannot process trigger: No frame available")
-            self.trigger_completed_signal.emit("error", self.camera_name)
-            return
-            
-        action = self.trigger_action
-        
-        if action == "capture":
-            # Save the current frame as an image
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
-            cv2.imwrite(filename, self.last_frame)
-            self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
-            self.trigger_completed_signal.emit(filename, self.camera_name)
-            
-        elif action == "analyze":
-            # Placeholder for running analysis on the frame
-            # This could be replaced with actual CV/ML processing
-            self.log_signal.emit(f"🔍 Analyzing frame from {self.camera_name}...")
-            
-            # Simulate analysis (replace with actual analysis code)
-            # Example: count objects, detect faces, read text, etc.
-            result = f"Analysis complete for {self.camera_name}"
-            
-            self.log_signal.emit(f"✅ {result}")
-            self.trigger_completed_signal.emit(result, self.camera_name)
-            
-        else:
-            self.log_signal.emit(f"⚠️ Unknown trigger action: {action}")
-            self.trigger_completed_signal.emit("error", self.camera_name)
+        self.mutex.unlock
