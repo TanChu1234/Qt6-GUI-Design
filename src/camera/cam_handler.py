@@ -61,7 +61,7 @@ class CameraThread(QThread):
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         # Attempt to connect to camera with timeout
-        if not self._connect_with_timeout(cap, url, timeout=1):
+        if not self._connect_with_timeout(cap, url, timeout=5):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False
@@ -83,6 +83,7 @@ class CameraThread(QThread):
     def _build_camera_url(self):
         """Build the camera URL string based on protocol."""
         if self.protocol == "RTSP":
+            # More generic RTSP URL format
             return f"rtsp://{self.username}:{self.password}@{self.ip}:{self.port}/stream1"
         elif self.protocol == "HTTP":
             return f"http://{self.username}:{self.password}@{self.ip}:{self.port}/video"
@@ -94,27 +95,38 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=5):
+    def _connect_with_timeout(self, cap, url, timeout=6):
         """Try to connect to the camera with a timeout."""
-        cap.open(url)
         start_time = time.time()
+        
+        # First attempt to open
+        cap.open(url)
         
         # Check connection with timeout
         while time.time() - start_time < timeout:
             if cap.isOpened():
-                return True
-            time.sleep(0.5)  # Avoid busy-waiting
+                # Test if we can actually get a frame
+                ret, _ = cap.read()
+                if ret:
+                    return True
             
-            # Try again
-            cap.open(url)
-            
-            # Check if we should still be trying
+            # Check if we should stop trying
             self.mutex.lock()
             if not self.active:
                 self.mutex.unlock()
                 return False
             self.mutex.unlock()
             
+            # Wait a bit before trying again
+            time.sleep(0.1)  # Shorter sleep to be more responsive
+            
+            # Only try reopening if we're still within timeout
+            if time.time() - start_time < timeout - 0.2:
+                cap.release()  # Make sure to release before reopening
+                cap.open(url)
+        
+        # If we get here, we've timed out
+        cap.release()  # Make sure to release the capture
         return False
             
     def _process_frames(self, cap):
@@ -129,7 +141,7 @@ class CameraThread(QThread):
             
             if not ret:
                 # Try a couple more times before giving up
-                retries = 0
+                retries = 3
                 while retries > 0 and self.active:
                     time.sleep(0.1)
                     ret, frame = cap.read()
@@ -207,4 +219,28 @@ class CameraThread(QThread):
         self.mutex.lock()
         self.triggered = True
         self.trigger_action = action
-        self.mutex.unlock
+        self.mutex.unlock()
+        return True
+        
+    def _process_trigger(self):
+        """Process the triggered action on the current frame."""
+        if self.trigger_action == "capture":
+            # Save the current frame to file
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
+            
+            if self.last_frame is not None:
+                try:
+                    cv2.imwrite(filename, self.last_frame)
+                    self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
+                    self.trigger_completed_signal.emit(filename, self.camera_name)
+                except Exception as e:
+                    self.log_signal.emit(f"❌ Error saving image: {str(e)}")
+                    self.trigger_completed_signal.emit("error", self.camera_name)
+            else:
+                self.log_signal.emit(f"❌ No frame available to capture")
+                self.trigger_completed_signal.emit("error", self.camera_name)
+        else:
+            # Handle other actions here
+            self.log_signal.emit(f"⚠️ Unknown action: {self.trigger_action}")
+            self.trigger_completed_signal.emit("error", self.camera_name)

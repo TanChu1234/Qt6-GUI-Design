@@ -76,8 +76,7 @@ class CameraWidget(QWidget):
         item = QListWidgetItem(QIcon(self.icon_connecting), camera_name)
         self.ui.listWidget.addItem(item)
         
-        # Store camera properties with temporary status
-        camera_info["status"] = "connecting"
+        # Store camera properties without status
         self.camera_properties[camera_name] = camera_info
 
         self.log_message(f"🔍 Checking connection to {ip_address}...")
@@ -112,7 +111,6 @@ class CameraWidget(QWidget):
         if is_reachable:
             # Update to offline icon initially (will update when connected)
             found_item.setIcon(QIcon(self.icon_offline))
-            self.camera_properties[found_camera]["status"] = "offline"
             
             # Save to config
             self.config_manager.add_camera(self.camera_properties[found_camera])
@@ -120,7 +118,6 @@ class CameraWidget(QWidget):
         else:
             # Update to offline icon
             found_item.setIcon(QIcon(self.icon_offline))
-            self.camera_properties[found_camera]["status"] = "offline"
             
             # Save to config
             self.config_manager.add_camera(self.camera_properties[found_camera])
@@ -247,6 +244,31 @@ class CameraWidget(QWidget):
         self.ui.display.setText("Hide")
         self.log_message(f"🖥️ Now displaying {camera_name}")
     
+    def _update_camera_icon(self, camera_name, status):
+        """Update the camera icon based on status."""
+        icon_map = {
+            "online": self.icon_online,
+            "offline": self.icon_offline,
+            "connecting": self.icon_connecting,
+            "connected": self.icon_online,
+            "disconnected": self.icon_offline
+        }
+        
+        if status not in icon_map:
+            return
+            
+        # Update icon in list
+        for i in range(self.ui.listWidget.count()):
+            item = self.ui.listWidget.item(i)
+            if item.text() == camera_name:
+                item.setIcon(QIcon(icon_map[status]))
+                break
+
+    def _update_camera_status(self, camera_name, status):
+        """Update the camera icon only."""
+        # Just update the icon
+        self._update_camera_icon(camera_name, status)
+    
     def start_camera(self, specific_camera=None):
         """Start real-time streaming for the selected or specified camera."""
         # If a specific camera was provided, use it, otherwise get from selection
@@ -269,8 +291,7 @@ class CameraWidget(QWidget):
             self.log_message(f"ℹ️ {camera_name} is already streaming")
             return
 
-        # Update status to connecting
-        self.camera_properties[camera_name]["status"] = "connecting"
+        # Update icon to connecting
         self._update_camera_icon(camera_name, "connecting")
 
         # Start new camera thread with all properties
@@ -304,40 +325,6 @@ class CameraWidget(QWidget):
         thread.start()
         self.log_message(f"✅ Started streaming {camera_name}")
 
-    def _update_camera_icon(self, camera_name, status):
-        """Update the camera icon based on status."""
-        icon_map = {
-            "online": self.icon_online,
-            "offline": self.icon_offline,
-            "connecting": self.icon_connecting,
-            "connected": self.icon_online,
-            "disconnected": self.icon_offline
-        }
-        
-        if status not in icon_map:
-            return
-            
-        # Update icon in list
-        for i in range(self.ui.listWidget.count()):
-            item = self.ui.listWidget.item(i)
-            if item.text() == camera_name:
-                item.setIcon(QIcon(icon_map[status]))
-                break
-
-    def _update_camera_status(self, camera_name, status):
-        """Update the camera status and icon."""
-        # Update internal status tracking
-        if camera_name in self.camera_properties:
-            if status == "connected":
-                self.camera_properties[camera_name]["status"] = "online"
-            elif status == "disconnected":
-                self.camera_properties[camera_name]["status"] = "offline"
-            elif status == "connecting":
-                self.camera_properties[camera_name]["status"] = "connecting"
-        
-        # Update the icon
-        self._update_camera_icon(camera_name, status)
-    
     def _handle_new_frame(self, pixmap, camera_name):
         """Handle incoming frames from camera threads."""
         # Only update the display if this is the current camera AND display is enabled
@@ -358,8 +345,8 @@ class CameraWidget(QWidget):
         # Remove the thread reference
         del self.camera_threads[camera_name]
         
-        # Update the status and icon
-        self._update_camera_status(camera_name, "disconnected")
+        # Update the icon
+        self._update_camera_icon(camera_name, "disconnected")
         
         # Clear the display if this was the current camera being displayed
         if self.displaying and self.current_camera == camera_name:
@@ -389,8 +376,8 @@ class CameraWidget(QWidget):
                 
             del self.camera_threads[camera_name]
             
-            # Update status to offline
-            self._update_camera_status(camera_name, "disconnected")
+            # Update icon to offline
+            self._update_camera_icon(camera_name, "disconnected")
             
             # Clear the display if this was the current camera being displayed
             if self.displaying and self.current_camera == camera_name:
@@ -416,9 +403,7 @@ class CameraWidget(QWidget):
             item = QListWidgetItem(QIcon(self.icon_offline), camera_name)
             self.ui.listWidget.addItem(item)
             
-            # Ensure status field exists
-            camera["status"] = "offline"
-            # Store camera properties
+            # Store camera properties (without status)
             self.camera_properties[camera_name] = camera
     
     def closeEvent(self, event):
@@ -545,7 +530,14 @@ class CameraWidget(QWidget):
                 self.log_message(f"❌ Failed to start camera {camera_name} for triggering")
                 return
         
-        # Trigger the camera (connections handled in start_camera)
+        # Connect to the trigger_completed signal if not already connected
+        if not hasattr(self.camera_threads[camera_name], "_trigger_connected"):
+            self.camera_threads[camera_name].trigger_completed_signal.connect(
+                lambda result, cam=camera_name: self.handle_trigger_result(result, cam)
+            )
+            self.camera_threads[camera_name]._trigger_connected = True
+        
+        # Trigger the camera
         self.camera_threads[camera_name].trigger(action)
         self.log_message(f"🔔 Triggered {camera_name} with action: {action}")
 
@@ -566,7 +558,14 @@ class CameraWidget(QWidget):
         # Stop the camera after trigger completes
         self.log_message(f"🛑 Stopping camera {camera_name} after trigger")
         self.stop_camera(camera_name)
-
+        
+        # Clear the display if this was the current camera being displayed
+        if self.displaying and self.current_camera == camera_name:
+            self.ui.label.clear()
+            self.current_camera = None
+            self.displaying = False
+            self.ui.display.setText("Display")
+            
     def run_ai_continuous(self):
         """Run AI in continuous mode. Currently a placeholder."""
         self.log_message("♻️ Running AI continuously...")

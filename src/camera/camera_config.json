@@ -27,11 +27,11 @@
     },
     {
         "camera_name": "nha",
-        "ip_address": "192.168.198.189",
+        "ip_address": "192.168.62.189",
         "port": "554",
         "username": "chunhattan",
         "password": "12345678",
         "protocol": "RTSP",
-        "status": "connecting"
+        "status": "offline"
     }
 ]

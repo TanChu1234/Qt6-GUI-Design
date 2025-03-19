@@ -23,7 +23,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(306, 356)
+        Form.resize(319, 400)
         Form.setStyleSheet(u"/* Unified Button Style */\n"
 "QPushButton {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
@@ -103,8 +103,9 @@ class Ui_Form(object):
 "}")
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(20, 30, 271, 257))
+        self.layoutWidget.setGeometry(QRect(20, 30, 281, 275))
         self.gridLayout_2 = QGridLayout(self.layoutWidget)
+        self.gridLayout_2.setSpacing(15)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
         self.label_14 = QLabel(self.layoutWidget)
@@ -189,14 +190,14 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.label_2, 2, 0, 1, 1)
 
-        self.layoutWidget1 = QWidget(Form)
-        self.layoutWidget1.setObjectName(u"layoutWidget1")
-        self.layoutWidget1.setGeometry(QRect(60, 300, 191, 42))
-        self.horizontalLayout = QHBoxLayout(self.layoutWidget1)
+        self.layoutWidget2 = QWidget(Form)
+        self.layoutWidget2.setObjectName(u"layoutWidget2")
+        self.layoutWidget2.setGeometry(QRect(70, 340, 191, 42))
+        self.horizontalLayout = QHBoxLayout(self.layoutWidget2)
         self.horizontalLayout.setSpacing(20)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.ok_button = QPushButton(self.layoutWidget1)
+        self.ok_button = QPushButton(self.layoutWidget2)
         self.ok_button.setObjectName(u"ok_button")
         self.ok_button.setMinimumSize(QSize(0, 35))
         font1 = QFont()
@@ -206,7 +207,7 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.ok_button)
 
-        self.cancel_button = QPushButton(self.layoutWidget1)
+        self.cancel_button = QPushButton(self.layoutWidget2)
         self.cancel_button.setObjectName(u"cancel_button")
         self.cancel_button.setMinimumSize(QSize(0, 35))
         self.cancel_button.setBaseSize(QSize(0, 0))

@@ -46,8 +46,8 @@ class Ui_Form(object):
 "    font-size: 14px;\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
+"	min-width: 30px;\n"
 "    color: white;\n"
-"    min-width: 70px;\n"
 "    text-align: center;\n"
 "}\n"
 "\n"
@@ -108,39 +108,44 @@ class Ui_Form(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.start_cam = QPushButton(self.layoutWidget)
         self.start_cam.setObjectName(u"start_cam")
-        self.start_cam.setMinimumSize(QSize(123, 60))
+        self.start_cam.setMinimumSize(QSize(70, 60))
         font1 = QFont()
         font1.setFamilies([u"Segoe UI"])
         font1.setBold(True)
         self.start_cam.setFont(font1)
+        self.start_cam.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.start_cam)
 
         self.stop_cam = QPushButton(self.layoutWidget)
         self.stop_cam.setObjectName(u"stop_cam")
-        self.stop_cam.setMinimumSize(QSize(123, 60))
+        self.stop_cam.setMinimumSize(QSize(70, 60))
         self.stop_cam.setFont(font1)
+        self.stop_cam.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.stop_cam)
 
         self.display = QPushButton(self.layoutWidget)
         self.display.setObjectName(u"display")
-        self.display.setMinimumSize(QSize(123, 60))
+        self.display.setMinimumSize(QSize(70, 60))
         self.display.setFont(font1)
+        self.display.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.display)
 
         self.run_once = QPushButton(self.layoutWidget)
         self.run_once.setObjectName(u"run_once")
-        self.run_once.setMinimumSize(QSize(123, 60))
+        self.run_once.setMinimumSize(QSize(70, 60))
         self.run_once.setFont(font1)
+        self.run_once.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.run_once)
 
         self.run_continuous = QPushButton(self.layoutWidget)
         self.run_continuous.setObjectName(u"run_continuous")
-        self.run_continuous.setMinimumSize(QSize(123, 60))
+        self.run_continuous.setMinimumSize(QSize(70, 60))
         self.run_continuous.setFont(font1)
+        self.run_continuous.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.run_continuous)
 
@@ -153,15 +158,17 @@ class Ui_Form(object):
         self.gridLayout_2.setVerticalSpacing(0)
         self.add_cam = QPushButton(self.layoutWidget)
         self.add_cam.setObjectName(u"add_cam")
-        self.add_cam.setMinimumSize(QSize(110, 60))
+        self.add_cam.setMinimumSize(QSize(70, 60))
         self.add_cam.setFont(font1)
+        self.add_cam.setStyleSheet(u"")
 
         self.gridLayout_2.addWidget(self.add_cam, 0, 0, 1, 1)
 
         self.remove_cam = QPushButton(self.layoutWidget)
         self.remove_cam.setObjectName(u"remove_cam")
-        self.remove_cam.setMinimumSize(QSize(110, 60))
+        self.remove_cam.setMinimumSize(QSize(70, 60))
         self.remove_cam.setFont(font1)
+        self.remove_cam.setStyleSheet(u"")
 
         self.gridLayout_2.addWidget(self.remove_cam, 0, 1, 1, 1)
 

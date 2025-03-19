@@ -44,8 +44,8 @@ QPushButton {
     font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
+	min-width: 30px;
     color: white;
-    min-width: 70px;
     text-align: center;
 }
 
@@ -117,7 +117,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="start_cam">
         <property name="minimumSize">
          <size>
-          <width>123</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -127,6 +127,9 @@ QListWidget#log_list {
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>START</string>
@@ -137,7 +140,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="stop_cam">
         <property name="minimumSize">
          <size>
-          <width>123</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -147,6 +150,9 @@ QListWidget#log_list {
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>STOP</string>
@@ -157,7 +163,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="display">
         <property name="minimumSize">
          <size>
-          <width>123</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -167,6 +173,9 @@ QListWidget#log_list {
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>DISPLAY</string>
@@ -177,7 +186,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="run_once">
         <property name="minimumSize">
          <size>
-          <width>123</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -187,6 +196,9 @@ QListWidget#log_list {
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>RUN AI 
@@ -198,7 +210,7 @@ ONCE TIME</string>
        <widget class="QPushButton" name="run_continuous">
         <property name="minimumSize">
          <size>
-          <width>123</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -208,6 +220,9 @@ ONCE TIME</string>
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>RUN AI 
@@ -229,7 +244,7 @@ REAL TIME</string>
        <widget class="QPushButton" name="add_cam">
         <property name="minimumSize">
          <size>
-          <width>110</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -239,6 +254,10 @@ REAL TIME</string>
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">
+</string>
         </property>
         <property name="text">
          <string>ADD CAM</string>
@@ -249,7 +268,7 @@ REAL TIME</string>
        <widget class="QPushButton" name="remove_cam">
         <property name="minimumSize">
          <size>
-          <width>110</width>
+          <width>70</width>
           <height>60</height>
          </size>
         </property>
@@ -259,6 +278,9 @@ REAL TIME</string>
           <pointsize>-1</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>DEL CAM</string>
