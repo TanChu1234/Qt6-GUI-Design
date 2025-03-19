@@ -4,7 +4,7 @@ import os
 class CameraConfigManager:
     """Manages saving and loading camera configurations"""
     
-    def __init__(self, config_file="src/camera/camera_config.json"):
+    def __init__(self, config_file="src/asset/camera_storage/camera_config.json"):
         # Use absolute path or relative to execution directory
         self.config_file = config_file
         self.cameras = []

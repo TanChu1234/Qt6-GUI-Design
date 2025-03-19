@@ -6,6 +6,9 @@ from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread
 from camera.check_ping import PingThread
 from camera.camera_configuration_manager import CameraConfigManager
+from datetime import datetime
+import os
+
 
 class CameraWidget(QWidget):
     """Main widget for camera management and display."""
@@ -72,20 +75,45 @@ class CameraWidget(QWidget):
     
     """ User Interface Management """
     def log_message(self, message):
-        """Append log messages to the log listWidget."""
-        self.ui.log_list.addItem(message)
+        """Append log messages with a timestamp to the log listWidget and export if exceeding 100 lines."""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_entry = f"[{timestamp}] {message}"
+
+        self.ui.log_list.addItem(log_entry)
         self.ui.log_list.scrollToBottom()  # Auto-scroll to the latest message
 
+        # Check if log_list exceeds 100 items
+        if self.ui.log_list.count() > 100:
+            self.export_log()
+
+    def export_log(self):
+        """Export log messages to 'outputs/logs' folder and clear the list."""
+        log_folder = "outputs/logs"
+        os.makedirs(log_folder, exist_ok=True)  # Ensure the directory exists
+
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = os.path.join(log_folder, f"log_{timestamp}.txt")
+
+        with open(filename, "w", encoding="utf-8") as file:
+            for index in range(self.ui.log_list.count()):
+                file.write(self.ui.log_list.item(index).text() + "\n")
+
+        self.ui.log_list.clear()  # Clear the log after exporting
+        print(f"Log exported to {filename}")  # Debug print
+    
     def select_camera(self, item):
         """Handle camera selection from listWidget."""
         camera_name = item.text()
         camera_props = self.camera_properties.get(camera_name, None)
 
         if camera_props:
-            self.log_message(f"📷 Selected {camera_name}:")
-            self.log_message(f"   IP: {camera_props['ip_address']}")
-            self.log_message(f"   Port: {camera_props['port']}")
-            self.log_message(f"   Username: {camera_props['username']}")
+            log_entry = (
+            f"📷 Selected {camera_name}:\n"
+            f"   IP: {camera_props['ip_address']}\n"
+            f"   Port: {camera_props['port']}\n"
+            f"   Username: {camera_props['username']}"
+            )
+            self.log_message(log_entry)
             # Don't log password for security reasons
         else:
             self.log_message(f"⚠️ No properties found for {camera_name}")
@@ -435,176 +463,164 @@ class CameraWidget(QWidget):
         else:
             self.log_message(f"⚠️ No active stream for {camera_name}")
    
-    # Trigger camera
     def run_ai_once(self):
-        """Process the command from the lineEdit to trigger specific cameras."""
-        # Get the command from lineEdit
-        command = self.ui.lineEdit.text().strip()
+        """Process the binary command from the lineEdit to trigger specific cameras."""
+        # Get the command from lineEdit as a hex string
+        command_hex = self.ui.lineEdit.text().strip()
         
-        if not command:
+        if not command_hex:
             self.log_message("⚠️ Please enter a camera command in the text field")
             return
             
-        self.log_message(f"🤖 Running AI once with command: {command}")
-        
-        # Parse the command
-        parts = command.split()
-        
-        # Check for trigger command
-        if parts[0].lower() == "trigger":
-            # Format: trigger camera1 camera2 camera3 [action]
-            
-            # Check if there's at least one camera specified
-            if len(parts) < 2:
-                self.log_message("⚠️ Please specify at least one camera to trigger")
+        # Try to convert hex string to bytes
+        try:
+            # Remove spaces, 0x prefixes, etc. and convert to bytes
+            clean_hex = command_hex.replace(" ", "").replace("0x", "")
+            if len(clean_hex) % 2 != 0:
+                self.log_message("⚠️ Invalid hex string: odd number of characters")
                 return
-            
-            # Determine if the last part is an action
-            action = "capture"  # Default action
-            camera_names = parts[1:]
-            
-            # If the last part doesn't look like a camera name, assume it's an action
-            if len(parts) > 2 and not self._is_camera_name(parts[-1]):
-                action = parts[-1]
-                camera_names = parts[1:-1]
-            
-            # Process each camera
-            for camera_name in camera_names:
-                target_camera = self._find_camera_by_partial_name(camera_name)
-                if target_camera:
-                    self._trigger_camera(target_camera, action)
-                else:
-                    self.log_message(f"❌ Camera matching '{camera_name}' not found")
-            
+                
+            command_bytes = bytes.fromhex(clean_hex)
+            self.log_message(f"🤖 Processing binary command: {command_bytes.hex(' ').upper()}")
+        except ValueError:
+            self.log_message("⚠️ Invalid hex format. Use format like: AA 55 01 02 01 02 XX XX")
             return
-        # Check if the command is for a specific camera
-        if parts[0].startswith("cam"):
-            # Extract camera number or name
-            target_camera = self._find_camera(parts[0])
-            if not target_camera:
-                return
-            
-            # Start and display the camera
-            self._activate_camera(target_camera)
-        else:
-            self.log_message(f"⚠️ Unknown command: {command}")
-            self.log_message("ℹ️ Use 'cam1', 'trigger cam2 cam3', etc.")
-
-    def _trigger_camera(self, camera_name, action="capture"):
-        """Trigger an action on a specific camera and stop it after completion."""
-        # Check if camera is running
-        if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
-            # Try to start the camera first
-            self.log_message(f"🔄 Starting camera {camera_name} before triggering...")
-            self.start_camera(camera_name)
-            
-            # Wait a bit for the camera to connect
-            QThread.msleep(300)
-            
-            # Check again
-            if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
-                self.log_message(f"❌ Failed to start camera {camera_name} for triggering")
-                return
         
-        # Connect to the trigger_completed signal if not already connected
-        if not hasattr(self.camera_threads[camera_name], "_trigger_connected"):
-            self.camera_threads[camera_name].trigger_completed_signal.connect(
-                lambda result, cam=camera_name: self.handle_trigger_result(result, cam)
-            )
-            self.camera_threads[camera_name]._trigger_connected = True
+        # Check minimum length (header + command type + camera count + at least one camera + action + checksum)
+        if len(command_bytes) < 7:
+            self.log_message("⚠️ Command too short. Minimum length is 7 bytes.")
+            return
         
-        # Trigger the camera
-        self.camera_threads[camera_name].trigger(action)
-        self.log_message(f"🔔 Triggered {camera_name} with action: {action}")
-    
-    def _handle_trigger_result(self, result, camera_name):
-        """Handle the result of a camera trigger and stop the camera."""
-        if result == "error":
-            self.log_message(f"❌ Trigger failed for {camera_name}")
-        else:
-            # Store the result
-            self.trigger_results[camera_name] = result
+        # Validate header (0xAA 0x55)
+        if command_bytes[0] != 0xAA or command_bytes[1] != 0x55:
+            self.log_message("⚠️ Invalid header. Expected: AA 55")
+            return
+        
+        # Validate command type (0x01 for trigger)
+        if command_bytes[2] != 0x01:
+            self.log_message(f"⚠️ Unknown command type: {command_bytes[2]:02X}")
+            return
+        
+        # Get camera count
+        camera_count = command_bytes[3]
+        if camera_count == 0:
+            self.log_message("⚠️ No cameras specified")
+            return
+        
+        # Check if the packet is long enough based on camera_count
+        expected_length = 6 + camera_count  # Header(2) + CmdType(1) + CamCount(1) + CamIndexes(n) + Action(1) + Checksum(2)
+        if len(command_bytes) != expected_length:
+            self.log_message(f"⚠️ Invalid packet length. Expected {expected_length} bytes for {camera_count} cameras.")
+            return
+        
+        # Validate checksum
+        calculated_checksum = 0
+        for i in range(len(command_bytes) - 2):
+            calculated_checksum ^= command_bytes[i]
+        
+        received_checksum = (command_bytes[-2] << 8) | command_bytes[-1]
+        if calculated_checksum != received_checksum:
+            self.log_message(f"⚠️ Checksum error. Calculated: {calculated_checksum:04X}, Received: {received_checksum:04X}")
+            return
+        
+        # Get action code
+        action_code = command_bytes[4 + camera_count]
+        action = self._get_action_from_code(action_code)
+        if not action:
+            self.log_message(f"⚠️ Unknown action code: {action_code:02X}")
+            return
+        
+        # Process each camera
+        for i in range(camera_count):
+            camera_index = command_bytes[4 + i]
+            # Convert 0-based index to 1-based for user display
+            display_index = camera_index + 1
             
-            # Log the result
-            if result.endswith(".jpg"):
-                self.log_message(f"📸 Image captured from {camera_name}: {result}")
+            # Get camera name from index
+            target_camera = self._get_camera_by_index(camera_index)
+            if target_camera:
+                self._trigger_camera(target_camera, action)
             else:
-                self.log_message(f"✅ Trigger result for {camera_name}: {result}")
+                self.log_message(f"❌ Camera with index {display_index} not found")
+
+    def _get_action_from_code(self, action_code):
+        """Convert action code to action string."""
+        action_map = {
+            0x01: "capture",
+            0x02: "stop"
+        }
+        return action_map.get(action_code)
+
+    def _get_camera_by_index(self, index):
+        """Get camera name by its index (0-based)."""
+        if 0 <= index < self.ui.listWidget.count():
+            return self.ui.listWidget.item(index).text()
+        return None
+
+    def _calculate_checksum(self, data):
+        """Calculate XOR checksum for the given data."""
+        checksum = 0
+        for byte in data:
+            checksum ^= byte
+        return checksum
+
+    def create_binary_command(self, camera_indexes, action_code):
+        """Create a binary command for the given camera indexes and action code.
         
-        # Stop the camera after trigger completes
-        self.log_message(f"🛑 Stopping camera {camera_name} after trigger")
-        self.stop_camera(camera_name)
+        Args:
+            camera_indexes (list): List of camera indexes (0-based)
+            action_code (int): Action code (0x01 for capture, 0x02 for stop)
+            
+        Returns:
+            bytes: The binary command
+        """
+        # Create the command up to before the checksum
+        command = bytearray([
+            0xAA, 0x55,             # Header
+            0x01,                   # Command Type (Trigger)
+            len(camera_indexes)     # Camera Count
+        ])
         
-        # Clear the display if this was the current camera being displayed
-        if self.displaying and self.current_camera == camera_name:
-            self.ui.label.clear()
-            self.current_camera = None
-            self.displaying = False
-            self.ui.display.setText("Display")
-    
+        # Add camera indexes
+        command.extend(camera_indexes)
+        
+        # Add action code
+        command.append(action_code)
+        
+        # Calculate checksum
+        checksum = self._calculate_checksum(command)
+        
+        # Add checksum (2 bytes, big endian)
+        command.append((checksum >> 8) & 0xFF)  # High byte
+        command.append(checksum & 0xFF)         # Low byte
+        
+        return bytes(command)
+
+    def format_command_for_display(self, command_bytes):
+        """Format a binary command for display."""
+        return ' '.join([f"{b:02X}" for b in command_bytes])
+
+    # Helper function to show example of creating a command
+    def show_command_example(self):
+        """Show an example of creating a binary command."""
+        # Example: trigger cameras 0 and 2 with capture action
+        camera_indexes = [0, 2]
+        action_code = 0x01  # Capture
+        
+        command = self.create_binary_command(camera_indexes, action_code)
+        formatted = self.format_command_for_display(command)
+        
+        self.log_message(f"📝 Example command: {formatted}")
+        self.log_message(f"ℹ️ This triggers cameras 1 and 3 to capture")
+        
+        # Set the example in the line edit
+        self.ui.lineEdit.setText(formatted)
+
     def run_ai_continuous(self):
         """Run AI in continuous mode. Currently a placeholder."""
         self.log_message("♻️ Running AI continuously...")
         # Implementation for continuous mode would go here
-    
-    """ Utils for searching camera """
-    def _find_camera(self, cam_identifier):
-        """Find a camera by number or name."""
-        if cam_identifier.startswith("cam"):
-            cam_identifier = cam_identifier[3:]  # Remove "cam" prefix
-        
-        # If it's a number, try to find by index
-        if cam_identifier.isdigit():
-            cam_index = int(cam_identifier) - 1  # Convert to 0-based index
-            if 0 <= cam_index < self.ui.listWidget.count():
-                return self.ui.listWidget.item(cam_index).text()
-            else:
-                self.log_message(f"❌ Camera {cam_identifier} not found in the list")
-                return None
-        else:
-            # Try to find by name
-            for i in range(self.ui.listWidget.count()):
-                camera_name = self.ui.listWidget.item(i).text()
-                if cam_identifier.lower() in camera_name.lower():
-                    return camera_name
-            
-            self.log_message(f"❌ Camera matching '{cam_identifier}' not found")
-            return None
-
-    def _is_camera_name(self, name):
-        """Check if the given name is a potential camera name by searching for matches."""
-        for i in range(self.ui.listWidget.count()):
-            camera_name = self.ui.listWidget.item(i).text()
-            if name.lower() in camera_name.lower():
-                return True
-        return False
-
-    def _find_camera_by_partial_name(self, name):
-        """Find a camera that contains the given name."""
-        for i in range(self.ui.listWidget.count()):
-            camera_name = self.ui.listWidget.item(i).text()
-            if name.lower() in camera_name.lower():
-                return camera_name
-        return None
-    
-    def _activate_camera(self, camera_name):
-        """Start and display a camera."""
-        # Check if the camera is already running
-        if camera_name in self.camera_threads and self.camera_threads[camera_name].isRunning():
-            self.log_message(f"✅ Using camera: {camera_name}")
-        else:
-            # Start the camera
-            self.log_message(f"🔄 Starting camera: {camera_name}")
-            self.start_camera(camera_name)
-        
-        # Set this as the current camera to display
-        self.current_camera = camera_name
-        self.displaying = True
-        self.ui.display.setText("Hide")
-        self.log_message(f"🖥️ Now displaying {camera_name}")
 
     
 
-    
-            
     

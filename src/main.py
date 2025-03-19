@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QSizePolicy
-from ui.camera_ui import CameraWidget  # ✅ Import CameraWidget
+from ui.camera_ui_control import CameraWidget  # ✅ Import CameraWidget
 from ui.main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow):
