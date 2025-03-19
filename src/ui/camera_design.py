@@ -23,7 +23,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1390, 837)
+        Form.resize(1640, 850)
         Form.setMinimumSize(QSize(1390, 0))
         font = QFont()
         font.setFamilies([u"Segoe UI"])
@@ -46,7 +46,7 @@ class Ui_Form(object):
 "    font-size: 14px;\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
-"	min-width: 30px;\n"
+"	min-width: 50px;\n"
 "    color: white;\n"
 "    text-align: center;\n"
 "}\n"
@@ -71,7 +71,7 @@ class Ui_Form(object):
 "\n"
 "/* Camera Display */\n"
 "QLabel#label {\n"
-"    background-color: rgb(238, 238, 238);\n"
+"    background-color: #FFFFFF;\n"
 "    border-radius: 10px;\n"
 "}\n"
 "\n"
@@ -92,23 +92,24 @@ class Ui_Form(object):
 "}\n"
 "QListWidget#log_list {\n"
 "    background-color: rgb(255, 255, 255);\n"
-"    border-radius: 5px;\n"
+"	border-radius:5px;\n"
 "    padding: 5px;\n"
 "    color: black;\n"
-"    font-size: 9px;\n"
+"    font-size: 11px;\n"
 "}")
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 1380, 826))
+        self.layoutWidget.setGeometry(QRect(0, 0, 1631, 841))
         self.gridLayout = QGridLayout(self.layoutWidget)
         self.gridLayout.setSpacing(8)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(0, 2, 0, 0)
         self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setSpacing(8)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.start_cam = QPushButton(self.layoutWidget)
         self.start_cam.setObjectName(u"start_cam")
-        self.start_cam.setMinimumSize(QSize(70, 60))
+        self.start_cam.setMinimumSize(QSize(90, 60))
         font1 = QFont()
         font1.setFamilies([u"Segoe UI"])
         font1.setBold(True)
@@ -119,7 +120,7 @@ class Ui_Form(object):
 
         self.stop_cam = QPushButton(self.layoutWidget)
         self.stop_cam.setObjectName(u"stop_cam")
-        self.stop_cam.setMinimumSize(QSize(70, 60))
+        self.stop_cam.setMinimumSize(QSize(90, 60))
         self.stop_cam.setFont(font1)
         self.stop_cam.setStyleSheet(u"")
 
@@ -127,7 +128,7 @@ class Ui_Form(object):
 
         self.display = QPushButton(self.layoutWidget)
         self.display.setObjectName(u"display")
-        self.display.setMinimumSize(QSize(70, 60))
+        self.display.setMinimumSize(QSize(90, 60))
         self.display.setFont(font1)
         self.display.setStyleSheet(u"")
 
@@ -135,7 +136,7 @@ class Ui_Form(object):
 
         self.run_once = QPushButton(self.layoutWidget)
         self.run_once.setObjectName(u"run_once")
-        self.run_once.setMinimumSize(QSize(70, 60))
+        self.run_once.setMinimumSize(QSize(90, 60))
         self.run_once.setFont(font1)
         self.run_once.setStyleSheet(u"")
 
@@ -143,14 +144,14 @@ class Ui_Form(object):
 
         self.run_continuous = QPushButton(self.layoutWidget)
         self.run_continuous.setObjectName(u"run_continuous")
-        self.run_continuous.setMinimumSize(QSize(70, 60))
+        self.run_continuous.setMinimumSize(QSize(90, 60))
         self.run_continuous.setFont(font1)
         self.run_continuous.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.run_continuous)
 
 
-        self.gridLayout.addLayout(self.horizontalLayout, 10, 1, 1, 1)
+        self.gridLayout.addLayout(self.horizontalLayout, 10, 1, 1, 11)
 
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
@@ -158,7 +159,7 @@ class Ui_Form(object):
         self.gridLayout_2.setVerticalSpacing(0)
         self.add_cam = QPushButton(self.layoutWidget)
         self.add_cam.setObjectName(u"add_cam")
-        self.add_cam.setMinimumSize(QSize(70, 60))
+        self.add_cam.setMinimumSize(QSize(90, 60))
         self.add_cam.setFont(font1)
         self.add_cam.setStyleSheet(u"")
 
@@ -166,7 +167,7 @@ class Ui_Form(object):
 
         self.remove_cam = QPushButton(self.layoutWidget)
         self.remove_cam.setObjectName(u"remove_cam")
-        self.remove_cam.setMinimumSize(QSize(70, 60))
+        self.remove_cam.setMinimumSize(QSize(90, 60))
         self.remove_cam.setFont(font1)
         self.remove_cam.setStyleSheet(u"")
 
@@ -175,11 +176,14 @@ class Ui_Form(object):
 
         self.gridLayout.addLayout(self.gridLayout_2, 10, 0, 1, 1)
 
-        self.log_list = QListWidget(self.layoutWidget)
-        self.log_list.setObjectName(u"log_list")
-        self.log_list.setMinimumSize(QSize(0, 60))
+        self.label = QLabel(self.layoutWidget)
+        self.label.setObjectName(u"label")
+        self.label.setMinimumSize(QSize(1080, 720))
+        self.label.setSizeIncrement(QSize(0, 0))
+        self.label.setStyleSheet(u"")
+        self.label.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addWidget(self.log_list, 10, 3, 1, 10)
+        self.gridLayout.addWidget(self.label, 4, 1, 5, 11)
 
         self.listWidget = QListWidget(self.layoutWidget)
         font2 = QFont()
@@ -200,28 +204,29 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.listWidget, 4, 0, 5, 1)
 
-        self.label_2 = QLabel(self.layoutWidget)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setMinimumSize(QSize(50, 60))
-        self.label_2.setFont(font1)
-        self.label_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-        self.label_2.setIndent(5)
-
-        self.gridLayout.addWidget(self.label_2, 10, 2, 1, 1)
-
-        self.label = QLabel(self.layoutWidget)
-        self.label.setObjectName(u"label")
-        self.label.setMinimumSize(QSize(1080, 720))
-        self.label.setSizeIncrement(QSize(0, 0))
-        self.label.setStyleSheet(u"")
-        self.label.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.label, 4, 1, 5, 12)
-
         self.lineEdit = QLineEdit(self.layoutWidget)
         self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setStyleSheet(u"")
 
-        self.gridLayout.addWidget(self.lineEdit, 9, 1, 1, 1)
+        self.gridLayout.addWidget(self.lineEdit, 9, 1, 1, 11)
+
+        self.log_list = QListWidget(self.layoutWidget)
+        self.log_list.setObjectName(u"log_list")
+        self.log_list.setMinimumSize(QSize(0, 60))
+        self.log_list.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.log_list, 4, 12, 5, 1)
+
+        self.label_2 = QLabel(self.layoutWidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setMinimumSize(QSize(50, 40))
+        self.label_2.setFont(font1)
+        self.label_2.setStyleSheet(u"	border: 1px solid rgb(255, 255, 255);\n"
+"	border-radius:5px;")
+        self.label_2.setAlignment(Qt.AlignCenter)
+        self.label_2.setIndent(0)
+
+        self.gridLayout.addWidget(self.label_2, 9, 12, 1, 1)
 
 
         self.retranslateUi(Form)
@@ -240,6 +245,7 @@ class Ui_Form(object):
 "REAL TIME", None))
         self.add_cam.setText(QCoreApplication.translate("Form", u"ADD CAM", None))
         self.remove_cam.setText(QCoreApplication.translate("Form", u"DEL CAM", None))
+        self.label.setText("")
 
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
@@ -248,6 +254,5 @@ class Ui_Form(object):
         self.listWidget.setSortingEnabled(__sortingEnabled)
 
         self.label_2.setText(QCoreApplication.translate("Form", u"LOG:", None))
-        self.label.setText("")
     # retranslateUi
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1415</width>
-    <height>733</height>
+    <width>1640</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -112,106 +112,16 @@ QComboBox QAbstractItemView {
 }
 </string>
   </property>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>0</y>
-     <width>1371</width>
-     <height>723</height>
+     <width>1621</width>
+     <height>841</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="spacing">
-     <number>8</number>
-    </property>
-    <item row="4" column="1" rowspan="7">
-     <widget class="QListWidget" name="log_list_2">
-      <property name="minimumSize">
-       <size>
-        <width>1080</width>
-        <height>720</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="0">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="horizontalSpacing">
-       <number>8</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>0</number>
-      </property>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="remove_cam">
-        <property name="minimumSize">
-         <size>
-          <width>110</width>
-          <height>60</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>-1</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>DEL CAM</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="add_cam">
-        <property name="minimumSize">
-         <size>
-          <width>110</width>
-          <height>60</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>-1</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>ADD CAM</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="0">
-     <widget class="QComboBox" name="comboBox"/>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Adress:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QLineEdit" name="lineEdit"/>
-    </item>
-    <item row="7" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Port:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QLineEdit" name="lineEdit_2"/>
-    </item>
-   </layout>
+   <layout class="QGridLayout" name="gridLayout"/>
   </widget>
  </widget>
  <resources/>

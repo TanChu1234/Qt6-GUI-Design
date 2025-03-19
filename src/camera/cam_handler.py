@@ -13,6 +13,7 @@ class CameraThread(QThread):
     connection_status_signal = Signal(str, str)  # (status, camera_name)
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
+    
     def __init__(self, ip, port, username, password, camera_name, protocol):
         """Initialize the camera thread with connection details."""
         super().__init__()
@@ -61,7 +62,7 @@ class CameraThread(QThread):
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         # Attempt to connect to camera with timeout
-        if not self._connect_with_timeout(cap, url, timeout=5):
+        if not self._connect_with_timeout(cap, url, timeout=2):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False

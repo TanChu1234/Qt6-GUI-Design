@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1390</width>
-    <height>837</height>
+    <width>1640</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -44,7 +44,7 @@ QPushButton {
     font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
-	min-width: 30px;
+	min-width: 50px;
     color: white;
     text-align: center;
 }
@@ -68,7 +68,7 @@ QLabel {
 
 /* Camera Display */
 QLabel#label {
-    background-color: rgb(238, 238, 238);
+    background-color: #FFFFFF;
     border-radius: 10px;
 }
 
@@ -89,10 +89,10 @@ QListWidget#listWidget {
 }
 QListWidget#log_list {
     background-color: rgb(255, 255, 255);
-    border-radius: 5px;
+	border-radius:5px;
     padding: 5px;
     color: black;
-    font-size: 9px;
+    font-size: 11px;
 }</string>
   </property>
   <widget class="QWidget" name="layoutWidget">
@@ -100,8 +100,8 @@ QListWidget#log_list {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1380</width>
-     <height>826</height>
+     <width>1631</width>
+     <height>841</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -111,13 +111,16 @@ QListWidget#log_list {
     <property name="spacing">
      <number>8</number>
     </property>
-    <item row="10" column="1">
+    <item row="10" column="1" colspan="11">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QPushButton" name="start_cam">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -140,7 +143,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="stop_cam">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -163,7 +166,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="display">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -186,7 +189,7 @@ QListWidget#log_list {
        <widget class="QPushButton" name="run_once">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -210,7 +213,7 @@ ONCE TIME</string>
        <widget class="QPushButton" name="run_continuous">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -244,7 +247,7 @@ REAL TIME</string>
        <widget class="QPushButton" name="add_cam">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -256,8 +259,7 @@ REAL TIME</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">
-</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>ADD CAM</string>
@@ -268,7 +270,7 @@ REAL TIME</string>
        <widget class="QPushButton" name="remove_cam">
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>90</width>
           <height>60</height>
          </size>
         </property>
@@ -289,13 +291,28 @@ REAL TIME</string>
       </item>
      </layout>
     </item>
-    <item row="10" column="3" colspan="10">
-     <widget class="QListWidget" name="log_list">
+    <item row="4" column="1" rowspan="5" colspan="11">
+     <widget class="QLabel" name="label">
       <property name="minimumSize">
        <size>
-        <width>0</width>
-        <height>60</height>
+        <width>1080</width>
+        <height>720</height>
        </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -341,12 +358,32 @@ REAL TIME</string>
       </item>
      </widget>
     </item>
-    <item row="10" column="2">
+    <item row="9" column="1" colspan="11">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="12" rowspan="5">
+     <widget class="QListWidget" name="log_list">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="12">
      <widget class="QLabel" name="label_2">
       <property name="minimumSize">
        <size>
         <width>50</width>
-        <height>60</height>
+        <height>40</height>
        </size>
       </property>
       <property name="font">
@@ -356,44 +393,20 @@ REAL TIME</string>
         <bold>true</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">	border: 1px solid rgb(255, 255, 255);
+	border-radius:5px;</string>
+      </property>
       <property name="text">
        <string>LOG:</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-      <property name="indent">
-       <number>5</number>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1" rowspan="5" colspan="12">
-     <widget class="QLabel" name="label">
-      <property name="minimumSize">
-       <size>
-        <width>1080</width>
-        <height>720</height>
-       </size>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
+      <property name="indent">
+       <number>0</number>
+      </property>
      </widget>
-    </item>
-    <item row="9" column="1">
-     <widget class="QLineEdit" name="lineEdit"/>
     </item>
    </layout>
   </widget>
