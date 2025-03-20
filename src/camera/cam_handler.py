@@ -96,7 +96,7 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=6):
+    def _connect_with_timeout(self, cap, url, timeout=2):
         """Try to connect to the camera with a timeout."""
         start_time = time.time()
         
@@ -132,9 +132,6 @@ class CameraThread(QThread):
             
     def _process_frames(self, cap):
         """Process frames from the camera in a loop."""
-        frame_count = 0
-        last_log_time = time.time()
-        frame_rate = 0
         
         while self.active:
             # Read frame with timeout handling
@@ -155,16 +152,7 @@ class CameraThread(QThread):
                     self.connection_status_signal.emit("disconnected", self.camera_name)
                     break
 
-            # FPS calculation and logging
-            frame_count += 1
-            current_time = time.time()
-            time_diff = current_time - last_log_time
-            
-            if time_diff >= 5.0:  # Log FPS every 5 seconds
-                frame_rate = frame_count / time_diff
-                self.log_signal.emit(f"📊 {self.camera_name} FPS: {frame_rate:.1f}")
-                frame_count = 0
-                last_log_time = current_time
+     
 
             # Convert to RGB format for display
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

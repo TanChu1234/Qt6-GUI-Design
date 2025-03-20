@@ -117,7 +117,7 @@ QListWidget#log_list {
        <number>8</number>
       </property>
       <item>
-       <widget class="QPushButton" name="start_cam">
+       <widget class="QPushButton" name="connect">
         <property name="minimumSize">
          <size>
           <width>90</width>
@@ -141,12 +141,12 @@ QListWidget#log_list {
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>START</string>
+         <string>CONNECT</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="stop_cam">
+       <widget class="QPushButton" name="disconnect">
         <property name="minimumSize">
          <size>
           <width>90</width>
@@ -170,7 +170,7 @@ QListWidget#log_list {
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>STOP</string>
+         <string>DISCONNECT</string>
         </property>
        </widget>
       </item>

@@ -14,5 +14,13 @@
         "username": "",
         "password": "",
         "protocol": "HTTP"
+    },
+    {
+        "camera_name": "home",
+        "ip_address": "192.168.214.217",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "protocol": "HTTP"
     }
 ]
