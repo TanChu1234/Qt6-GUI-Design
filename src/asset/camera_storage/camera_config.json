@@ -1,37 +1,18 @@
 [
     {
         "camera_name": "tan",
-        "ip_address": "192.168.3.1",
+        "ip_address": "192.168.3.2",
         "port": "8080",
         "username": "",
         "password": "",
         "protocol": "HTTP"
     },
     {
-        "camera_name": "camera2",
-        "ip_address": "192.168.3.15",
+        "camera_name": "Camera 2",
+        "ip_address": "192.168.3.1",
         "port": "8080",
         "username": "",
         "password": "",
-        "protocol": "HTTP",
-        "status": "connecting"
-    },
-    {
-        "camera_name": "new",
-        "ip_address": "192.168.198.217",
-        "port": "8080",
-        "username": "",
-        "password": "",
-        "protocol": "HTTP",
-        "status": "connecting"
-    },
-    {
-        "camera_name": "nha",
-        "ip_address": "192.168.62.189",
-        "port": "554",
-        "username": "chunhattan",
-        "password": "12345678",
-        "protocol": "RTSP",
-        "status": "offline"
+        "protocol": "HTTP"
     }
 ]

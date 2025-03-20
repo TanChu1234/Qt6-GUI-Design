@@ -124,6 +124,12 @@ QListWidget#log_list {
           <height>60</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -145,6 +151,12 @@ QListWidget#log_list {
          <size>
           <width>90</width>
           <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -170,6 +182,12 @@ QListWidget#log_list {
           <height>60</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -186,11 +204,17 @@ QListWidget#log_list {
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="run_once">
+       <widget class="QPushButton" name="trigger_http">
         <property name="minimumSize">
          <size>
           <width>90</width>
           <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -204,13 +228,13 @@ QListWidget#log_list {
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>RUN AI 
-ONCE TIME</string>
+         <string>TRIGGER
+HTTP</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="run_continuous">
+       <widget class="QPushButton" name="trigger_tcp">
         <property name="minimumSize">
          <size>
           <width>90</width>
@@ -228,8 +252,8 @@ ONCE TIME</string>
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>RUN AI 
-REAL TIME</string>
+         <string>TRIGGER
+TCP</string>
         </property>
        </widget>
       </item>
@@ -297,6 +321,12 @@ REAL TIME</string>
        <size>
         <width>1080</width>
         <height>720</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1080</width>
+        <height>16777215</height>
        </size>
       </property>
       <property name="sizeIncrement">

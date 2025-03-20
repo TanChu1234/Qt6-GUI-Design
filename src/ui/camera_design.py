@@ -110,6 +110,7 @@ class Ui_Form(object):
         self.start_cam = QPushButton(self.layoutWidget)
         self.start_cam.setObjectName(u"start_cam")
         self.start_cam.setMinimumSize(QSize(90, 60))
+        self.start_cam.setMaximumSize(QSize(16777215, 16777215))
         font1 = QFont()
         font1.setFamilies([u"Segoe UI"])
         font1.setBold(True)
@@ -121,6 +122,7 @@ class Ui_Form(object):
         self.stop_cam = QPushButton(self.layoutWidget)
         self.stop_cam.setObjectName(u"stop_cam")
         self.stop_cam.setMinimumSize(QSize(90, 60))
+        self.stop_cam.setMaximumSize(QSize(16777215, 16777215))
         self.stop_cam.setFont(font1)
         self.stop_cam.setStyleSheet(u"")
 
@@ -129,26 +131,28 @@ class Ui_Form(object):
         self.display = QPushButton(self.layoutWidget)
         self.display.setObjectName(u"display")
         self.display.setMinimumSize(QSize(90, 60))
+        self.display.setMaximumSize(QSize(16777215, 16777215))
         self.display.setFont(font1)
         self.display.setStyleSheet(u"")
 
         self.horizontalLayout.addWidget(self.display)
 
-        self.run_once = QPushButton(self.layoutWidget)
-        self.run_once.setObjectName(u"run_once")
-        self.run_once.setMinimumSize(QSize(90, 60))
-        self.run_once.setFont(font1)
-        self.run_once.setStyleSheet(u"")
+        self.trigger_http = QPushButton(self.layoutWidget)
+        self.trigger_http.setObjectName(u"trigger_http")
+        self.trigger_http.setMinimumSize(QSize(90, 60))
+        self.trigger_http.setMaximumSize(QSize(16777215, 16777215))
+        self.trigger_http.setFont(font1)
+        self.trigger_http.setStyleSheet(u"")
 
-        self.horizontalLayout.addWidget(self.run_once)
+        self.horizontalLayout.addWidget(self.trigger_http)
 
-        self.run_continuous = QPushButton(self.layoutWidget)
-        self.run_continuous.setObjectName(u"run_continuous")
-        self.run_continuous.setMinimumSize(QSize(90, 60))
-        self.run_continuous.setFont(font1)
-        self.run_continuous.setStyleSheet(u"")
+        self.trigger_tcp = QPushButton(self.layoutWidget)
+        self.trigger_tcp.setObjectName(u"trigger_tcp")
+        self.trigger_tcp.setMinimumSize(QSize(90, 60))
+        self.trigger_tcp.setFont(font1)
+        self.trigger_tcp.setStyleSheet(u"")
 
-        self.horizontalLayout.addWidget(self.run_continuous)
+        self.horizontalLayout.addWidget(self.trigger_tcp)
 
 
         self.gridLayout.addLayout(self.horizontalLayout, 10, 1, 1, 11)
@@ -179,6 +183,7 @@ class Ui_Form(object):
         self.label = QLabel(self.layoutWidget)
         self.label.setObjectName(u"label")
         self.label.setMinimumSize(QSize(1080, 720))
+        self.label.setMaximumSize(QSize(1080, 16777215))
         self.label.setSizeIncrement(QSize(0, 0))
         self.label.setStyleSheet(u"")
         self.label.setAlignment(Qt.AlignCenter)
@@ -239,10 +244,10 @@ class Ui_Form(object):
         self.start_cam.setText(QCoreApplication.translate("Form", u"START", None))
         self.stop_cam.setText(QCoreApplication.translate("Form", u"STOP", None))
         self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
-        self.run_once.setText(QCoreApplication.translate("Form", u"RUN AI \n"
-"ONCE TIME", None))
-        self.run_continuous.setText(QCoreApplication.translate("Form", u"RUN AI \n"
-"REAL TIME", None))
+        self.trigger_http.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
+"HTTP", None))
+        self.trigger_tcp.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
+"TCP", None))
         self.add_cam.setText(QCoreApplication.translate("Form", u"ADD CAM", None))
         self.remove_cam.setText(QCoreApplication.translate("Form", u"DEL CAM", None))
         self.label.setText("")
