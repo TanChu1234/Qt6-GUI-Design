@@ -15,15 +15,15 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QListView, QListWidget, QListWidgetItem,
-    QPushButton, QSizePolicy, QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QListView,
+    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1640, 850)
+        Form.resize(1780, 820)
         Form.setMinimumSize(QSize(1390, 0))
         font = QFont()
         font.setFamilies([u"Segoe UI"])
@@ -99,63 +99,41 @@ class Ui_Form(object):
 "}")
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(0, 0, 1631, 841))
+        self.layoutWidget.setGeometry(QRect(0, 0, 1761, 800))
         self.gridLayout = QGridLayout(self.layoutWidget)
-        self.gridLayout.setSpacing(8)
+        self.gridLayout.setSpacing(10)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(0, 2, 0, 0)
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setSpacing(8)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.connect = QPushButton(self.layoutWidget)
-        self.connect.setObjectName(u"connect")
-        self.connect.setMinimumSize(QSize(90, 60))
-        self.connect.setMaximumSize(QSize(16777215, 16777215))
+        self.log_list = QListWidget(self.layoutWidget)
+        self.log_list.setObjectName(u"log_list")
+        self.log_list.setMinimumSize(QSize(0, 60))
+        self.log_list.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.log_list, 4, 8, 5, 1)
+
+        self.label_2 = QLabel(self.layoutWidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setMinimumSize(QSize(50, 40))
         font1 = QFont()
         font1.setFamilies([u"Segoe UI"])
         font1.setBold(True)
-        self.connect.setFont(font1)
-        self.connect.setStyleSheet(u"")
+        self.label_2.setFont(font1)
+        self.label_2.setStyleSheet(u"	border: 1px solid rgb(255, 255, 255);\n"
+"	border-radius:5px;")
+        self.label_2.setAlignment(Qt.AlignCenter)
+        self.label_2.setIndent(0)
 
-        self.horizontalLayout.addWidget(self.connect)
+        self.gridLayout.addWidget(self.label_2, 9, 8, 1, 1)
 
-        self.disconnect = QPushButton(self.layoutWidget)
-        self.disconnect.setObjectName(u"disconnect")
-        self.disconnect.setMinimumSize(QSize(90, 60))
-        self.disconnect.setMaximumSize(QSize(16777215, 16777215))
-        self.disconnect.setFont(font1)
-        self.disconnect.setStyleSheet(u"")
+        self.label = QLabel(self.layoutWidget)
+        self.label.setObjectName(u"label")
+        self.label.setMinimumSize(QSize(1080, 720))
+        self.label.setMaximumSize(QSize(1080, 16777215))
+        self.label.setSizeIncrement(QSize(0, 0))
+        self.label.setStyleSheet(u"")
+        self.label.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout.addWidget(self.disconnect)
-
-        self.display = QPushButton(self.layoutWidget)
-        self.display.setObjectName(u"display")
-        self.display.setMinimumSize(QSize(90, 60))
-        self.display.setMaximumSize(QSize(16777215, 16777215))
-        self.display.setFont(font1)
-        self.display.setStyleSheet(u"")
-
-        self.horizontalLayout.addWidget(self.display)
-
-        self.trigger_http = QPushButton(self.layoutWidget)
-        self.trigger_http.setObjectName(u"trigger_http")
-        self.trigger_http.setMinimumSize(QSize(90, 60))
-        self.trigger_http.setMaximumSize(QSize(16777215, 16777215))
-        self.trigger_http.setFont(font1)
-        self.trigger_http.setStyleSheet(u"")
-
-        self.horizontalLayout.addWidget(self.trigger_http)
-
-        self.trigger_tcp = QPushButton(self.layoutWidget)
-        self.trigger_tcp.setObjectName(u"trigger_tcp")
-        self.trigger_tcp.setMinimumSize(QSize(90, 60))
-        self.trigger_tcp.setFont(font1)
-        self.trigger_tcp.setStyleSheet(u"")
-
-        self.horizontalLayout.addWidget(self.trigger_tcp)
-
-
-        self.gridLayout.addLayout(self.horizontalLayout, 10, 1, 1, 11)
+        self.gridLayout.addWidget(self.label, 4, 1, 5, 7)
 
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
@@ -178,17 +156,7 @@ class Ui_Form(object):
         self.gridLayout_2.addWidget(self.remove_cam, 0, 1, 1, 1)
 
 
-        self.gridLayout.addLayout(self.gridLayout_2, 10, 0, 1, 1)
-
-        self.label = QLabel(self.layoutWidget)
-        self.label.setObjectName(u"label")
-        self.label.setMinimumSize(QSize(1080, 720))
-        self.label.setMaximumSize(QSize(1080, 16777215))
-        self.label.setSizeIncrement(QSize(0, 0))
-        self.label.setStyleSheet(u"")
-        self.label.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.label, 4, 1, 5, 11)
+        self.gridLayout.addLayout(self.gridLayout_2, 9, 0, 1, 1)
 
         self.listWidget = QListWidget(self.layoutWidget)
         font2 = QFont()
@@ -202,36 +170,64 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
         self.listWidget.setSizePolicy(sizePolicy)
-        self.listWidget.setMinimumSize(QSize(200, 0))
+        self.listWidget.setMinimumSize(QSize(296, 0))
         self.listWidget.setSizeIncrement(QSize(0, 0))
         self.listWidget.setFont(font)
         self.listWidget.setFlow(QListView.TopToBottom)
 
         self.gridLayout.addWidget(self.listWidget, 4, 0, 5, 1)
 
-        self.lineEdit = QLineEdit(self.layoutWidget)
-        self.lineEdit.setObjectName(u"lineEdit")
-        self.lineEdit.setStyleSheet(u"")
+        self.connect = QPushButton(self.layoutWidget)
+        self.connect.setObjectName(u"connect")
+        self.connect.setMinimumSize(QSize(90, 60))
+        self.connect.setMaximumSize(QSize(16777215, 16777215))
+        self.connect.setFont(font1)
+        self.connect.setStyleSheet(u"")
 
-        self.gridLayout.addWidget(self.lineEdit, 9, 1, 1, 11)
+        self.gridLayout.addWidget(self.connect, 9, 1, 1, 1)
 
-        self.log_list = QListWidget(self.layoutWidget)
-        self.log_list.setObjectName(u"log_list")
-        self.log_list.setMinimumSize(QSize(0, 60))
-        self.log_list.setStyleSheet(u"")
+        self.disconnect = QPushButton(self.layoutWidget)
+        self.disconnect.setObjectName(u"disconnect")
+        self.disconnect.setMinimumSize(QSize(90, 60))
+        self.disconnect.setMaximumSize(QSize(16777215, 16777215))
+        self.disconnect.setFont(font1)
+        self.disconnect.setStyleSheet(u"")
 
-        self.gridLayout.addWidget(self.log_list, 4, 12, 5, 1)
+        self.gridLayout.addWidget(self.disconnect, 9, 2, 1, 1)
 
-        self.label_2 = QLabel(self.layoutWidget)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setMinimumSize(QSize(50, 40))
-        self.label_2.setFont(font1)
-        self.label_2.setStyleSheet(u"	border: 1px solid rgb(255, 255, 255);\n"
-"	border-radius:5px;")
-        self.label_2.setAlignment(Qt.AlignCenter)
-        self.label_2.setIndent(0)
+        self.display = QPushButton(self.layoutWidget)
+        self.display.setObjectName(u"display")
+        self.display.setMinimumSize(QSize(90, 60))
+        self.display.setMaximumSize(QSize(16777215, 16777215))
+        self.display.setFont(font1)
+        self.display.setStyleSheet(u"")
 
-        self.gridLayout.addWidget(self.label_2, 9, 12, 1, 1)
+        self.gridLayout.addWidget(self.display, 9, 3, 1, 1)
+
+        self.trigger_http = QPushButton(self.layoutWidget)
+        self.trigger_http.setObjectName(u"trigger_http")
+        self.trigger_http.setMinimumSize(QSize(90, 60))
+        self.trigger_http.setMaximumSize(QSize(16777215, 16777215))
+        self.trigger_http.setFont(font1)
+        self.trigger_http.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.trigger_http, 9, 4, 1, 1)
+
+        self.trigger_tcp = QPushButton(self.layoutWidget)
+        self.trigger_tcp.setObjectName(u"trigger_tcp")
+        self.trigger_tcp.setMinimumSize(QSize(90, 60))
+        self.trigger_tcp.setFont(font1)
+        self.trigger_tcp.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.trigger_tcp, 9, 5, 1, 1)
+
+        self.detect = QPushButton(self.layoutWidget)
+        self.detect.setObjectName(u"detect")
+        self.detect.setMinimumSize(QSize(90, 60))
+        self.detect.setFont(font1)
+        self.detect.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.detect, 9, 6, 1, 1)
 
 
         self.retranslateUi(Form)
@@ -241,16 +237,10 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.connect.setText(QCoreApplication.translate("Form", u"CONNECT", None))
-        self.disconnect.setText(QCoreApplication.translate("Form", u"DISCONNECT", None))
-        self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
-        self.trigger_http.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
-"HTTP", None))
-        self.trigger_tcp.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
-"TCP", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"LOG:", None))
+        self.label.setText("")
         self.add_cam.setText(QCoreApplication.translate("Form", u"ADD CAM", None))
         self.remove_cam.setText(QCoreApplication.translate("Form", u"DEL CAM", None))
-        self.label.setText("")
 
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
@@ -258,6 +248,13 @@ class Ui_Form(object):
         ___qlistwidgetitem.setText(QCoreApplication.translate("Form", u"Camera ", None));
         self.listWidget.setSortingEnabled(__sortingEnabled)
 
-        self.label_2.setText(QCoreApplication.translate("Form", u"LOG:", None))
+        self.connect.setText(QCoreApplication.translate("Form", u"CONNECT", None))
+        self.disconnect.setText(QCoreApplication.translate("Form", u"DISCONNECT", None))
+        self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
+        self.trigger_http.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
+"HTTP", None))
+        self.trigger_tcp.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
+"TCP", None))
+        self.detect.setText(QCoreApplication.translate("Form", u"DETECT", None))
     # retranslateUi
 

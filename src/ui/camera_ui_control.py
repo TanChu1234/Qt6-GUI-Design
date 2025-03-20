@@ -41,9 +41,6 @@ class CameraWidget(QWidget):
     
     def _setup_ui(self):
         """Connect UI elements to their handlers."""
-        # Set placeholder text for the lineEdit
-        self.ui.lineEdit.setPlaceholderText("Enter camera command (e.g., cam1, trigger cam2)")
-        
         # Connect UI buttons
         self.ui.add_cam.clicked.connect(self.add_camera)
         self.ui.connect.clicked.connect(self.start_camera)

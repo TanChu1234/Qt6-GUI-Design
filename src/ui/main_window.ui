@@ -24,7 +24,7 @@ QMainWindow {
 QPushButton {
     border: none;
     padding: 12px 20px;
-    font-size: 16px;
+    font-size: 24px;
     font-weight: bold;
     border-radius: 5px;
     color: white;
@@ -47,7 +47,7 @@ QPushButton#camera_page:hover {
 /* Communication Page Button */
 QPushButton#tcp_page {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #007AFF, stop:1 #009FFF);
+                                stop:0 #007AFF, stop:1 #1AA9FF);
 }
 
 QPushButton#tcp_page:hover {
@@ -66,6 +66,16 @@ QPushButton#http_page:hover {
                                 stop:0 #C050F5, stop:1 #E080FF);
 }
 
+/* Add Item Button */
+QPushButton#model_page {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */
+}
+
+QPushButton#model_page:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */
+}
 /* Pressed Effect */
 QPushButton:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
@@ -112,7 +122,7 @@ QPushButton:pressed {
    <widget class="QPushButton" name="tcp_page">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>700</x>
       <y>30</y>
       <width>211</width>
       <height>80</height>
@@ -168,7 +178,7 @@ QPushButton:pressed {
     </property>
     <property name="iconSize">
      <size>
-      <width>32</width>
+      <width>48</width>
       <height>32</height>
      </size>
     </property>
@@ -197,6 +207,35 @@ QPushButton:pressed {
     <widget class="QWidget" name="page"/>
     <widget class="QWidget" name="page_3"/>
     <widget class="QWidget" name="page_2"/>
+   </widget>
+   <widget class="QPushButton" name="model_page">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>30</y>
+      <width>211</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>180</width>
+      <height>80</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>  AI</string>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../asset/images/brain.png</normaloff>../asset/images/brain.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>38</width>
+      <height>38</height>
+     </size>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

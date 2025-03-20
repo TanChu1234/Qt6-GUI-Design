@@ -152,8 +152,6 @@ class CameraThread(QThread):
                     self.connection_status_signal.emit("disconnected", self.camera_name)
                     break
 
-     
-
             # Convert to RGB format for display
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
