@@ -1,0 +1,18 @@
+[
+    {
+        "camera_name": "tan",
+        "ip_address": "192.168.3.2",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "protocol": "HTTP"
+    },
+    {
+        "camera_name": "Camera 2",
+        "ip_address": "192.168.3.1",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "protocol": "HTTP"
+    }
+]

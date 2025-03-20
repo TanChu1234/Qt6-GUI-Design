@@ -6,78 +6,327 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1320</width>
-    <height>830</height>
+    <width>1640</width>
+    <height>850</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1390</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+    <pointsize>-1</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">/* Main Window Background */
+QWidget {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #1E1E2E, stop:1 #252836);
+    color: white;
+    font-size: 14px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+
+/* Unified Button Style */
+QPushButton {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #007AFF, stop:1 #009FFF);
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+	min-width: 50px;
+    color: white;
+    text-align: center;
+}
+
+/* Button Hover Effect */
+QPushButton:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #66BFFF, stop:1 #80D5FF);
+}
+
+/* Button Pressed Effect */
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Labels */
+QLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Camera Display */
+QLabel#label {
+    background-color: #FFFFFF;
+    border-radius: 10px;
+}
+
+/* Log Label */
+QLabel#label_2 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+/* List Widgets */
+QListWidget#listWidget {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 5px;
+    color: black;
+    font-size: 14px;
+}
+QListWidget#log_list {
+    background-color: rgb(255, 255, 255);
+	border-radius:5px;
+    padding: 5px;
+    color: black;
+    font-size: 11px;
+}</string>
+  </property>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>1301</width>
-     <height>801</height>
+     <x>0</x>
+     <y>0</y>
+     <width>1631</width>
+     <height>841</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="horizontalSpacing">
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="spacing">
      <number>8</number>
     </property>
-    <property name="verticalSpacing">
-     <number>0</number>
-    </property>
-    <item row="2" column="3" rowspan="2">
-     <widget class="QPushButton" name="run_once">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
+    <item row="10" column="1" colspan="11">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>8</number>
       </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>RUN AI 
-ONCE TIME</string>
-      </property>
-     </widget>
+      <item>
+       <widget class="QPushButton" name="start_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>START</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stop_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>STOP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="display">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DISPLAY</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="trigger_http">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>TRIGGER
+HTTP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="trigger_tcp">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>TRIGGER
+TCP</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item row="2" column="6" rowspan="2">
-     <widget class="QListWidget" name="log_list"/>
+    <item row="10" column="0">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="horizontalSpacing">
+       <number>8</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="add_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>ADD CAM</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="remove_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DEL CAM</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item row="2" column="4" rowspan="2">
-     <widget class="QPushButton" name="run_continuous">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>RUN AI 
-REAL TIME</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1" rowspan="5" colspan="6">
+    <item row="4" column="1" rowspan="5" colspan="11">
      <widget class="QLabel" name="label">
       <property name="minimumSize">
        <size>
         <width>1080</width>
         <height>720</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1080</width>
+        <height>16777215</height>
        </size>
       </property>
       <property name="sizeIncrement">
@@ -87,51 +336,13 @@ REAL TIME</string>
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(0, 0, 127);</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2" rowspan="2">
-     <widget class="QPushButton" name="stop_cam">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>STOP</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1" rowspan="2">
-     <widget class="QPushButton" name="start_cam">
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>START</string>
       </property>
      </widget>
     </item>
@@ -157,7 +368,8 @@ REAL TIME</string>
       </property>
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
        </font>
       </property>
       <property name="flow">
@@ -167,73 +379,64 @@ REAL TIME</string>
        <property name="text">
         <string>Camera </string>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
       </item>
      </widget>
     </item>
-    <item row="2" column="5" rowspan="2">
+    <item row="9" column="1" colspan="11">
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="12" rowspan="5">
+     <widget class="QListWidget" name="log_list">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="12">
      <widget class="QLabel" name="label_2">
       <property name="minimumSize">
        <size>
-        <width>70</width>
-        <height>0</height>
+        <width>50</width>
+        <height>40</height>
        </size>
       </property>
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
         <bold>true</bold>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">	border: 1px solid rgb(255, 255, 255);
+	border-radius:5px;</string>
       </property>
       <property name="text">
        <string>LOG:</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
       <property name="indent">
-       <number>5</number>
+       <number>0</number>
       </property>
      </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QPushButton" name="search_cam">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Search Camera</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="add_cam">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Add Cam</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="remove_cam">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Remove Cam</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
