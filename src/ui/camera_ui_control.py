@@ -622,7 +622,7 @@ class CameraWidget(QWidget):
             if triggered_cameras:
                 print(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
             
-            if failed_cameras:
+            if failed_cameras: 
                 print(f"❌ Failed cameras: {', '.join(failed_cameras)}")
                 
             if skipped_cameras:
@@ -633,5 +633,79 @@ class CameraWidget(QWidget):
         except Exception as e:
             print(f"❌ Unexpected error in trigger_http: {str(e)}")
             
-    def run_ai_model(self):
-        print("add ai model here")
+    def run_ai_model(self):    
+        """Trigger cameras independently based on JSON configuration with improved isolation."""
+        json_path, _ = QFileDialog.getOpenFileName(
+            self, 
+            "Select Camera Trigger JSON", 
+            "", 
+            "JSON Files (*.json);;All Files (*)"
+        )
+        
+        if not json_path or not os.path.exists(json_path):
+            print(f"❌ Trigger JSON file not found or canceled")
+            return
+        
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                trigger_configs = json.load(f)
+            
+            triggered_cameras = []
+            failed_cameras = []
+            skipped_cameras = []
+            
+            # Process each camera completely independently
+            for config in trigger_configs:
+                camera_name = config.get("camera_name")  
+                    
+                if not camera_name:
+                    print("⚠️ Skipping entry: No camera_name specified in config")
+                    continue
+                
+                # Check if camera is in running threads
+                if camera_name not in self.camera_threads:
+                    print(f"⚠️ Camera {camera_name} not connected")
+                    skipped_cameras.append(camera_name)
+                    continue
+                
+                try:
+                    # Get the thread for this camera
+                    thread = self.camera_threads[camera_name]
+                    
+                    # Verify thread is running
+                    if not thread.isRunning():
+                        print(f"⚠️ Camera {camera_name} thread not running")
+                        skipped_cameras.append(camera_name)
+                        continue
+                    
+                    # Attempt to trigger
+                    result = thread.trigger_and_process()
+                    
+                    if result:
+                        triggered_cameras.append(camera_name)
+                        print(f"✅ Triggered {camera_name}")
+                    else:
+                        failed_cameras.append(camera_name)
+                        print(f"❌ Failed to trigger {camera_name}")
+                    
+                except Exception as e:
+                    print(f"❌ Error triggering {camera_name}: {str(e)}")
+                    failed_cameras.append(camera_name)
+            
+            # Final summary
+            print("\n=== Trigger HTTP Summary ===")
+            print(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
+            
+            if triggered_cameras:
+                print(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
+            
+            if failed_cameras: 
+                print(f"❌ Failed cameras: {', '.join(failed_cameras)}")
+                
+            if skipped_cameras:
+                print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parsing JSON file: {str(e)}")
+        except Exception as e:
+            print(f"❌ Unexpected error in detect: {str(e)}")

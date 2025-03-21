@@ -28,6 +28,7 @@ class CameraThread(QThread):
         # State variables
         self.active = False  # Controls thread main loop
         self.triggered = False  # Flag for trigger operations
+        self.triggered_ai = False
         self.trigger_action = None  # What action to perform when triggered
         
         # Thread synchronization
@@ -39,7 +40,7 @@ class CameraThread(QThread):
         
         # Output configuration
         self.save_path = "captures"  # Default path for saved images
-        
+        self.result_path = "outputs/detections"
         # Create the save directory if it doesn't exist
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
@@ -166,6 +167,11 @@ class CameraThread(QThread):
                 self._process_trigger()
                 self.triggered = False
                 
+            # Check if run AI
+            if self.triggered_ai:
+                self._process_ai()
+                self.triggered_ai = False
+                
             # Can release the lock before UI operations
             self.mutex.unlock()
             
@@ -208,7 +214,20 @@ class CameraThread(QThread):
         self.trigger_action = action
         self.mutex.unlock()
         return True
-        
+    
+    def trigger_and_process(self):
+        """Trigger the camera to perform an action on the next frame."""
+        if not self.active:
+            self.log_signal.emit(f"⚠️ Cannot trigger {self.camera_name}: Camera not active")
+            self.trigger_completed_signal.emit("error", self.camera_name)
+            return False
+            
+        self.mutex.lock()
+        self.triggered_ai = True
+        self.mutex.unlock()
+        return True
+    
+      
     def _process_trigger(self):
         """Process the triggered action on the current frame."""
         if self.trigger_action == "capture":
@@ -231,3 +250,24 @@ class CameraThread(QThread):
             # Handle other actions here
             self.log_signal.emit(f"⚠️ Unknown action: {self.trigger_action}")
             self.trigger_completed_signal.emit("error", self.camera_name)
+            
+    def _process_ai(self):
+        """Process the triggered action on the current frame."""
+        # Save the current frame to file
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
+        
+        if self.last_frame is not None:
+            try:
+                print(type(self.last_frame))
+                cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
+                cv2.imwrite(filename, self.last_frame)
+                self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
+                self.trigger_completed_signal.emit(filename, self.camera_name)
+            except Exception as e:
+                self.log_signal.emit(f"❌ Error saving image: {str(e)}")
+                self.trigger_completed_signal.emit("error", self.camera_name)
+        else:
+            self.log_signal.emit(f"❌ No frame available to capture")
+            self.trigger_completed_signal.emit("error", self.camera_name)
+        
