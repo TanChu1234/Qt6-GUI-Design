@@ -28,6 +28,7 @@ class CameraThread(QThread):
         # State variables
         self.active = False  # Controls thread main loop
         self.triggered = False  # Flag for trigger operations
+        self.triggered_ai = False
         self.trigger_action = None  # What action to perform when triggered
         
         # Thread synchronization
@@ -39,7 +40,7 @@ class CameraThread(QThread):
         
         # Output configuration
         self.save_path = "captures"  # Default path for saved images
-        
+        self.result_path = "outputs/detections"
         # Create the save directory if it doesn't exist
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
@@ -96,7 +97,7 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=6):
+    def _connect_with_timeout(self, cap, url, timeout=2):
         """Try to connect to the camera with a timeout."""
         start_time = time.time()
         
@@ -132,9 +133,6 @@ class CameraThread(QThread):
             
     def _process_frames(self, cap):
         """Process frames from the camera in a loop."""
-        frame_count = 0
-        last_log_time = time.time()
-        frame_rate = 0
         
         while self.active:
             # Read frame with timeout handling
@@ -155,17 +153,6 @@ class CameraThread(QThread):
                     self.connection_status_signal.emit("disconnected", self.camera_name)
                     break
 
-            # FPS calculation and logging
-            frame_count += 1
-            current_time = time.time()
-            time_diff = current_time - last_log_time
-            
-            if time_diff >= 5.0:  # Log FPS every 5 seconds
-                frame_rate = frame_count / time_diff
-                self.log_signal.emit(f"📊 {self.camera_name} FPS: {frame_rate:.1f}")
-                frame_count = 0
-                last_log_time = current_time
-
             # Convert to RGB format for display
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
@@ -179,6 +166,11 @@ class CameraThread(QThread):
             if self.triggered:
                 self._process_trigger()
                 self.triggered = False
+                
+            # Check if run AI
+            if self.triggered_ai:
+                self._process_ai()
+                self.triggered_ai = False
                 
             # Can release the lock before UI operations
             self.mutex.unlock()
@@ -222,7 +214,20 @@ class CameraThread(QThread):
         self.trigger_action = action
         self.mutex.unlock()
         return True
-        
+    
+    def trigger_and_process(self):
+        """Trigger the camera to perform an action on the next frame."""
+        if not self.active:
+            self.log_signal.emit(f"⚠️ Cannot trigger {self.camera_name}: Camera not active")
+            self.trigger_completed_signal.emit("error", self.camera_name)
+            return False
+            
+        self.mutex.lock()
+        self.triggered_ai = True
+        self.mutex.unlock()
+        return True
+    
+      
     def _process_trigger(self):
         """Process the triggered action on the current frame."""
         if self.trigger_action == "capture":
@@ -245,3 +250,24 @@ class CameraThread(QThread):
             # Handle other actions here
             self.log_signal.emit(f"⚠️ Unknown action: {self.trigger_action}")
             self.trigger_completed_signal.emit("error", self.camera_name)
+            
+    def _process_ai(self):
+        """Process the triggered action on the current frame."""
+        # Save the current frame to file
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
+        
+        if self.last_frame is not None:
+            try:
+                print(type(self.last_frame))
+                cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
+                cv2.imwrite(filename, self.last_frame)
+                self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
+                self.trigger_completed_signal.emit(filename, self.camera_name)
+            except Exception as e:
+                self.log_signal.emit(f"❌ Error saving image: {str(e)}")
+                self.trigger_completed_signal.emit("error", self.camera_name)
+        else:
+            self.log_signal.emit(f"❌ No frame available to capture")
+            self.trigger_completed_signal.emit("error", self.camera_name)
+        

@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox, QFileDialog
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread
@@ -8,6 +7,7 @@ from camera.check_ping import PingThread
 from camera.camera_configuration_manager import CameraConfigManager
 from datetime import datetime
 import os
+import time
 import json
 
 class CameraWidget(QWidget):
@@ -41,23 +41,20 @@ class CameraWidget(QWidget):
     
     def _setup_ui(self):
         """Connect UI elements to their handlers."""
-        # Set placeholder text for the lineEdit
-        self.ui.lineEdit.setPlaceholderText("Enter camera command (e.g., cam1, trigger cam2)")
-        
         # Connect UI buttons
         self.ui.add_cam.clicked.connect(self.add_camera)
-        self.ui.start_cam.clicked.connect(self.start_camera)
-        self.ui.stop_cam.clicked.connect(self.stop_camera)
+        self.ui.connect.clicked.connect(self.start_camera)
+        self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
         self.ui.trigger_http.clicked.connect(self.trigger_http)
-        self.ui.trigger_tcp.clicked.connect(self.trigger)
+        self.ui.detect.clicked.connect(self.run_ai_model)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
     
     def load_saved_cameras(self):
         """Load saved camera configurations from file"""
         cameras = self.config_manager.load_config()
-        self.log_message(f"📋 Loaded {len(cameras)} saved cameras")
+        print(f"📋 Loaded {len(cameras)} saved cameras")
         
         # Add cameras to the list and properties dictionary
         for camera in cameras:
@@ -85,6 +82,9 @@ class CameraWidget(QWidget):
         # Check if log_list exceeds 100 items
         if self.ui.log_list.count() > 100:
             self.export_log()
+            
+        # Add print statement
+        print(log_entry)
 
     def export_log(self):
         """Export log messages to 'outputs/logs' folder and clear the list."""
@@ -113,10 +113,10 @@ class CameraWidget(QWidget):
             f"   Port: {camera_props['port']}\n"
             f"   Username: {camera_props['username']}"
             )
-            self.log_message(log_entry)
+            print(log_entry)
             # Don't log password for security reasons
         else:
-            self.log_message(f"⚠️ No properties found for {camera_name}")
+            print(f"⚠️ No properties found for {camera_name}")
     
     def toggle_display(self):
         """Toggle display of the currently selected camera."""
@@ -124,13 +124,13 @@ class CameraWidget(QWidget):
         if self.displaying:
             # Stop displaying but keep threads running
             self._clear_display()
-            self.log_message("🔍 Display turned off")
+            print("🔍 Display turned off")
             return
             
         # Start displaying a camera
         item = self.ui.listWidget.currentItem()
         if not item:
-            self.log_message("⚠️ No camera selected to display!")
+            print("⚠️ No camera selected to display!")
             return
 
         camera_name = item.text()
@@ -154,7 +154,7 @@ class CameraWidget(QWidget):
         self.current_camera = camera_name
         self.displaying = True
         self.ui.display.setText("HIDE")
-        self.log_message(f"🖥️ Now displaying {camera_name}")
+        print(f"🖥️ Now displaying {camera_name}")
     
     def _clear_display(self):
         """Helper method to clear the display and reset display state."""
@@ -186,7 +186,7 @@ class CameraWidget(QWidget):
         # Store camera properties without status
         self.camera_properties[camera_name] = camera_info
 
-        self.log_message(f"🔍 Checking connection to {ip_address}...")
+        print(f"🔍 Checking connection to {ip_address}...")
 
         # Ping the camera
         ping_thread = PingThread(ip_address)
@@ -214,7 +214,7 @@ class CameraWidget(QWidget):
                 break
         
         if not found_camera or not found_item:
-            self.log_message(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
+            print(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
             return
             
         if is_reachable:
@@ -223,7 +223,7 @@ class CameraWidget(QWidget):
             
             # Save to config
             self.config_manager.add_camera(self.camera_properties[found_camera])
-            self.log_message(f"✅ Camera {found_camera} is reachable at {camera_ip}")
+            print(f"✅ Camera {found_camera} is reachable at {camera_ip}")
         else:
             # Remove the camera from the list since it's unreachable
             self.ui.listWidget.takeItem(found_index)
@@ -232,7 +232,7 @@ class CameraWidget(QWidget):
             if found_camera in self.camera_properties:
                 del self.camera_properties[found_camera]
                 
-            self.log_message(f"❌ Camera {found_camera} at {camera_ip} is unreachable! Camera removed.")
+            print(f"❌ Camera {found_camera} at {camera_ip} is unreachable! Camera removed.")
             
         # Clean up the ping thread
         for i, thread in enumerate(self.ping_threads):
@@ -243,7 +243,7 @@ class CameraWidget(QWidget):
         """Remove the selected camera from the list and configuration."""
         item = self.ui.listWidget.currentItem()
         if not item:
-            self.log_message("⚠️ No camera selected to remove!")
+            print("⚠️ No camera selected to remove!")
             return
 
         camera_name = item.text()
@@ -288,9 +288,9 @@ class CameraWidget(QWidget):
         success = self.config_manager.remove_camera_by_name(camera_name)
         
         if success:
-            self.log_message(f"🗑️ Removed camera '{camera_name}'")
+            print(f"🗑️ Removed camera '{camera_name}'")
         else:
-            self.log_message(f"⚠️ Failed to remove camera '{camera_name}' from configuration")
+            print(f"⚠️ Failed to remove camera '{camera_name}' from configuration")
         
         # Clear display if this was the current camera
         if self.current_camera == camera_name:
@@ -319,16 +319,38 @@ class CameraWidget(QWidget):
         # Just update the icon
         self._update_camera_icon(camera_name, status)
     
+    def _handle_camera_stopped(self, camera_name):
+        """Handle when a camera thread stops by itself (due to disconnection)"""
+        if camera_name not in self.camera_threads:
+            return
+            
+        # Ensure thread is fully finished
+        try:
+            if self.camera_threads[camera_name].isRunning():
+                self.camera_threads[camera_name].wait(1000)  # Wait with timeout
+        except RuntimeError:
+            pass  # Thread might already be finished
+            
+        # Remove the thread reference
+        del self.camera_threads[camera_name]
+        
+        # Update the icon
+        self._update_camera_icon(camera_name, "disconnected")
+        
+        # Clear the display if this was the current camera being displayed
+        if self.displaying and self.current_camera == camera_name:
+            self._clear_display()
+                
+        print(f"🛑 Camera {camera_name} stopped due to disconnection")
+        
+        # The key improvement: Don't affect other cameras - just handle this one
+    
     def closeEvent(self, event):
         """Ensure all camera threads stop when closing the window."""
         # Create a copy of the keys to avoid modification during iteration
         camera_names = list(self.camera_threads.keys())
         for camera_name in camera_names:
-            self.camera_threads[camera_name].stop()
-            try:
-                self.camera_threads[camera_name].wait(1000)  # Wait with timeout
-            except RuntimeError:
-                pass  # Thread might already be finished
+            self.stop_camera(camera_name)
         
         # Save configuration on close
         self.config_manager.save_config()
@@ -339,11 +361,11 @@ class CameraWidget(QWidget):
                 try: 
                     thread.terminate()
                     thread.wait(500)
-                except:
+                except Exception as e:
+                    print(f"⚠️ Error terminating ping thread: {str(e)}")
                     pass
                     
         event.accept()
-    
     """ Camera Operation """
     # Start Camera
     def start_camera(self, specific_camera=None):
@@ -353,19 +375,19 @@ class CameraWidget(QWidget):
         if not camera_name:
             item = self.ui.listWidget.currentItem()
             if not item:
-                self.log_message("⚠️ No camera selected!")
+                print("⚠️ No camera selected!")
                 return
             camera_name = item.text()
 
         camera_props = self.camera_properties.get(camera_name, None)
 
         if not camera_props:
-            self.log_message(f"❌ No properties found for {camera_name}")
+            print(f"❌ No properties found for {camera_name}")
             return
 
         # If thread already exists and is running, just log that
         if camera_name in self.camera_threads and self.camera_threads[camera_name].isRunning():
-            self.log_message(f"ℹ️ {camera_name} is already streaming")
+            print(f"ℹ️ {camera_name} is already streaming")
             return
 
         # Update icon to connecting
@@ -400,7 +422,7 @@ class CameraWidget(QWidget):
         )
         
         thread.start()
-        self.log_message(f"✅ Started streaming {camera_name}")
+        print(f"✅ Started streaming {camera_name}")
 
     def _handle_new_frame(self, pixmap, camera_name):
         """Handle incoming frames from camera threads."""
@@ -408,18 +430,88 @@ class CameraWidget(QWidget):
         if self.displaying and camera_name == self.current_camera:
             self.ui.label.setPixmap(pixmap)
         
+    # Stop Camera        
+    def stop_camera(self, specific_camera=None):
+        """Stop streaming for the selected or specified camera with proper isolation."""
+        # If a specific camera was provided, use it, otherwise get from selection
+        camera_name = specific_camera
+        if not camera_name:
+            item = self.ui.listWidget.currentItem()
+            if not item:
+                print("⚠️ No camera selected!")
+                return False
+            camera_name = item.text()
+
+        # Check if camera thread exists
+        if camera_name not in self.camera_threads:
+            print(f"ℹ️ No active stream for {camera_name}")
+            return False
+            
+        # Get the thread reference
+        thread = self.camera_threads[camera_name]
+        
+        # Make a copy of the thread reference before removal
+        # to prevent affecting dictionary during operations
+        thread_ref = thread
+        
+        try:
+            print(f"🛑 Stopping {camera_name}...")
+            
+            # Disconnect all signals from this thread first to prevent conflicts
+            # Use try/except since some signals may not be connected
+            try:
+                thread_ref.frame_signal.disconnect()
+                thread_ref.log_signal.disconnect()
+                thread_ref.connection_status_signal.disconnect()
+                thread_ref.trigger_completed_signal.disconnect()
+                thread_ref.finished.disconnect()
+            except TypeError:
+                # It's okay if some signals were not connected
+                pass
+                
+            # Now stop the thread's operation
+            thread_ref.stop()
+            
+            # Update icon to offline before waiting (for UI responsiveness)
+            self._update_camera_icon(camera_name, "disconnected")
+            
+            # Clear the display if this was the current camera being displayed
+            if self.displaying and self.current_camera == camera_name:
+                self._clear_display()
+                
+            # Remove the thread from our dictionary BEFORE waiting
+            # This ensures other code won't try to use this thread anymore
+            del self.camera_threads[camera_name]
+            
+            # Wait for the thread to finish, with a reasonable timeout
+            if thread_ref.isRunning():
+                print(f"⏱️ Waiting for {camera_name} thread to finish...")
+                success = thread_ref.wait(2000)  # Wait up to 2 seconds
+                if not success:
+                    print(f"⚠️ Thread for {camera_name} didn't stop properly, forcing termination")
+                    thread_ref.terminate()  # Force termination as a last resort
+                    thread_ref.wait(500)   # Give it a moment to clean up
+            
+            print(f"✅ Successfully stopped {camera_name}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error stopping {camera_name}: {str(e)}")
+            # Still try to remove from dictionary if there was an error
+            if camera_name in self.camera_threads:
+                del self.camera_threads[camera_name]
+            return False
+   
+   
     def _handle_camera_stopped(self, camera_name):
-        """Handle when a camera thread stops by itself (due to disconnection)"""
+        """Handle when a camera thread stops by itself (due to disconnection or error)"""
         if camera_name not in self.camera_threads:
             return
             
-        # Ensure thread is fully finished
-        try:
-            self.camera_threads[camera_name].wait(1000)  # Wait with timeout
-        except RuntimeError:
-            pass  # Thread might already be finished
-            
-        # Remove the thread reference
+        # Store a reference to the thread
+        thread = self.camera_threads[camera_name]
+        
+        # Remove the thread reference FIRST to prevent other code from using it
         del self.camera_threads[camera_name]
         
         # Update the icon
@@ -429,42 +521,23 @@ class CameraWidget(QWidget):
         if self.displaying and self.current_camera == camera_name:
             self._clear_display()
                 
-        self.log_message(f"🛑 Camera {camera_name} stopped due to disconnection")
+        # Ensure thread is fully finished without blocking the UI
+        try:
+            if thread.isRunning():
+                # Use a short timeout to avoid blocking UI
+                thread.wait(500)  
+                
+                # If it's still running after timeout, we'll terminate it
+                if thread.isRunning():
+                    print(f"⚠️ Force terminating {camera_name} thread")
+                    thread.terminate()
+        except RuntimeError as e:
+            print(f"⚠️ Runtime error cleaning up {camera_name} thread: {str(e)}")
+        except Exception as e:
+            print(f"⚠️ Error cleaning up {camera_name} thread: {str(e)}")
+            
+        print(f"🛑 Camera {camera_name} stopped")
     
-    # Stop Camera        
-    def stop_camera(self, specific_camera=None):
-        """Stop streaming for the selected or specified camera."""
-        # If a specific camera was provided, use it, otherwise get from selection
-        camera_name = specific_camera
-        if not camera_name:
-            item = self.ui.listWidget.currentItem()
-            if not item:
-                self.log_message("⚠️ No camera selected!")
-                return
-            camera_name = item.text()
-
-        if camera_name in self.camera_threads:
-            thread = self.camera_threads[camera_name]
-            thread.stop()
-            
-            try:
-                thread.wait(1000)  # Wait with timeout
-            except RuntimeError:
-                pass  # Thread might already be finished
-                
-            del self.camera_threads[camera_name]
-            
-            # Update icon to offline
-            self._update_camera_icon(camera_name, "disconnected")
-            
-            # Clear the display if this was the current camera being displayed
-            if self.displaying and self.current_camera == camera_name:
-                self._clear_display()
-                
-            self.log_message(f"🛑 Stopped {camera_name}")
-        else:
-            self.log_message(f"⚠️ No active stream for {camera_name}")
-   
     def _handle_trigger_result(self, result, camera_name):
         """
         Handle the result of a camera trigger.
@@ -474,232 +547,165 @@ class CameraWidget(QWidget):
             camera_name (str): Name of the camera that was triggered
         """
         if result == "error":
-            self.log_message(f"❌ Trigger failed for {camera_name}")
+            print(f"❌ Trigger failed for {camera_name}")
         else:
             # Successful trigger, log the result (usually the filename)
-            self.log_message(f"✅ Trigger successful for {camera_name}: {result}")
+            print(f"✅ Trigger successful for {camera_name}: {result}")
         
         # Store the result in trigger_results dictionary
         self.trigger_results[camera_name] = result
 
     def trigger_http(self):
-        """
-        Trigger cameras by JSON configuration with signal-based handling.
-        """
-        # Open file dialog to select JSON file
-        file_path, _ = QFileDialog.getOpenFileName(
+        """Trigger cameras independently based on JSON configuration with improved isolation."""
+        json_path, _ = QFileDialog.getOpenFileName(
             self, 
             "Select Camera Trigger JSON", 
             "", 
             "JSON Files (*.json);;All Files (*)"
         )
         
-        # If no file selected, return
-        if not file_path:
-            self.log_message("⚠️ No JSON file selected")
+        if not json_path or not os.path.exists(json_path):
+            print(f"❌ Trigger JSON file not found or canceled")
             return
         
         try:
-            # Read and parse the JSON file
-            with open(file_path, 'r', encoding='utf-8') as file:
-                trigger_config = json.load(file)
+            with open(json_path, 'r', encoding='utf-8') as f:
+                trigger_configs = json.load(f)
             
-            # Validate JSON structure and process triggers
-            if not isinstance(trigger_config, list):
-                self.log_message("❌ Invalid JSON format. Expected a list of camera triggers.")
-                return
+            triggered_cameras = []
+            failed_cameras = []
+            skipped_cameras = []
             
-            # Track trigger results for summary
-            successful_triggers = []
-            failed_triggers = []
-            
-            # Process each trigger in the JSON
-            for trigger in trigger_config:
-                # Validate trigger entry
-                if not isinstance(trigger, dict):
-                    self.log_message(f"⚠️ Skipping invalid trigger: {trigger}")
-                    continue
+            # Process each camera completely independently
+            for config in trigger_configs:
+                camera_name = config.get("camera_name")
+                trigger_type = config.get("type", "capture")
                 
-                # Extract and validate camera name
-                camera_name = trigger.get('camera_name')
                 if not camera_name:
-                    self.log_message("⚠️ Skipping trigger without camera name")
+                    print("⚠️ Skipping entry: No camera_name specified in config")
                     continue
                 
-                # Find the camera by partial name
-                target_camera = self._find_camera_by_partial_name(camera_name)
+                # Check if camera is in running threads
+                if camera_name not in self.camera_threads:
+                    print(f"⚠️ Camera {camera_name} not connected")
+                    skipped_cameras.append(camera_name)
+                    continue
                 
-                if target_camera:
-                    # Determine action (default to capture)
-                    action = trigger.get('type', 'capture').lower()
+                try:
+                    # Get the thread for this camera
+                    thread = self.camera_threads[camera_name]
                     
-                    # Attempt to trigger the camera
-                    try:
-                        result = self._trigger_and_handle_camera(target_camera, action)
-                        if result:
-                            successful_triggers.append(target_camera)
-                        else:
-                            failed_triggers.append(target_camera)
-                    except Exception as e:
-                        self.log_message(f"❌ Error triggering {target_camera}: {str(e)}")
-                        failed_triggers.append(target_camera)
-                else:
-                    self.log_message(f"❌ Camera matching '{camera_name}' not found")
-                    failed_triggers.append(camera_name)
-            
-            # Provide summary notification
-            self._show_trigger_summary(successful_triggers, failed_triggers)
-        
-        except (json.JSONDecodeError, IOError) as e:
-            self.log_message(f"❌ File error: {str(e)}")
-        except Exception as e:
-            self.log_message(f"❌ Unexpected error during trigger: {str(e)}")
-
-    def _trigger_and_handle_camera(self, camera_name, action="capture"):
-        """
-        Comprehensive method to trigger a camera and handle its lifecycle.
-        
-        Returns:
-            bool: True if trigger was successful, False otherwise
-        """
-        # Ensure camera is running
-        if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
-            try:
-                self.log_message(f"🔄 Starting camera {camera_name} before triggering...")
-                self.start_camera(camera_name)
-                
-                # Wait for camera to connect
-                QThread.msleep(300)
-                
-                # Verify camera started
-                if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
-                    self.log_message(f"❌ Failed to start camera {camera_name} for triggering")
-                    return False
-            except Exception as e:
-                self.log_message(f"❌ Error starting {camera_name}: {str(e)}")
-                return False
-        
-        # Prepare trigger signal connection
-        thread = self.camera_threads[camera_name]
-        if not hasattr(thread, "_trigger_connected"):
-            thread.trigger_completed_signal.connect(
-                lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
-            )
-            thread._trigger_connected = True
-        
-        # Trigger the camera
-        try:
-            trigger_result = thread.trigger(action)
-            if trigger_result:
-                self.log_message(f"🔔 Triggered {camera_name} with action: {action}")
-                return True
-            else:
-                self.log_message(f"❌ Trigger failed for {camera_name}")
-                return False
-        except Exception as e:
-            self.log_message(f"❌ Trigger error for {camera_name}: {str(e)}")
-            return False
-
-    def _handle_trigger_result(self, result, camera_name):
-        """Handle the result of a camera trigger and manage its state."""
-        # Determine and log result
-        if result == "error":
-            self.log_message(f"❌ Trigger failed for {camera_name}")
-        else:
-            # Store and log result
-            self.trigger_results[camera_name] = result
-            message = (f"📸 Image captured from {camera_name}: {result}" 
-                    if result.endswith(".jpg") 
-                    else f"✅ Trigger result for {camera_name}: {result}")
-            self.log_message(message)
-        
-        # Stop the camera and manage display
-        self.log_message(f"🛑 Stopping camera {camera_name} after trigger")
-        self.stop_camera(camera_name)
-        
-        # Clear display if this was the current camera
-        if self.displaying and self.current_camera == camera_name:
-            self._clear_display()
-
-    def _show_trigger_summary(self, successful_triggers, failed_triggers):
-        """Display a summary of trigger operations."""
-        if not (successful_triggers or failed_triggers):
-            return
-        
-        summary_message = ""
-        if successful_triggers:
-            summary_message += f"✅ Triggered: {', '.join(successful_triggers)}\n"
-        if failed_triggers:
-            summary_message += f"❌ Failed: {', '.join(failed_triggers)}"
-
-    def _find_camera_by_partial_name(self, name):
-        """Find a camera that contains the given name."""
-        name_lower = name.lower()
-        for i in range(self.ui.listWidget.count()):
-            camera_name = self.ui.listWidget.item(i).text()
-            if name_lower in camera_name.lower():
-                return camera_name
-        return None
-
-
-    def trigger_tcp(self, byte_array):
-        """
-        Trigger cameras using a 5-byte array over TCP.
-        Each bit in the 5-byte array represents a camera (40 cameras total).
-        
-        Args:
-            byte_array (bytes or list): A 5-byte array where each bit controls a camera.
-        """
-        # Validate byte array input
-        if not isinstance(byte_array, (bytes, list)) or len(byte_array) != 5:
-            self.log_message("❌ Invalid byte array. Expected 5 bytes for 40 cameras.")
-            return
-        
-        # Convert list to bytes if necessary
-        if isinstance(byte_array, list):
-            try:
-                byte_array = bytes(byte_array)
-            except ValueError:
-                self.log_message("❌ Invalid byte values in array. Must be 0-255.")
-                return
-        
-        # Track trigger results for summary
-        successful_triggers = []
-        failed_triggers = []
-        
-        try:
-            # Process each camera based on the byte array
-            for camera_idx in range(40):  # 0 to 39 cameras
-                byte_idx = camera_idx // 8  # Which byte (0-4)
-                bit_idx = camera_idx % 8   # Which bit in that byte (0-7)
-                
-                # Check if the bit for this camera is set
-                if byte_array[byte_idx] & (1 << bit_idx):
-                    # Find the camera by index (assuming listWidget has camera names in order)
-                    if camera_idx < self.ui.listWidget.count():
-                        camera_name = self.ui.listWidget.item(camera_idx).text()
-                        
-                        # Attempt to trigger the camera
-                        try:
-                            result = self._trigger_and_handle_camera(camera_name, "capture")
-                            if result:
-                                successful_triggers.append(camera_name)
-                            else:
-                                failed_triggers.append(camera_name)
-                        except Exception as e:
-                            self.log_message(f"❌ Error triggering {camera_name}: {str(e)}")
-                            failed_triggers.append(camera_name)
+                    # Verify thread is running
+                    if not thread.isRunning():
+                        print(f"⚠️ Camera {camera_name} thread not running")
+                        skipped_cameras.append(camera_name)
+                        continue
+                    
+                    # Attempt to trigger
+                    result = thread.trigger(trigger_type)
+                    
+                    if result:
+                        triggered_cameras.append(camera_name)
+                        print(f"✅ Triggered {camera_name}")
                     else:
-                        self.log_message(f"❌ Camera index {camera_idx} not found in list")
-                        failed_triggers.append(f"Camera_{camera_idx}")
-        
-            # Provide summary notification
-            self._show_trigger_summary(successful_triggers, failed_triggers)
-        
+                        failed_cameras.append(camera_name)
+                        print(f"❌ Failed to trigger {camera_name}")
+                    
+                except Exception as e:
+                    print(f"❌ Error triggering {camera_name}: {str(e)}")
+                    failed_cameras.append(camera_name)
+            
+            # Final summary
+            print("\n=== Trigger HTTP Summary ===")
+            print(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
+            
+            if triggered_cameras:
+                print(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
+            
+            if failed_cameras: 
+                print(f"❌ Failed cameras: {', '.join(failed_cameras)}")
+                
+            if skipped_cameras:
+                print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parsing JSON file: {str(e)}")
         except Exception as e:
-            self.log_message(f"❌ Unexpected error during TCP trigger: {str(e)}")
-
-    def trigger(self):
-        byte_array = bytes([0x01, 0x00, 0x00, 0x00, 0x00])
-        self.trigger_tcp(byte_array)
+            print(f"❌ Unexpected error in trigger_http: {str(e)}")
+            
+    def run_ai_model(self):    
+        """Trigger cameras independently based on JSON configuration with improved isolation."""
+        json_path, _ = QFileDialog.getOpenFileName(
+            self, 
+            "Select Camera Trigger JSON", 
+            "", 
+            "JSON Files (*.json);;All Files (*)"
+        )
         
+        if not json_path or not os.path.exists(json_path):
+            print(f"❌ Trigger JSON file not found or canceled")
+            return
+        
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                trigger_configs = json.load(f)
+            
+            triggered_cameras = []
+            failed_cameras = []
+            skipped_cameras = []
+            
+            # Process each camera completely independently
+            for config in trigger_configs:
+                camera_name = config.get("camera_name")  
+                    
+                if not camera_name:
+                    print("⚠️ Skipping entry: No camera_name specified in config")
+                    continue
+                
+                # Check if camera is in running threads
+                if camera_name not in self.camera_threads:
+                    print(f"⚠️ Camera {camera_name} not connected")
+                    skipped_cameras.append(camera_name)
+                    continue
+                
+                try:
+                    # Get the thread for this camera
+                    thread = self.camera_threads[camera_name]
+                    
+                    # Verify thread is running
+                    if not thread.isRunning():
+                        print(f"⚠️ Camera {camera_name} thread not running")
+                        skipped_cameras.append(camera_name)
+                        continue
+                    
+                    # Attempt to trigger
+                    result = thread.trigger_and_process()
+                    
+                    if result:
+                        triggered_cameras.append(camera_name)
+                        print(f"✅ Triggered {camera_name}")
+                    else:
+                        failed_cameras.append(camera_name)
+                        print(f"❌ Failed to trigger {camera_name}")
+                    
+                except Exception as e:
+                    print(f"❌ Error triggering {camera_name}: {str(e)}")
+                    failed_cameras.append(camera_name)
+            
+            # Final summary
+            print("\n=== Trigger HTTP Summary ===")
+            print(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
+            
+            if triggered_cameras:
+                print(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
+            
+            if failed_cameras: 
+                print(f"❌ Failed cameras: {', '.join(failed_cameras)}")
+                
+            if skipped_cameras:
+                print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parsing JSON file: {str(e)}")
+        except Exception as e:
+            print(f"❌ Unexpected error in detect: {str(e)}")

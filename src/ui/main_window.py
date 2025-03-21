@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
 "QPushButton {\n"
 "    border: none;\n"
 "    padding: 12px 20px;\n"
-"    font-size: 16px;\n"
+"    font-size: 24px;\n"
 "    font-weight: bold;\n"
 "    border-radius: 5px;\n"
 "    color: white;\n"
@@ -57,7 +57,7 @@ class Ui_MainWindow(object):
 "QPushButton#tcp_page {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y"
                         "2:0, \n"
-"                                stop:0 #007AFF, stop:1 #009FFF);\n"
+"                                stop:0 #007AFF, stop:1 #1AA9FF);\n"
 "}\n"
 "\n"
 "QPushButton#tcp_page:hover {\n"
@@ -76,6 +76,17 @@ class Ui_MainWindow(object):
 "                                stop:0 #C050F5, stop:1 #E080FF);\n"
 "}\n"
 "\n"
+"/* Add Item Button */\n"
+"QPushButton#model_page {\n"
+"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+"                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */\n"
+"}\n"
+"\n"
+"QPushButton#model_page:hover {\n"
+"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+"                  "
+                        "              stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */\n"
+"}\n"
 "/* Pressed Effect */\n"
 "QPushButton:pressed {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
@@ -91,18 +102,18 @@ class Ui_MainWindow(object):
         self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.camera_page.setLayoutDirection(Qt.LeftToRight)
         icon = QIcon()
-        icon.addFile(u"../asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"src/asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.camera_page.setIcon(icon)
         self.camera_page.setIconSize(QSize(32, 32))
         self.tcp_page = QPushButton(self.centralwidget)
         self.tcp_page.setObjectName(u"tcp_page")
-        self.tcp_page.setGeometry(QRect(260, 30, 211, 80))
+        self.tcp_page.setGeometry(QRect(700, 30, 211, 80))
         self.tcp_page.setMinimumSize(QSize(180, 80))
         font = QFont()
         font.setBold(True)
         self.tcp_page.setFont(font)
         icon1 = QIcon()
-        icon1.addFile(u"../asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon1.addFile(u"src/asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.tcp_page.setIcon(icon1)
         self.tcp_page.setIconSize(QSize(32, 32))
         self.http_page = QPushButton(self.centralwidget)
@@ -110,9 +121,9 @@ class Ui_MainWindow(object):
         self.http_page.setGeometry(QRect(480, 30, 211, 80))
         self.http_page.setMinimumSize(QSize(180, 80))
         icon2 = QIcon()
-        icon2.addFile(u"../asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon2.addFile(u"src/asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.http_page.setIcon(icon2)
-        self.http_page.setIconSize(QSize(32, 32))
+        self.http_page.setIconSize(QSize(48, 32))
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setGeometry(QRect(40, 150, 1841, 911))
@@ -128,6 +139,14 @@ class Ui_MainWindow(object):
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
         self.stackedWidget.addWidget(self.page_2)
+        self.model_page = QPushButton(self.centralwidget)
+        self.model_page.setObjectName(u"model_page")
+        self.model_page.setGeometry(QRect(260, 30, 211, 80))
+        self.model_page.setMinimumSize(QSize(180, 80))
+        icon3 = QIcon()
+        icon3.addFile(u"src/asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.model_page.setIcon(icon3)
+        self.model_page.setIconSize(QSize(38, 38))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -143,5 +162,6 @@ class Ui_MainWindow(object):
         self.camera_page.setText(QCoreApplication.translate("MainWindow", u"  CAMERA", None))
         self.tcp_page.setText(QCoreApplication.translate("MainWindow", u"  TCP", None))
         self.http_page.setText(QCoreApplication.translate("MainWindow", u"  HTTP", None))
+        self.model_page.setText(QCoreApplication.translate("MainWindow", u"  AI", None))
     # retranslateUi
 

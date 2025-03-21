@@ -1,12 +1,14 @@
 [
-    
     {
         "camera_name": "tan",
         "type": "capture"
-    },
-
+    }, 
     {
-        "camera_name": "Camera 3",
+        "camera_name": "Camera 2",  
+        "type": "capture"
+    },
+    {
+        "camera_name": "home",  
         "type": "capture"
     }
     
