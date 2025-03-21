@@ -42,12 +42,12 @@ class CameraConfigManager:
                 # Update existing camera
                 self.cameras[i] = camera_info
                 self.save_config()
-                return True
+                return "updated"
                 
         # Add new camera
         self.cameras.append(camera_info)
         self.save_config()
-        return True
+        return "added"
         
     def remove_camera(self, camera_info):
         """Remove a camera from the configuration"""
