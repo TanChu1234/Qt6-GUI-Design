@@ -135,65 +135,69 @@ class CameraThread(QThread):
         """Process frames from the camera in a loop."""
         
         while self.active:
-            # Read frame with timeout handling
-            ret, frame = cap.read()
-            
+            ret, frame = self._read_frame_with_retries(cap)
             if not ret:
-                # Try a couple more times before giving up
-                retries = 3
-                while retries > 0 and self.active:
-                    time.sleep(0.1)
-                    ret, frame = cap.read()
-                    if ret:
-                        break
-                    retries -= 1
-                
-                if not ret:
-                    self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
-                    self.connection_status_signal.emit("disconnected", self.camera_name)
-                    break
+                break
 
-            # Convert to RGB format for display
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            rgb_frame = self._convert_frame_to_rgb(frame)
+            self._handle_frame(rgb_frame, frame)
+            self._emit_frame_signal(rgb_frame)
             
-            # Thread-safe operations on shared state
-            self.mutex.lock()
-            
-            # Store the last frame for trigger processing (in BGR format)
-            self.last_frame = frame.copy()
-            
-            # Check if we've been triggered
-            if self.triggered:
-                self._process_trigger()
-                self.triggered = False
-                
-            # Check if run AI
-            if self.triggered_ai:
-                self._process_ai()
-                self.triggered_ai = False
-                
-            # Can release the lock before UI operations
-            self.mutex.unlock()
-            
-            # Convert to QImage - this can be slow so do it outside the lock
-            h, w, ch = rgb_frame.shape
-            bytes_per_line = ch * w
-            qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            
-            # Convert to pixmap and emit signal
-            pixmap = QPixmap.fromImage(qt_image)
-            self.frame_signal.emit(pixmap, self.camera_name)
-            
-            # Reduce CPU usage - adjust based on desired frame rate
             time.sleep(0.03)  # ~30 fps max
             
-            # Check if we should stop - thread-safe way
-            self.mutex.lock()
-            should_continue = self.active
-            self.mutex.unlock()
-            
-            if not should_continue:
+            if not self._should_continue():
                 break
+
+    def _read_frame_with_retries(self, cap):
+        """Read frame with retries if initial read fails."""
+        ret, frame = cap.read()
+        if not ret:
+            retries = 3
+            while retries > 0 and self.active:
+                time.sleep(0.1)
+                ret, frame = cap.read()
+                if ret:
+                    break
+                retries -= 1
+            
+            if not ret:
+                self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
+                self.connection_status_signal.emit("disconnected", self.camera_name)
+        return ret, frame
+
+    def _convert_frame_to_rgb(self, frame):
+        """Convert BGR frame to RGB format."""
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    def _handle_frame(self, rgb_frame, frame):
+        """Handle frame processing and triggering."""
+        self.mutex.lock()
+        self.last_frame = frame.copy()
+        
+        if self.triggered:
+            self._process_trigger()
+            self.triggered = False
+            
+        if self.triggered_ai:
+            self._process_ai()
+            self.triggered_ai = False
+            
+        self.mutex.unlock()
+
+    def _emit_frame_signal(self, rgb_frame):
+        """Convert frame to QPixmap and emit frame signal."""
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = ch * w
+        qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qt_image)
+        self.frame_signal.emit(pixmap, self.camera_name)
+
+    def _should_continue(self):
+        """Check if the thread should continue running."""
+        self.mutex.lock()
+        should_continue = self.active
+        self.mutex.unlock()
+        return should_continue
     
     def stop(self):
         """Stop the camera thread safely."""
@@ -244,7 +248,7 @@ class CameraThread(QThread):
                     self.log_signal.emit(f"❌ Error saving image: {str(e)}")
                     self.trigger_completed_signal.emit("error", self.camera_name)
             else:
-                self.log_signal.emit(f"❌ No frame available to capture")
+                self.log_signal.emit("❌ No frame available to capture")
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
             # Handle other actions here
@@ -268,6 +272,6 @@ class CameraThread(QThread):
                 self.log_signal.emit(f"❌ Error saving image: {str(e)}")
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
-            self.log_signal.emit(f"❌ No frame available to capture")
+            self.log_signal.emit("❌ No frame available to capture")
             self.trigger_completed_signal.emit("error", self.camera_name)
         
