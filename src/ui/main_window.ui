@@ -58,7 +58,7 @@ QPushButton#tcp_page:hover {
 /* Add Item Button */
 QPushButton#http_page {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #A000D7, stop:1 #D100FF);
+                                stop:0 #A000D7, stop:1 #D61AFF);
 }
 
 QPushButton#http_page:hover {
@@ -170,7 +170,7 @@ QPushButton:pressed {
      </size>
     </property>
     <property name="text">
-     <string>  HTTP</string>
+     <string>  3</string>
     </property>
     <property name="icon">
      <iconset>

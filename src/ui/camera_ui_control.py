@@ -319,32 +319,6 @@ class CameraWidget(QWidget):
         # Just update the icon
         self._update_camera_icon(camera_name, status)
     
-    def _handle_camera_stopped(self, camera_name):
-        """Handle when a camera thread stops by itself (due to disconnection)"""
-        if camera_name not in self.camera_threads:
-            return
-            
-        # Ensure thread is fully finished
-        try:
-            if self.camera_threads[camera_name].isRunning():
-                self.camera_threads[camera_name].wait(1000)  # Wait with timeout
-        except RuntimeError:
-            pass  # Thread might already be finished
-            
-        # Remove the thread reference
-        del self.camera_threads[camera_name]
-        
-        # Update the icon
-        self._update_camera_icon(camera_name, "disconnected")
-        
-        # Clear the display if this was the current camera being displayed
-        if self.displaying and self.current_camera == camera_name:
-            self._clear_display()
-                
-        print(f"🛑 Camera {camera_name} stopped due to disconnection")
-        
-        # The key improvement: Don't affect other cameras - just handle this one
-    
     def closeEvent(self, event):
         """Ensure all camera threads stop when closing the window."""
         # Create a copy of the keys to avoid modification during iteration

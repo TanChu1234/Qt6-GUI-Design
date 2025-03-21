@@ -68,7 +68,7 @@ class Ui_MainWindow(object):
 "/* Add Item Button */\n"
 "QPushButton#http_page {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #A000D7, stop:1 #D100FF);\n"
+"                                stop:0 #A000D7, stop:1 #D61AFF);\n"
 "}\n"
 "\n"
 "QPushButton#http_page:hover {\n"
@@ -102,7 +102,7 @@ class Ui_MainWindow(object):
         self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.camera_page.setLayoutDirection(Qt.LeftToRight)
         icon = QIcon()
-        icon.addFile(u"src/asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"../asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.camera_page.setIcon(icon)
         self.camera_page.setIconSize(QSize(32, 32))
         self.tcp_page = QPushButton(self.centralwidget)
@@ -113,7 +113,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         self.tcp_page.setFont(font)
         icon1 = QIcon()
-        icon1.addFile(u"src/asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon1.addFile(u"../asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.tcp_page.setIcon(icon1)
         self.tcp_page.setIconSize(QSize(32, 32))
         self.http_page = QPushButton(self.centralwidget)
@@ -121,7 +121,7 @@ class Ui_MainWindow(object):
         self.http_page.setGeometry(QRect(480, 30, 211, 80))
         self.http_page.setMinimumSize(QSize(180, 80))
         icon2 = QIcon()
-        icon2.addFile(u"src/asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon2.addFile(u"../asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.http_page.setIcon(icon2)
         self.http_page.setIconSize(QSize(48, 32))
         self.stackedWidget = QStackedWidget(self.centralwidget)
@@ -144,7 +144,7 @@ class Ui_MainWindow(object):
         self.model_page.setGeometry(QRect(260, 30, 211, 80))
         self.model_page.setMinimumSize(QSize(180, 80))
         icon3 = QIcon()
-        icon3.addFile(u"src/asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon3.addFile(u"../asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.model_page.setIcon(icon3)
         self.model_page.setIconSize(QSize(38, 38))
         MainWindow.setCentralWidget(self.centralwidget)
@@ -161,7 +161,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.camera_page.setText(QCoreApplication.translate("MainWindow", u"  CAMERA", None))
         self.tcp_page.setText(QCoreApplication.translate("MainWindow", u"  TCP", None))
-        self.http_page.setText(QCoreApplication.translate("MainWindow", u"  HTTP", None))
+        self.http_page.setText(QCoreApplication.translate("MainWindow", u"  3", None))
         self.model_page.setText(QCoreApplication.translate("MainWindow", u"  AI", None))
     # retranslateUi
 
