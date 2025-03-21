@@ -47,7 +47,7 @@ class CameraWidget(QWidget):
         self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
         self.ui.trigger_http.clicked.connect(self.trigger_http)
-        # self.ui.trigger_tcp.clicked.connect(self.trigger)
+        self.ui.detect.clicked.connect(self.run_ai_model)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
     
@@ -632,3 +632,6 @@ class CameraWidget(QWidget):
             print(f"❌ Error parsing JSON file: {str(e)}")
         except Exception as e:
             print(f"❌ Unexpected error in trigger_http: {str(e)}")
+            
+    def run_ai_model(self):
+        print("add ai model here")
