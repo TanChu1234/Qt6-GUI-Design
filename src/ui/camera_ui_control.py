@@ -46,8 +46,9 @@ class CameraWidget(QWidget):
         self.ui.connect.clicked.connect(self.connect_all_cameras)
         self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
-        self.ui.trigger_http.clicked.connect(self.trigger_http)
-        self.ui.detect.clicked.connect(self.run_ai_model)
+        # Change from returning a value to a lambda function
+        self.ui.trigger_http.clicked.connect(lambda: self.trigger_cameras(trigger_type="capture"))
+        self.ui.detect.clicked.connect(lambda: self.trigger_cameras(trigger_type="ai_detect"))
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
         
@@ -686,25 +687,16 @@ class CameraWidget(QWidget):
         self.trigger_results[camera_name] = result
 
     """ Trigger Management """
-    def trigger_http(self):
-        """Trigger cameras based on JSON configuration."""
-        json_path = self._get_json_path()
+    def trigger_cameras(self, trigger_type=None):
+        """
+        Trigger cameras based on JSON configuration with optional trigger type.
         
-        if not json_path:
-            return
-        
-        try:
-            trigger_configs = self._load_json_config(json_path)
-            triggered_cameras, failed_cameras, skipped_cameras = self._process_trigger_configs(trigger_configs)
-            self._print_trigger_summary(trigger_configs, triggered_cameras, failed_cameras, skipped_cameras)
-            
-        except json.JSONDecodeError as e:
-            print(f"❌ Error parsing JSON file: {str(e)}")
-        except Exception as e:
-            print(f"❌ Unexpected error in trigger_http: {str(e)}")
-    
-    def run_ai_model(self):
-        """Trigger cameras and run AI processing."""
+        Args:
+            trigger_type (str, optional): Type of trigger to use. 
+                - None: Basic trigger (HTTP-like behavior)
+                - "ai_detect": Trigger with AI detection
+                Defaults to None.
+        """
         json_path = self._get_json_path()
         
         if not json_path:
@@ -713,15 +705,15 @@ class CameraWidget(QWidget):
         try:
             trigger_configs = self._load_json_config(json_path)
             triggered_cameras, failed_cameras, skipped_cameras = self._process_trigger_configs(
-                trigger_configs, 
-                trigger_type="ai_detect"
+                trigger_configs,
+                trigger_type=trigger_type
             )
             self._print_trigger_summary(trigger_configs, triggered_cameras, failed_cameras, skipped_cameras)
             
         except json.JSONDecodeError as e:
             print(f"❌ Error parsing JSON file: {str(e)}")
         except Exception as e:
-            print(f"❌ Unexpected error in run_ai_model: {str(e)}")
+            print(f"❌ Unexpected error in trigger_cameras: {str(e)}")
     
     def _get_json_path(self):
         """Get the JSON path from the file dialog."""
@@ -743,7 +735,7 @@ class CameraWidget(QWidget):
         with open(json_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     
-    def _process_trigger_configs(self, trigger_configs, trigger_type="capture"):
+    def _process_trigger_configs(self, trigger_configs, trigger_type):
         """
         Process trigger configurations for multiple cameras.
         
@@ -760,7 +752,7 @@ class CameraWidget(QWidget):
         
         for config in trigger_configs:
             camera_name = config.get("camera_name")
-            config_trigger_type = config.get("type", trigger_type)  # Use config type or default
+            # config_trigger_type = config.get("type", trigger_type)  # Use config type or default
             
             if not camera_name:
                 print("⚠️ Skipping entry: No camera_name specified in config")
@@ -780,10 +772,8 @@ class CameraWidget(QWidget):
                     continue
                 
                 # Call the appropriate trigger method based on trigger_type
-                if trigger_type == "ai_detect":
-                    result = thread.trigger_and_process()
-                else:
-                    result = thread.trigger(config_trigger_type)
+                result = thread.trigger(trigger_type)
+                
                 
                 if result:
                     triggered_cameras.append(camera_name)

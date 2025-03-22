@@ -9,7 +9,7 @@ class YOLOWorker(QThread):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.model = YOLO("best100.pt")
+        self.model = YOLO("src\model\yolov8s.pt")
         self.model.overrides['conf'] = 0.8
         self.model.overrides['iou'] = 0.5
         self.model.overrides['agnostic_nms'] = True

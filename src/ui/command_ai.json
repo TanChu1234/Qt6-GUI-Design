@@ -3,6 +3,15 @@
         "camera_name": "tan"
     },
     {
-        "camera_name": "Camera 2"
+        "camera_name": "cam3"
+    }, 
+    {
+        "camera_name": "cam4"
+    }, 
+    {
+        "camera_name": "cam5"
+    }, 
+    {
+        "camera_name": "home"
     }
 ]
