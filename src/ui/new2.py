@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox, QFileDialog
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Signal
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread
@@ -31,6 +30,7 @@ class CameraWidget(QWidget):
         
         # Initialize config manager
         self.config_manager = CameraConfigManager()
+        
         # Define icon paths
         self.icon_offline = "src/asset/images/red.png"
         self.icon_online = "src/asset/images/green.png"
@@ -43,7 +43,7 @@ class CameraWidget(QWidget):
         """Connect UI elements to their handlers."""
         # Connect UI buttons
         self.ui.add_cam.clicked.connect(self.add_camera)
-        self.ui.connect.clicked.connect(self.connect_all_cameras)
+        self.ui.connect.clicked.connect(self.start_camera)
         self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
         self.ui.trigger_http.clicked.connect(self.trigger_http)
@@ -360,202 +360,61 @@ class CameraWidget(QWidget):
         
     """ Camera Operation """
     def start_camera(self, specific_camera=None):
-        """
-        Start real-time streaming for a single selected or specified camera.
-        This method remains mostly unchanged from your current implementation.
-        """
+        """Start real-time streaming for the selected or specified camera."""
         # If a specific camera was provided, use it, otherwise get from selection
         camera_name = specific_camera
         if not camera_name:
             item = self.ui.listWidget.currentItem()
             if not item:
                 print("⚠️ No camera selected!")
-                return False
+                return
             camera_name = item.text()
 
         camera_props = self.camera_properties.get(camera_name, None)
 
         if not camera_props:
             print(f"❌ No properties found for {camera_name}")
-            return False
+            return
 
         # If thread already exists and is running, just log that
         if camera_name in self.camera_threads and self.camera_threads[camera_name].isRunning():
             print(f"ℹ️ {camera_name} is already streaming")
-            return True
+            return
 
         # Update icon to connecting
         self._update_camera_icon(camera_name, "connecting")
 
         # Start new camera thread with all properties
-        try:
-            self.camera_threads[camera_name] = CameraThread(
-                camera_props["ip_address"],
-                camera_props["port"],
-                camera_props["username"],
-                camera_props["password"],
-                camera_props["camera_name"],
-                camera_props["protocol"],
-            )
-            
-            # Connect signals
-            thread = self.camera_threads[camera_name]
-            thread.frame_signal.connect(
-                lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
-            )
-            thread.log_signal.connect(self.log_message)
-            thread.connection_status_signal.connect(
-                lambda status, cam=camera_name: self._update_camera_status(cam, status)
-            )
-            thread.trigger_completed_signal.connect(
-                lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
-            )
-            
-            # Handle thread finished signal to clean up properly
-            thread.finished.connect(
-                lambda cam=camera_name: self._handle_camera_stopped(cam)
-            )
-            
-            thread.start()
-            print(f"✅ Started streaming {camera_name}")
-            return True
+        self.camera_threads[camera_name] = CameraThread(
+            camera_props["ip_address"],
+            camera_props["port"],
+            camera_props["username"],
+            camera_props["password"],
+            camera_props["camera_name"],
+            camera_props["protocol"],
+        )
         
-        except Exception as e:
-            print(f"❌ Error starting {camera_name}: {str(e)}")
-            return False
-    
-    def connect_all_cameras(self):
-        """
-        Connect all cameras listed in the ListWidget
-        """
-        # Get the total number of cameras in the list
-        total_cameras = self.ui.listWidget.count()
+        # Connect signals
+        thread = self.camera_threads[camera_name]
+        thread.frame_signal.connect(
+            lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
+        )
+        thread.log_signal.connect(self.log_message)
+        thread.connection_status_signal.connect(
+            lambda status, cam=camera_name: self._update_camera_status(cam, status)
+        )
+        thread.trigger_completed_signal.connect(
+            lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
+        )
         
-        if total_cameras == 0:
-            self.log_message("⚠️ No cameras in the list to connect")
-            return
+        # Handle thread finished signal to clean up properly
+        thread.finished.connect(
+            lambda cam=camera_name: self._handle_camera_stopped(cam)
+        )
         
-        # Connection results tracking
-        connection_results = {
-            'total': total_cameras,
-            'successful': [],
-            'failed': [],
-            'skipped': []
-        }
-        
-        # Log start of connection attempt
-        self.log_message(f"🔌 Initiating connection for {total_cameras} cameras")
-        
-        # Iterate through all items in the ListWidget
-        for i in range(1, total_cameras):
-            # Get the current item
-            item = self.ui.listWidget.item(i)
-            
-            # Validate item and camera name
-            if not item:
-                self.log_message(f"⚠️ Invalid item at index {i}")
-                connection_results['skipped'].append(f"Invalid Item {i}")
-                continue
-            
-            # Get camera name
-            camera_name = item.text().strip()
-            
-            # Skip empty camera names
-            if not camera_name:
-                self.log_message(f"⚠️ Skipping empty camera name")
-                connection_results['skipped'].append("Empty Name")
-                continue
-            
-            # Validate camera exists in properties
-            if camera_name not in self.camera_properties:
-                self.log_message(f"❌ No configuration found for {camera_name}")
-                connection_results['skipped'].append(camera_name)
-                continue
-            
-            # Attempt to connect the camera
-            try:
-                # Get camera properties
-                camera_props = self.camera_properties[camera_name]
-                
-                # Create camera thread
-                thread = CameraThread(
-                    ip=camera_props['ip_address'],
-                    port=camera_props['port'],
-                    username=camera_props['username'],
-                    password=camera_props['password'],
-                    camera_name=camera_props['camera_name'],
-                    protocol=camera_props['protocol']
-                )
-                
-                # Connect signals for this thread
-                thread.connection_status_signal.connect(
-                    lambda status, cam=camera_name: self._update_camera_status(cam, status)
-                )
-                thread.log_signal.connect(self.log_message)
-                thread.frame_signal.connect(
-                    lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
-                )
-                thread.trigger_completed_signal.connect(
-                    lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
-                )
-                thread.finished.connect(
-                    lambda cam=camera_name: self._handle_camera_stopped(cam)
-                )
-                
-                # Start the thread
-                thread.start()
-                
-                # Store the thread
-                self.camera_threads[camera_name] = thread
-                
-                # Update connection results
-                connection_results['successful'].append(camera_name)
-                # self.log_message(f"✅ Connected {camera_name}")
-                
-                # Update list widget item icon to indicate connection status
-                item.setIcon(QIcon(self.icon_online))
-            
-            except Exception as e:
-                # Handle connection errors
-                error_msg = f"❌ Error connecting {camera_name}: {str(e)}"
-                self.log_message(error_msg)
-                
-                # Update list widget item icon to indicate failure
-                item.setIcon(QIcon(self.icon_offline))
-                
-                connection_results['failed'].append(camera_name)
-        
-        # Log connection summary
-        self.log_connection_summary(connection_results)
+        thread.start()
+        print(f"✅ Started streaming {camera_name}")
 
-    def log_connection_summary(self, connection_results):
-        """
-        Log a detailed summary of camera connection attempts
-        
-        Args:
-            connection_results (dict): Dictionary containing connection results
-        """
-        # Separator for readability
-        self.log_message("\n=== Camera Connection Summary ===")
-        
-        # Total cameras
-        self.log_message(f"📊 Total Cameras: {connection_results['total']}")
-        
-        # Successfully Connected Cameras
-        if connection_results['successful']:
-            self.log_message(f"✅ Successfully Connected: {len(connection_results['successful'])}")
-            self.log_message(f"   Cameras: {', '.join(connection_results['successful'])}")
-        
-        # Failed Connections
-        if connection_results['failed']:
-            self.log_message(f"❌ Failed to Connect: {len(connection_results['failed'])}")
-            self.log_message(f"   Cameras: {', '.join(connection_results['failed'])}")
-        
-        # Skipped Cameras
-        if connection_results['skipped']:
-            self.log_message(f"⏩ Skipped Cameras: {len(connection_results['skipped'])}")
-            self.log_message(f"   Cameras: {', '.join(map(str, connection_results['skipped']))}")
-    
     def _handle_new_frame(self, pixmap, camera_name):
         """Handle incoming frames from camera threads."""
         # Only update the display if this is the current camera AND display is enabled

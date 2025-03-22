@@ -97,39 +97,40 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=2):
-        """Try to connect to the camera with a timeout."""
-        start_time = time.time()
+    def _connect_with_timeout(self, cap, url, timeout=None):
+        """
+        Attempt to connect to the camera without a strict timeout
         
-        # First attempt to open
-        cap.open(url)
+        Args:
+            cap (cv2.VideoCapture): Video capture object
+            url (str): Camera URL or source
+            timeout (optional): Ignored, kept for compatibility
         
-        # Check connection with timeout
-        while time.time() - start_time < timeout:
-            if cap.isOpened():
-                # Test if we can actually get a frame
-                ret, _ = cap.read()
-                if ret:
-                    return True
+        Returns:
+            bool: True if connection successful, False otherwise
+        """
+        try:
+            # Open the camera source
+            cap.open(url)
             
-            # Check if we should stop trying
-            self.mutex.lock()
-            if not self.active:
-                self.mutex.unlock()
+            # Check if the capture is opened successfully
+            if not cap.isOpened():
+                self.log_signal.emit(f"❌ Failed to open camera {self.camera_name}")
                 return False
-            self.mutex.unlock()
             
-            # Wait a bit before trying again
-            time.sleep(0.1)  # Shorter sleep to be more responsive
+            # Attempt to read a frame to verify connection
+            ret, frame = cap.read()
             
-            # Only try reopening if we're still within timeout
-            if time.time() - start_time < timeout - 0.2:
-                cap.release()  # Make sure to release before reopening
-                cap.open(url)
+            if not ret or frame is None:
+                self.log_signal.emit(f"⚠️ Cannot read frame from {self.camera_name}")
+                return False
+            
+            return True
         
-        # If we get here, we've timed out
-        cap.release()  # Make sure to release the capture
-        return False
+        except Exception as e:
+            # Log any connection errors
+            self.log_signal.emit(f"❌ Connection error for {self.camera_name}: {str(e)}")
+            return False
             
     def _process_frames(self, cap):
         """Process frames from the camera in a loop."""
