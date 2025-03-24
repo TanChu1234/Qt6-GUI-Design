@@ -7,6 +7,7 @@ from camera.cam_handler import CameraThread
 from camera.check_ping import PingThread
 from camera.camera_configuration_manager import CameraConfigManager
 from datetime import datetime
+from model.model_yolo import YOLODetector
 import os
 import time
 import json
@@ -37,6 +38,10 @@ class CameraWidget(QWidget):
         self.icon_connecting = "src/asset/images/yellow.png"
         
         self._setup_ui()
+        # Create a single YOLODetector instance to be shared by all camera threads
+        
+        self.yolo_detector = YOLODetector(model_path="src/model/yolov8s.pt")
+       
         self.load_saved_cameras()
     
     def _setup_ui(self):
@@ -398,6 +403,7 @@ class CameraWidget(QWidget):
                 camera_props["password"],
                 camera_props["camera_name"],
                 camera_props["protocol"],
+                yolo_detector= self.yolo_detector
             )
             
             # Connect signals
@@ -486,7 +492,8 @@ class CameraWidget(QWidget):
                     username=camera_props['username'],
                     password=camera_props['password'],
                     camera_name=camera_props['camera_name'],
-                    protocol=camera_props['protocol']
+                    protocol=camera_props['protocol'],
+                    yolo_detector= self.yolo_detector
                 )
                 
                 # Connect signals for this thread

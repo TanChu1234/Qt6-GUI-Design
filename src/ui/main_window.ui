@@ -86,7 +86,7 @@ QPushButton:pressed {
    <widget class="QPushButton" name="tcp_page">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>480</x>
       <y>30</y>
       <width>211</width>
       <height>80</height>
@@ -121,7 +121,7 @@ QPushButton:pressed {
    <widget class="QPushButton" name="http_page">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>700</x>
       <y>30</y>
       <width>211</width>
       <height>80</height>
@@ -134,7 +134,7 @@ QPushButton:pressed {
      </size>
     </property>
     <property name="text">
-     <string>  3</string>
+     <string>  HTTP</string>
     </property>
     <property name="icon">
      <iconset>
@@ -151,7 +151,7 @@ QPushButton:pressed {
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>150</y>
+      <y>130</y>
       <width>1841</width>
       <height>911</height>
      </rect>
@@ -198,6 +198,36 @@ QPushButton:pressed {
      <size>
       <width>38</width>
       <height>38</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="http_page_2">
+    <property name="geometry">
+     <rect>
+      <x>920</x>
+      <y>30</y>
+      <width>211</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>180</width>
+      <height>80</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>  DASH 
+  BOARD</string>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../asset/images/http.png</normaloff>../asset/images/http.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>48</width>
+      <height>32</height>
      </size>
     </property>
    </widget>

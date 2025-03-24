@@ -64,7 +64,7 @@ class TCPServerApp(QWidget):
         
         try:
             # Get IP from text field or use default
-            ip_address = '192.168.28.1'  # Use the requested IP
+            ip_address = '192.168.1.26'  # Use the requested IP
             port = 502  # You can change port or make it configurable
             
             # Create server socket
@@ -138,27 +138,29 @@ class TCPServerApp(QWidget):
                 break
 
     def handle_command(self, json_data):
-        """
-        Process the received JSON command
+        # Add debug logging
+        self.log_message(f"DEBUG: Received JSON data type: {type(json_data)}")
+        self.log_message(f"DEBUG: JSON data content: {json_data}")
         
-        Args:
-            json_data: The JSON data received from the client
-            
-        Returns:
-            dict: Response to send back to the client
-        """
-        # Check if we have a command type
-        if isinstance(json_data, list):
-            # This is a trigger configuration
-            if self.camera_widget:
-                # Emit signal to process the command in the main thread
-                self.signal_relay.command_signal.emit({"command": "trigger", "data": json_data})
-                return {"status": "success", "message": "Trigger command received"}
-            else:
-                return {"status": "error", "message": "Camera widget not available"}
+        # Handle dictionary with camera commands (keys are camera names)
+        if isinstance(json_data, dict) and any(isinstance(value, dict) and "type" in value for value in json_data.values()):
+            self.log_message("DEBUG: Direct camera command dictionary detected")
+            self.signal_relay.command_signal.emit({"command": "trigger", "data": json_data})
+            return {"status": "success", "message": "Camera trigger commands received"}
+        
+        # Handle list format (original format with list containing dictionary)
+        elif isinstance(json_data, list):
+            # Check if it's our expected list with dictionary inside
+            if len(json_data) > 0 and isinstance(json_data[0], dict):
+                camera_dict = json_data[0]
+                # Check if this is a camera command dictionary
+                if any(isinstance(value, dict) and "type" in value for value in camera_dict.values()):
+                    self.log_message("DEBUG: List-wrapped camera command dictionary detected")
+                    self.signal_relay.command_signal.emit({"command": "trigger", "data": camera_dict})
+                    return {"status": "success", "message": "Trigger command received"}
         
         # For other command types, you can add more handlers here
-        command = json_data.get("command")
+        command = json_data.get("command") if isinstance(json_data, dict) else None
         if command == "status":
             # Return the status of all cameras
             if self.camera_widget:
@@ -170,7 +172,7 @@ class TCPServerApp(QWidget):
                 return {"status": "error", "message": "Camera widget not available"}
         
         # Unknown command
-        return {"status": "error", "message": "Unknown command"}
+        return {"status": "error", "message": "Unknown command format"}
     
     def get_camera_status(self):
         """
@@ -192,28 +194,31 @@ class TCPServerApp(QWidget):
         return status
     
     def process_command(self, command_data):
-        """
-        Process commands from the signal (runs in the main thread)
-        
-        Args:
-            command_data (dict): The command data to process
-        """
         command_type = command_data.get("command")
         
         if command_type == "trigger":
-            # This is a trigger command
-            trigger_configs = command_data.get("data", [])
-            self.log_message(f"Processing trigger command for {len(trigger_configs)} cameras")
+            # Get the data (which could be a dict)
+            trigger_data = command_data.get("data", {})
+            self.log_message(f"DEBUG: Processing trigger data: {trigger_data}")
             
-            # Process the trigger configs directly
+            # Process the trigger commands
             if self.camera_widget:
                 triggered_cameras, failed_cameras, skipped_cameras = self.camera_widget._process_trigger_configs(
-                    trigger_configs  # Each config has its own trigger_type
+                    trigger_data
                 )
                 
                 # Log the summary
                 self.log_message("\n=== Trigger Summary ===")
-                self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
+                
+                # Use appropriate length calculation based on data type
+                if isinstance(trigger_data, dict):
+                    total_cameras = len(trigger_data)
+                elif isinstance(trigger_data, list):
+                    total_cameras = len(trigger_data)
+                else:
+                    total_cameras = 0
+                    
+                self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{total_cameras} cameras")
                 
                 if triggered_cameras:
                     self.log_message(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
@@ -223,9 +228,7 @@ class TCPServerApp(QWidget):
                     
                 if skipped_cameras:
                     self.log_message(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
-        
-        # Add handlers for other command types as needed
-
+                    
     def stop_server(self):
         """
         Stop the server and clean up resources

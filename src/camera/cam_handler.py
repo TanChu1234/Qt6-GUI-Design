@@ -1,6 +1,6 @@
 from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
 from PySide6.QtGui import QPixmap, QImage
-from ultralytics import YOLO
+from model.model_yolo import YOLODetector
 import numpy as np
 import cv2
 import time
@@ -16,7 +16,7 @@ class CameraThread(QThread):
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
     
-    def __init__(self, ip, port, username, password, camera_name, protocol):
+    def __init__(self, ip, port, username, password, camera_name, protocol, yolo_detector=None):
         """Initialize the camera thread with connection details."""
         super().__init__()
         # Connection parameters
@@ -40,21 +40,16 @@ class CameraThread(QThread):
         self.last_frame = None
         
         # Output configuration
-        self.save_path = "captures"  # Default path for saved images
+        self.save_path = "outputs/captures"  # Default path for saved images
         self.result_path = "outputs/detections"
         # Create the save directory if it doesn't exist
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        for path in [self.save_path, self.result_path]:
+            if not os.path.exists(path):
+                os.makedirs(path)
             
-        self.model = YOLO("src\model\yolov8s.pt")
-        self.model.overrides['conf'] = 0.8
-        self.model.overrides['iou'] = 0.5
-        self.model.overrides['agnostic_nms'] = True
-        self.model.overrides['max_det'] = 5
+        # Store the YOLO detector instance
+        self.yolo_detector = yolo_detector
         
-        # Warm up the model
-        dummy_frame = np.zeros((640, 640, 3), dtype=np.uint8)
-        _ = self.model(dummy_frame)
     def run(self):
         """Main thread execution method."""
         self.active = True
@@ -73,7 +68,7 @@ class CameraThread(QThread):
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         # Attempt to connect to camera with timeout
-        if not self._connect_with_timeout(cap, url, timeout=2):
+        if not self._connect_with_timeout(cap, url):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False
@@ -107,7 +102,7 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=None):
+    def _connect_with_timeout(self, cap, url):
         """
         Attempt to connect to the camera without a strict timeout
         
@@ -241,65 +236,30 @@ class CameraThread(QThread):
         """Process the triggered action on the current frame."""
         # Save the current frame to file
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
+        
         
         if self.last_frame is not None:
             try:   
-                if trigger_action == "ai":
+                if trigger_action == "ai" and self.yolo_detector is not None:
+                    filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
                     # print(type(self.last_frame))
-                    # cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
                     # Run inference
-                    results = self.model(self.last_frame)
-                        # Create annotated image
-                    annotated_frame = self.last_frame.copy()
-                    
-                    # Draw bounding boxes and labels
-                    for r in results:
-                        boxes = r.boxes
-                        for box in boxes:
-                            # Extract confidence
-                            conf = float(box.conf[0])
-                            
-                            # Only process detections with confidence > 0.8
-                            if conf > 0.8:
-                                # Extract coordinates
-                                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                                
-                                # Extract class
-                                cls = int(box.cls[0])
-                                class_name = r.names[cls]
-                                
-                                # Draw rectangle and label
-                                cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                                cv2.putText(annotated_frame, f"{class_name} {conf:.2f}", 
-                                        (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
-                                        (0, 255, 0), 2)
-                    cv2.imwrite(filename, annotated_frame)
-                    # Log detection results (only counting those with confidence > 0.8)
-                    detected_items = {}
-                    for r in results:
-                        for box in r.boxes:
-                            conf = float(box.conf[0])
-                            if conf > 0.5:
-                                cls = int(box.cls[0])
-                                class_name = r.names[cls]
-                                if class_name in detected_items:
-                                    detected_items[class_name] += 1
-                                else:
-                                    detected_items[class_name] = 1
-                    
-                    if detected_items:
-                        detection_summary = ", ".join([f"{count} {item}" for item, count in detected_items.items()])
+                    _, detection_summary = self.yolo_detector.detect(
+                        self.last_frame, 
+                        filename
+                    )
+
+                    # Log detection results
+                    if detection_summary:
                         self.log_signal.emit(f"🤖 AI detection found: {detection_summary} in {self.camera_name}")
                     else:
                         self.log_signal.emit(f"🤖 No objects detected with confidence > 0.8 in {self.camera_name}")
                     
                     self.log_signal.emit(f"🤖 Detection results saved to: {filename}")
                     self.trigger_completed_signal.emit(filename, self.camera_name)
-                    # Save the annotated image
-                    cv2.imwrite(filename, annotated_frame)
                    
                 elif trigger_action == "capture":
+                    filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
                     cv2.imwrite(filename, self.last_frame)
                     self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
                     self.trigger_completed_signal.emit(filename, self.camera_name)

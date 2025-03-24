@@ -41,7 +41,7 @@
     },
     {
         "camera_name": "home",
-        "ip_address": "192.168.28.217",
+        "ip_address": "192.168.1.22",
         "port": "8080",
         "username": "",
         "password": "",
