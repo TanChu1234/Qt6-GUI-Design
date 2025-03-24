@@ -1,7 +1,7 @@
 [
     {
         "camera_name": "tan",
-        "ip_address": "192.168.3.1",
+        "ip_address": "192.168.1.21",
         "port": "8080",
         "username": "",
         "password": "",

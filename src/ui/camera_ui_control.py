@@ -9,7 +9,6 @@ from camera.camera_configuration_manager import CameraConfigManager
 from datetime import datetime
 from model.model_yolo import YOLODetector
 import os
-import time
 import json
 
 class CameraWidget(QWidget):
@@ -52,9 +51,8 @@ class CameraWidget(QWidget):
         self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
         # Change from returning a value to a lambda function
-        # Update these lines to use the simplified trigger_cameras method
-        self.ui.trigger_http.clicked.connect(self.trigger_cameras)
-        self.ui.detect.clicked.connect(self.trigger_cameras)
+        self.ui.trigger.clicked.connect(self.trigger_cameras)
+        self.ui.detect.clicked.connect(self.dtect_real_time)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
         
@@ -803,3 +801,6 @@ class CameraWidget(QWidget):
             
         if skipped_cameras:
             print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+            
+    def dtect_real_time(self):
+        print("Add run real time with YOLO")

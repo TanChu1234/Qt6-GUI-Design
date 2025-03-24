@@ -195,31 +195,14 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.disconnect, 9, 2, 1, 1)
 
-        self.display = QPushButton(self.layoutWidget)
-        self.display.setObjectName(u"display")
-        self.display.setMinimumSize(QSize(90, 60))
-        self.display.setMaximumSize(QSize(16777215, 16777215))
-        self.display.setFont(font1)
-        self.display.setStyleSheet(u"")
+        self.trigger = QPushButton(self.layoutWidget)
+        self.trigger.setObjectName(u"trigger")
+        self.trigger.setMinimumSize(QSize(90, 60))
+        self.trigger.setMaximumSize(QSize(16777215, 16777215))
+        self.trigger.setFont(font1)
+        self.trigger.setStyleSheet(u"")
 
-        self.gridLayout.addWidget(self.display, 9, 3, 1, 1)
-
-        self.trigger_http = QPushButton(self.layoutWidget)
-        self.trigger_http.setObjectName(u"trigger_http")
-        self.trigger_http.setMinimumSize(QSize(90, 60))
-        self.trigger_http.setMaximumSize(QSize(16777215, 16777215))
-        self.trigger_http.setFont(font1)
-        self.trigger_http.setStyleSheet(u"")
-
-        self.gridLayout.addWidget(self.trigger_http, 9, 4, 1, 1)
-
-        self.trigger_tcp = QPushButton(self.layoutWidget)
-        self.trigger_tcp.setObjectName(u"trigger_tcp")
-        self.trigger_tcp.setMinimumSize(QSize(90, 60))
-        self.trigger_tcp.setFont(font1)
-        self.trigger_tcp.setStyleSheet(u"")
-
-        self.gridLayout.addWidget(self.trigger_tcp, 9, 5, 1, 1)
+        self.gridLayout.addWidget(self.trigger, 9, 4, 1, 1)
 
         self.detect = QPushButton(self.layoutWidget)
         self.detect.setObjectName(u"detect")
@@ -228,6 +211,23 @@ class Ui_Form(object):
         self.detect.setStyleSheet(u"")
 
         self.gridLayout.addWidget(self.detect, 9, 6, 1, 1)
+
+        self.stop_all = QPushButton(self.layoutWidget)
+        self.stop_all.setObjectName(u"stop_all")
+        self.stop_all.setMinimumSize(QSize(90, 60))
+        self.stop_all.setFont(font1)
+        self.stop_all.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.stop_all, 9, 3, 1, 1)
+
+        self.display = QPushButton(self.layoutWidget)
+        self.display.setObjectName(u"display")
+        self.display.setMinimumSize(QSize(90, 60))
+        self.display.setMaximumSize(QSize(16777215, 16777215))
+        self.display.setFont(font1)
+        self.display.setStyleSheet(u"")
+
+        self.gridLayout.addWidget(self.display, 9, 5, 1, 1)
 
 
         self.retranslateUi(Form)
@@ -250,11 +250,9 @@ class Ui_Form(object):
 
         self.connect.setText(QCoreApplication.translate("Form", u"CONNECT", None))
         self.disconnect.setText(QCoreApplication.translate("Form", u"DISCONNECT", None))
-        self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
-        self.trigger_http.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
-"HTTP", None))
-        self.trigger_tcp.setText(QCoreApplication.translate("Form", u"TRIGGER\n"
-"TCP", None))
+        self.trigger.setText(QCoreApplication.translate("Form", u"TRIGGER", None))
         self.detect.setText(QCoreApplication.translate("Form", u"DETECT", None))
+        self.stop_all.setText(QCoreApplication.translate("Form", u"STOP ALL", None))
+        self.display.setText(QCoreApplication.translate("Form", u"DISPLAY", None))
     # retranslateUi
 

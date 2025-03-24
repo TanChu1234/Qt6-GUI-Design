@@ -53,7 +53,7 @@ class YOLODetector:
                 conf = float(box.conf[0])
                 
                 # Only process detections with confidence > threshold
-                if conf > 0.8:
+                if conf > 0.5:
                     # Extract coordinates
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     
@@ -63,10 +63,15 @@ class YOLODetector:
                     
                     # Draw rectangle and label
                     cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    # Get image dimensions
+                    h, w = annotated_frame.shape[:2]
+                    text_x = max(0, min(x1, w-10))  # Keep x within image width
+                    text_y = max(20, min(y1-10, h-10))  # Keep y within image height
+
                     cv2.putText(annotated_frame, f"{class_name} {conf:.2f}", 
-                            (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
-                            (0, 255, 0), 2)
-        
+                                (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
+                                (0, 255, 0), 2)
+                    print("text done")
         # Count detected items with confidence > 0.5
         detected_items = {}
         for r in results:
