@@ -1,15 +1,6 @@
-[
-    {
-        "camera_name": "tan",
-        "type": "capture"
-    }, 
-    {
-        "camera_name": "Camera 2",  
-        "type": "capture"
-    },
-    {
-        "camera_name": "home",  
-        "type": "capture"
-    }
-    
-]
+
+{
+    "tan": {"type": "ai"},
+    "Camera 2": {"type": "capture"},
+    "home": {"type": "ai"}
+}

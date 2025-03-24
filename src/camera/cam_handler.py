@@ -1,6 +1,7 @@
 from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
 from PySide6.QtGui import QPixmap, QImage
-# from model.model_yolo import YOLOWorker
+from ultralytics import YOLO
+import numpy as np
 import cv2
 import time
 import os
@@ -34,10 +35,7 @@ class CameraThread(QThread):
         # Thread synchronization
         self.mutex = QMutex()
         self.condition = QWaitCondition()
-        # Initialize YOLO worker thread
-        # self.yolo_worker = YOLOWorker()
-        # self.yolo_worker.resultReady.connect(self.update_image)
-        # self.yolo_worker.start()
+
         # Frame buffer
         self.last_frame = None
         
@@ -47,7 +45,16 @@ class CameraThread(QThread):
         # Create the save directory if it doesn't exist
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
+            
+        self.model = YOLO("src\model\yolov8s.pt")
+        self.model.overrides['conf'] = 0.8
+        self.model.overrides['iou'] = 0.5
+        self.model.overrides['agnostic_nms'] = True
+        self.model.overrides['max_det'] = 5
         
+        # Warm up the model
+        dummy_frame = np.zeros((640, 640, 3), dtype=np.uint8)
+        _ = self.model(dummy_frame)
     def run(self):
         """Main thread execution method."""
         self.active = True
@@ -238,12 +245,60 @@ class CameraThread(QThread):
         
         if self.last_frame is not None:
             try:   
-                if trigger_action == "ai_detect":
-                    print(type(self.last_frame))
-                    cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
-                    cv2.imwrite(filename, self.last_frame)
-                    self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
+                if trigger_action == "ai":
+                    # print(type(self.last_frame))
+                    # cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
+                    # Run inference
+                    results = self.model(self.last_frame)
+                        # Create annotated image
+                    annotated_frame = self.last_frame.copy()
+                    
+                    # Draw bounding boxes and labels
+                    for r in results:
+                        boxes = r.boxes
+                        for box in boxes:
+                            # Extract confidence
+                            conf = float(box.conf[0])
+                            
+                            # Only process detections with confidence > 0.8
+                            if conf > 0.8:
+                                # Extract coordinates
+                                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                                
+                                # Extract class
+                                cls = int(box.cls[0])
+                                class_name = r.names[cls]
+                                
+                                # Draw rectangle and label
+                                cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                                cv2.putText(annotated_frame, f"{class_name} {conf:.2f}", 
+                                        (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
+                                        (0, 255, 0), 2)
+                    cv2.imwrite(filename, annotated_frame)
+                    # Log detection results (only counting those with confidence > 0.8)
+                    detected_items = {}
+                    for r in results:
+                        for box in r.boxes:
+                            conf = float(box.conf[0])
+                            if conf > 0.5:
+                                cls = int(box.cls[0])
+                                class_name = r.names[cls]
+                                if class_name in detected_items:
+                                    detected_items[class_name] += 1
+                                else:
+                                    detected_items[class_name] = 1
+                    
+                    if detected_items:
+                        detection_summary = ", ".join([f"{count} {item}" for item, count in detected_items.items()])
+                        self.log_signal.emit(f"🤖 AI detection found: {detection_summary} in {self.camera_name}")
+                    else:
+                        self.log_signal.emit(f"🤖 No objects detected with confidence > 0.8 in {self.camera_name}")
+                    
+                    self.log_signal.emit(f"🤖 Detection results saved to: {filename}")
                     self.trigger_completed_signal.emit(filename, self.camera_name)
+                    # Save the annotated image
+                    cv2.imwrite(filename, annotated_frame)
+                   
                 elif trigger_action == "capture":
                     cv2.imwrite(filename, self.last_frame)
                     self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
@@ -254,6 +309,4 @@ class CameraThread(QThread):
         else:
             self.log_signal.emit("❌ No frame available to capture")
             self.trigger_completed_signal.emit("error", self.camera_name)
-        
-    
         

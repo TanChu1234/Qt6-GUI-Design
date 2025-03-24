@@ -1,6 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QSizePolicy
 from ui.camera_ui_control import CameraWidget  # ✅ Import CameraWidget
+from ui.server_tcp import TCPServerApp
 from ui.main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow):
@@ -14,19 +15,28 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        # ✅ Create CameraWidget instance
+         # Create widget instances
         self.camera_widget = CameraWidget()
-        
-        # ✅ Add CameraWidget to stackedWidget
-        self.ui.stackedWidget.addWidget(self.camera_widget)
-        self.ui.stackedWidget.setCurrentWidget(self.camera_widget)
-        # ✅ Optionally, connect a button to switch to CameraWidget page
+        self.tcp_widget = TCPServerApp(self.camera_widget)
+
+        # Add widgets to stackedWidget
+        self.camera_index = self.ui.stackedWidget.addWidget(self.camera_widget)
+        self.tcp_index = self.ui.stackedWidget.addWidget(self.tcp_widget)
+
+        # Set initial page
+        self.ui.stackedWidget.setCurrentIndex(self.camera_index)
+
+        # Connect navigation buttons
         self.ui.camera_page.clicked.connect(self.show_camera_page)
+        self.ui.tcp_page.clicked.connect(self.show_tcp_page)
 
     def show_camera_page(self):
         """Switches to the CameraWidget page."""
-        self.ui.stackedWidget.setCurrentWidget(self.camera_widget)
+        self.ui.stackedWidget.setCurrentIndex(self.camera_index)
 
+    def show_tcp_page(self):
+        """Switches to the TCPServerApp page."""
+        self.ui.stackedWidget.setCurrentIndex(self.tcp_index)
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()

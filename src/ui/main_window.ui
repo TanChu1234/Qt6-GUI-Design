@@ -22,6 +22,8 @@ QMainWindow {
 
 /* General Button Styling */
 QPushButton {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #007AFF, stop:1 #009FFF);
     border: none;
     padding: 12px 20px;
     font-size: 24px;
@@ -33,50 +35,12 @@ QPushButton {
     padding-left: 10px;
 }
 
-/* Camera Page Button */
-QPushButton#camera_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #028A66, stop:1 #00B894);
-}
-
-QPushButton#camera_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #36C4A1, stop:1 #50E0B7);
-}
-
-/* Communication Page Button */
-QPushButton#tcp_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #007AFF, stop:1 #1AA9FF);
-}
-
-QPushButton#tcp_page:hover {
+/* Button Hover Effect */
+QPushButton:hover {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
                                 stop:0 #66BFFF, stop:1 #80D5FF);
 }
 
-/* Add Item Button */
-QPushButton#http_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #A000D7, stop:1 #D61AFF);
-}
-
-QPushButton#http_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #C050F5, stop:1 #E080FF);
-}
-
-/* Add Item Button */
-QPushButton#model_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */
-}
-
-QPushButton#model_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */
-}
-/* Pressed Effect */
 QPushButton:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
                                 stop:0 #027055, stop:1 #00987A);

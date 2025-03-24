@@ -47,14 +47,15 @@ class CameraWidget(QWidget):
         self.ui.disconnect.clicked.connect(self.stop_camera)
         self.ui.display.clicked.connect(self.toggle_display)
         # Change from returning a value to a lambda function
-        self.ui.trigger_http.clicked.connect(lambda: self.trigger_cameras(trigger_type="capture"))
-        self.ui.detect.clicked.connect(lambda: self.trigger_cameras(trigger_type="ai_detect"))
+        # Update these lines to use the simplified trigger_cameras method
+        self.ui.trigger_http.clicked.connect(self.trigger_cameras)
+        self.ui.detect.clicked.connect(self.trigger_cameras)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
         
         # Add double-click handler to connect to camera
         self.ui.listWidget.itemDoubleClicked.connect(self.connect_on_double_click)
-    
+        
     def load_saved_cameras(self):
         """Load saved camera configurations from file."""
         cameras = self.config_manager.load_config()
@@ -687,16 +688,7 @@ class CameraWidget(QWidget):
         self.trigger_results[camera_name] = result
 
     """ Trigger Management """
-    def trigger_cameras(self, trigger_type=None):
-        """
-        Trigger cameras based on JSON configuration with optional trigger type.
-        
-        Args:
-            trigger_type (str, optional): Type of trigger to use. 
-                - None: Basic trigger (HTTP-like behavior)
-                - "ai_detect": Trigger with AI detection
-                Defaults to None.
-        """
+    def trigger_cameras(self):
         json_path = self._get_json_path()
         
         if not json_path:
@@ -705,8 +697,7 @@ class CameraWidget(QWidget):
         try:
             trigger_configs = self._load_json_config(json_path)
             triggered_cameras, failed_cameras, skipped_cameras = self._process_trigger_configs(
-                trigger_configs,
-                trigger_type=trigger_type
+                trigger_configs
             )
             self._print_trigger_summary(trigger_configs, triggered_cameras, failed_cameras, skipped_cameras)
             
@@ -735,28 +726,32 @@ class CameraWidget(QWidget):
         with open(json_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     
-    def _process_trigger_configs(self, trigger_configs, trigger_type):
-        """
-        Process trigger configurations for multiple cameras.
-        
-        Args:
-            trigger_configs (list): List of camera trigger configurations
-            trigger_type (str): Type of trigger operation (default: "capture")
-            
-        Returns:
-            tuple: Lists of (triggered_cameras, failed_cameras, skipped_cameras)
-        """
+    def _process_trigger_configs(self, trigger_configs):
         triggered_cameras = []
         failed_cameras = []
         skipped_cameras = []
         
+        # Handle dict-style JSON config (like your example)
+        if isinstance(trigger_configs, dict):
+            config_items = []
+            for camera_name, config in trigger_configs.items():
+                # Convert each entry to the format expected by the rest of the method
+                config_entry = {"camera_name": camera_name}
+                # Copy all properties from the config
+                config_entry.update(config)
+                config_items.append(config_entry)
+            trigger_configs = config_items
+        
+        # Now process each camera configuration
         for config in trigger_configs:
             camera_name = config.get("camera_name")
-            # config_trigger_type = config.get("type", trigger_type)  # Use config type or default
             
             if not camera_name:
                 print("⚠️ Skipping entry: No camera_name specified in config")
                 continue
+            
+            # Get the trigger type from config (default to "capture" if not specified)
+            config_trigger_type = config.get("type", "capture")
             
             if camera_name not in self.camera_threads:
                 print(f"⚠️ Camera {camera_name} not connected")
@@ -771,9 +766,9 @@ class CameraWidget(QWidget):
                     skipped_cameras.append(camera_name)
                     continue
                 
-                # Call the appropriate trigger method based on trigger_type
-                result = thread.trigger(trigger_type)
-                
+                # Call the trigger method with the camera-specific trigger type
+                print(f"🔄 Triggering {camera_name} with type: {config_trigger_type}")
+                result = thread.trigger(config_trigger_type)
                 
                 if result:
                     triggered_cameras.append(camera_name)

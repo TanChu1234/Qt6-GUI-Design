@@ -117,11 +117,29 @@ QComboBox QAbstractItemView {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1621</width>
-     <height>841</height>
+     <width>731</width>
+     <height>601</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout"/>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QPushButton" name="stop_socket">
+      <property name="text">
+       <string>STOP SERVER</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="start_socket">
+      <property name="text">
+       <string>START SERVER</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

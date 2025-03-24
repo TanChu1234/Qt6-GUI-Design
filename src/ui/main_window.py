@@ -31,6 +31,8 @@ class Ui_MainWindow(object):
 "\n"
 "/* General Button Styling */\n"
 "QPushButton {\n"
+"	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+"                                stop:0 #007AFF, stop:1 #009FFF);\n"
 "    border: none;\n"
 "    padding: 12px 20px;\n"
 "    font-size: 24px;\n"
@@ -42,52 +44,12 @@ class Ui_MainWindow(object):
 "    padding-left: 10px;\n"
 "}\n"
 "\n"
-"/* Camera Page Button */\n"
-"QPushButton#camera_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #028A66, stop:1 #00B894);\n"
-"}\n"
-"\n"
-"QPushButton#camera_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #36C4A1, stop:1 #50E0B7);\n"
-"}\n"
-"\n"
-"/* Communication Page Button */\n"
-"QPushButton#tcp_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y"
-                        "2:0, \n"
-"                                stop:0 #007AFF, stop:1 #1AA9FF);\n"
-"}\n"
-"\n"
-"QPushButton#tcp_page:hover {\n"
+"/* Button Hover Effect */\n"
+"QPushButton:hover {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
 "                                stop:0 #66BFFF, stop:1 #80D5FF);\n"
 "}\n"
 "\n"
-"/* Add Item Button */\n"
-"QPushButton#http_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #A000D7, stop:1 #D61AFF);\n"
-"}\n"
-"\n"
-"QPushButton#http_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #C050F5, stop:1 #E080FF);\n"
-"}\n"
-"\n"
-"/* Add Item Button */\n"
-"QPushButton#model_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */\n"
-"}\n"
-"\n"
-"QPushButton#model_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                  "
-                        "              stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */\n"
-"}\n"
-"/* Pressed Effect */\n"
 "QPushButton:pressed {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
 "                                stop:0 #027055, stop:1 #00987A);\n"
@@ -102,7 +64,7 @@ class Ui_MainWindow(object):
         self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.camera_page.setLayoutDirection(Qt.LeftToRight)
         icon = QIcon()
-        icon.addFile(u"../asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"src/asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.camera_page.setIcon(icon)
         self.camera_page.setIconSize(QSize(32, 32))
         self.tcp_page = QPushButton(self.centralwidget)
@@ -113,7 +75,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         self.tcp_page.setFont(font)
         icon1 = QIcon()
-        icon1.addFile(u"../asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon1.addFile(u"src/asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.tcp_page.setIcon(icon1)
         self.tcp_page.setIconSize(QSize(32, 32))
         self.http_page = QPushButton(self.centralwidget)
@@ -121,7 +83,7 @@ class Ui_MainWindow(object):
         self.http_page.setGeometry(QRect(480, 30, 211, 80))
         self.http_page.setMinimumSize(QSize(180, 80))
         icon2 = QIcon()
-        icon2.addFile(u"../asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon2.addFile(u"src/asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.http_page.setIcon(icon2)
         self.http_page.setIconSize(QSize(48, 32))
         self.stackedWidget = QStackedWidget(self.centralwidget)
@@ -144,7 +106,7 @@ class Ui_MainWindow(object):
         self.model_page.setGeometry(QRect(260, 30, 211, 80))
         self.model_page.setMinimumSize(QSize(180, 80))
         icon3 = QIcon()
-        icon3.addFile(u"../asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon3.addFile(u"src/asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.model_page.setIcon(icon3)
         self.model_page.setIconSize(QSize(38, 38))
         MainWindow.setCentralWidget(self.centralwidget)

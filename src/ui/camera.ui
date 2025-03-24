@@ -341,7 +341,82 @@ QListWidget#log_list {
       </property>
      </widget>
     </item>
+    <item row="9" column="4">
+     <widget class="QPushButton" name="trigger">
+      <property name="minimumSize">
+       <size>
+        <width>90</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>TRIGGER</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="6">
+     <widget class="QPushButton" name="detect">
+      <property name="minimumSize">
+       <size>
+        <width>90</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>DETECT</string>
+      </property>
+     </widget>
+    </item>
     <item row="9" column="3">
+     <widget class="QPushButton" name="stop_all">
+      <property name="minimumSize">
+       <size>
+        <width>90</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>STOP ALL</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="5">
      <widget class="QPushButton" name="display">
       <property name="minimumSize">
        <size>
@@ -367,83 +442,6 @@ QListWidget#log_list {
       </property>
       <property name="text">
        <string>DISPLAY</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="4">
-     <widget class="QPushButton" name="trigger_http">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>TRIGGER
-HTTP</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="5">
-     <widget class="QPushButton" name="trigger_tcp">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>TRIGGER
-TCP</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="6">
-     <widget class="QPushButton" name="detect">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>DETECT</string>
       </property>
      </widget>
     </item>
