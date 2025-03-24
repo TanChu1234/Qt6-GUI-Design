@@ -12,6 +12,7 @@ class CameraThread(QThread):
     # Define signals
     frame_signal = Signal(QPixmap, str)  # For UI updates (pixmap, camera_name)
     log_signal = Signal(str)  # For logging messages
+    person_count = Signal(int)
     connection_status_signal = Signal(str, str)  # (status, camera_name)
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
@@ -237,36 +238,54 @@ class CameraThread(QThread):
         # Save the current frame to file
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         
-        
         if self.last_frame is not None:
             try:   
                 if trigger_action == "ai" and self.yolo_detector is not None:
                     filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
-                    # print(type(self.last_frame))
-                    # Run inference
-                    _, detection_summary = self.yolo_detector.detect(
+                    
+                    # Run inference - now only returns person_count
+                    _, detection_summary, person_count = self.yolo_detector.detect(
                         self.last_frame, 
                         filename
                     )
-
+                    
+                    # Emit the check_cart signal based on person count (for backward compatibility)
+                    # You can modify this logic as needed
+                    self.person_count.emit(person_count)
+                    
                     # Log detection results
                     if detection_summary:
                         self.log_signal.emit(f"🤖 AI detection found: {detection_summary} in {self.camera_name}")
                     else:
-                        self.log_signal.emit(f"🤖 No objects detected with confidence > 0.8 in {self.camera_name}")
+                        self.log_signal.emit(f"🤖 No objects detected with confidence > 0.6 in {self.camera_name}")
+                    
+                    # Log the person count value
+                    self.log_signal.emit(f"🔍 Person count for {self.camera_name}: {person_count}")
                     
                     self.log_signal.emit(f"🤖 Detection results saved to: {filename}")
-                    self.trigger_completed_signal.emit(filename, self.camera_name)
-                   
+                    
+                    # Include the person count in the trigger_completed_signal
+                    # Format: "filename|person_count"
+                    self.trigger_completed_signal.emit(f"{filename}|{person_count}", self.camera_name)
+                
                 elif trigger_action == "capture":
                     filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
                     cv2.imwrite(filename, self.last_frame)
                     self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
-                    self.trigger_completed_signal.emit(filename, self.camera_name)
+                    
+                    # For regular captures, emit False for check_cart (for backward compatibility)
+                    self.check_cart.emit(False)
+                    
+                    # Include count=0 for regular captures
+                    self.trigger_completed_signal.emit(f"{filename}|0", self.camera_name)
+                    
             except Exception as e:
                 self.log_signal.emit(f"❌ Error: {str(e)}")
+                # For errors, emit False for check_cart (for backward compatibility)
+                self.check_cart.emit(False)
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
             self.log_signal.emit("❌ No frame available to capture")
+            # For errors, emit False for check_cart (for backward compatibility)
+            self.check_cart.emit(0)
             self.trigger_completed_signal.emit("error", self.camera_name)
-        

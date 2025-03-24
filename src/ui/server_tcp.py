@@ -13,7 +13,7 @@ class SignalRelay(QObject):
     """
     log_signal = Signal(str)
     command_signal = Signal(dict)  # Signal for handling commands
-
+    check_cart = Signal(bool)
 class TCPServerApp(QWidget):
     def __init__(self, camera_widget=None):
         super().__init__()
@@ -317,10 +317,10 @@ class TCPServerApp(QWidget):
             
             # Process the trigger commands
             if self.camera_widget:
-                triggered_cameras, failed_cameras, skipped_cameras = self.camera_widget._process_trigger_configs(
+                triggered_cameras, failed_cameras, skipped_cameras, person_counts = self.camera_widget._process_trigger_configs(
                     trigger_data
                 )
-                
+                # print(person_counts)
                 # Log the summary
                 self.log_message(f"\n=== Trigger Summary for {command_id} ===")
                 

@@ -40,7 +40,7 @@ class CameraWidget(QWidget):
         # Create a single YOLODetector instance to be shared by all camera threads
         
         self.yolo_detector = YOLODetector(model_path="src/model/yolov8s.pt")
-       
+        self.person = None
         self.load_saved_cameras()
     
     def _setup_ui(self):
@@ -94,6 +94,10 @@ class CameraWidget(QWidget):
         # Add print statement
         print(log_entry)
 
+    def count_person(self, person_count):
+        self.person = person_count
+        
+    
     def export_log(self):
         """Export log messages to 'outputs/logs' folder and clear the list."""
         log_folder = "outputs/logs"
@@ -142,6 +146,44 @@ class CameraWidget(QWidget):
             print(f"⚠️ No properties found for {camera_name}")
     
     def toggle_display(self):
+        """Toggle display of the currently selected camera."""
+        # Check if we currently have a displayed camera
+        if self.displaying:
+            # Stop displaying but keep threads running
+            self._clear_display()
+            print("🔍 Display turned off")
+            return
+            
+        # Start displaying a camera
+        item = self.ui.listWidget.currentItem()
+        if not item:
+            print("⚠️ No camera selected to display!")
+            return
+
+        camera_name = item.text()
+
+        # Check if camera is running, if not, suggest starting it
+        if camera_name not in self.camera_threads:
+            reply = QMessageBox.question(
+                self,
+                "Start Camera",
+                f"Camera '{camera_name}' is not streaming. Start it now?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            
+            if reply == QMessageBox.Yes:
+                self.start_camera(camera_name)
+            else:
+                return
+                
+        # Set this as the current camera to display
+        self.current_camera = camera_name
+        self.displaying = True
+        self.ui.display.setText("HIDE")
+        print(f"🖥️ Now displaying {camera_name}")
+    
+    def toggle_run_ai(self):
         """Toggle display of the currently selected camera."""
         # Check if we currently have a displayed camera
         if self.displaying:
@@ -410,6 +452,7 @@ class CameraWidget(QWidget):
                 lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
             )
             thread.log_signal.connect(self.log_message)
+            thread.person_count.connect(self.count_person)
             thread.connection_status_signal.connect(
                 lambda status, cam=camera_name: self._update_camera_status(cam, status)
             )
@@ -499,6 +542,7 @@ class CameraWidget(QWidget):
                     lambda status, cam=camera_name: self._update_camera_status(cam, status)
                 )
                 thread.log_signal.connect(self.log_message)
+                thread.person_count.connect(self.count_person)
                 thread.frame_signal.connect(
                     lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
                 )
@@ -701,7 +745,7 @@ class CameraWidget(QWidget):
         
         try:
             trigger_configs = self._load_json_config(json_path)
-            triggered_cameras, failed_cameras, skipped_cameras = self._process_trigger_configs(
+            triggered_cameras, failed_cameras, skipped_cameras, _ = self._process_trigger_configs(
                 trigger_configs
             )
             self._print_trigger_summary(trigger_configs, triggered_cameras, failed_cameras, skipped_cameras)
@@ -735,6 +779,7 @@ class CameraWidget(QWidget):
         triggered_cameras = []
         failed_cameras = []
         skipped_cameras = []
+        person_counts = {}
         
         # Handle dict-style JSON config (like your example)
         if isinstance(trigger_configs, dict):
@@ -776,9 +821,11 @@ class CameraWidget(QWidget):
                 result = thread.trigger(config_trigger_type)
                 
                 if result:
+                    person_counts[camera_name] = self.person
                     triggered_cameras.append(camera_name)
                     print(f"✅ Triggered {camera_name}")
                 else:
+                    person_counts[camera_name] = 0
                     failed_cameras.append(camera_name)
                     print(f"❌ Failed to trigger {camera_name}")
                 
@@ -786,7 +833,7 @@ class CameraWidget(QWidget):
                 print(f"❌ Error triggering {camera_name}: {str(e)}")
                 failed_cameras.append(camera_name)
         
-        return triggered_cameras, failed_cameras, skipped_cameras
+        return triggered_cameras, failed_cameras, skipped_cameras, person_counts
     
     def _print_trigger_summary(self, trigger_configs, triggered_cameras, failed_cameras, skipped_cameras):
         """Print a summary of trigger results."""

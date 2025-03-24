@@ -14,10 +14,10 @@ class YOLODetector:
             
         # Load and configure the model
         self.model = YOLO(model_path)
-        self.model.overrides['conf'] = 0.8  # Confidence threshold
-        self.model.overrides['iou'] = 0.5   # IoU threshold
-        self.model.overrides['agnostic_nms'] = True  # Class-agnostic NMS
-        self.model.overrides['max_det'] = 5  # Maximum number of detections
+        # self.model.overrides['conf'] = 0.5  # Confidence threshold
+        # self.model.overrides['iou'] = 0.5   # IoU threshold
+        # self.model.overrides['agnostic_nms'] = True  # Class-agnostic NMS
+        self.model.overrides['max_det'] = 1  # Maximum number of detections
         
         # Warm up the model with a dummy frame
         self._warmup_model()
@@ -29,16 +29,6 @@ class YOLODetector:
         _ = self.model(dummy_frame)
     
     def detect(self, frame, save_path=None):
-        """
-        Perform object detection on a frame.
-        
-        Args:
-            frame: The input frame for detection
-            save_path: Optional path to save the annotated image
-            
-        Returns:
-            tuple: (annotated_frame, detection_summary)
-        """
         # Run inference
         results = self.model(frame)
         
@@ -53,7 +43,7 @@ class YOLODetector:
                 conf = float(box.conf[0])
                 
                 # Only process detections with confidence > threshold
-                if conf > 0.5:
+                if conf > 0.6 and box.cls[0] == 0:
                     # Extract coordinates
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     
@@ -71,15 +61,20 @@ class YOLODetector:
                     cv2.putText(annotated_frame, f"{class_name} {conf:.2f}", 
                                 (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
                                 (0, 255, 0), 2)
-                    print("text done")
-        # Count detected items with confidence > 0.5
+        
+        # Count detected items
         detected_items = {}
+        person_count = 0  # Total person count
+        
         for r in results:
             for box in r.boxes:
                 conf = float(box.conf[0])
-                if conf > 0.5:
-                    cls = int(box.cls[0])
-                    class_name = r.names[cls]
+                cls = int(box.cls[0])
+                class_name = r.names[cls]
+                
+                # Count all persons with confidence > 0.6
+                if conf > 0.6 and cls == 0 and class_name == "person":
+                    person_count += 1
                     if class_name in detected_items:
                         detected_items[class_name] += 1
                     else:
@@ -96,4 +91,4 @@ class YOLODetector:
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             cv2.imwrite(save_path, annotated_frame)
         
-        return annotated_frame, detection_summary
+        return annotated_frame, detection_summary, person_count
