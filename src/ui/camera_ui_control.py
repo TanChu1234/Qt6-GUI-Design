@@ -599,11 +599,11 @@ class CameraWidget(QWidget):
         for camera_name in camera_names:
             try:
                 thread = self.camera_threads.get(camera_name)
-                
+                print(thread.connection_status_signal())
                 # Only stop if the thread is actually running
-                if thread and thread.isRunning():  # Fixed: Check if thread is running instead of status
-                    self.stop_camera(camera_name)
-                    stopped_cameras.append(camera_name)
+                # if thread and thread.isRunning():  # Fixed: Check if thread is running instead of status
+                #     self.stop_camera(camera_name)
+                #     stopped_cameras.append(camera_name)
             
             except Exception as e:
                 print(f"❌ Error stopping {camera_name}: {str(e)}")
