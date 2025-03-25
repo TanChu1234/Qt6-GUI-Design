@@ -148,19 +148,30 @@ class CameraThread(QThread):
     def _process_frames(self, cap):
         """Process frames from the camera in a loop."""
         
-        while self.active:
-            ret, frame = self._read_frame_with_retries(cap)
-            if not ret:
-                break
+        try:
+            while self.active:
+                # Check for stop condition more frequently
+                if not self._should_continue():
+                    break
+                    
+                ret, frame = self._read_frame_with_retries(cap)
+                if not ret:
+                    break
 
-            rgb_frame = self._convert_frame_to_rgb(frame)
-            self._handle_frame(rgb_frame, frame)
-            self._emit_frame_signal(rgb_frame)
-            
-            time.sleep(0.03)  # ~30 fps max
-            
-            if not self._should_continue():
-                break
+                rgb_frame = self._convert_frame_to_rgb(frame)
+                self._handle_frame(rgb_frame, frame)
+                self._emit_frame_signal(rgb_frame)
+                
+                # Shorter sleep time to check active flag more often
+                time.sleep(0.01)  
+        except Exception as e:
+            self.log_signal.emit(f"❌ Error in frame processing: {str(e)}")
+        finally:
+            # Force release resources
+            self.last_frame = None
+            # Try to encourage garbage collection
+            import gc
+            gc.collect()
 
     def _read_frame_with_retries(self, cap):
         """Read frame with retries if initial read fails."""
@@ -184,15 +195,19 @@ class CameraThread(QThread):
         return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     def _handle_frame(self, rgb_frame, frame):
-        """Handle frame processing and triggering."""
-        self.mutex.lock()
-        self.last_frame = frame.copy()
-        
-        if self.triggered:
-            self._process_trigger(self.trigger_action)
-            self.triggered = False
-            
-        self.mutex.unlock()
+        """Handle frame processing and triggering with proper lock handling."""
+        try:
+            self.mutex.lock()
+            # Only make a copy if needed for a trigger, otherwise just reference
+            if self.triggered:
+                self.last_frame = frame.copy()
+                self._process_trigger(self.trigger_action)
+                self.triggered = False
+            else:
+                # Just keep a reference without copying if not triggering
+                self.last_frame = frame
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
 
     def _emit_frame_signal(self, rgb_frame):
         """Convert frame to QPixmap and emit frame signal."""
@@ -204,19 +219,28 @@ class CameraThread(QThread):
 
     def _should_continue(self):
         """Check if the thread should continue running."""
-        self.mutex.lock()
-        should_continue = self.active
-        self.mutex.unlock()
-        return should_continue
+        try:
+            self.mutex.lock()
+            should_continue = self.active
+            return should_continue
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
     
     def stop(self):
         """Stop the camera thread safely."""
-        self.mutex.lock()
-        self.active = False
-        self.triggered = False  # Reset trigger state
-        self.trigger_action = None  # Clear any pending trigger actions
-        self.mutex.unlock()
+        try:
+            self.mutex.lock()
+            self.active = False
+            self.triggered = False  # Reset trigger state
+            self.trigger_action = None  # Clear any pending trigger actions
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
+            
+        # Wake any waiting threads
         self.condition.wakeAll()
+        
+        # Remove frame buffer to free memory
+        self.last_frame = None
     
     def trigger(self, action):
         """

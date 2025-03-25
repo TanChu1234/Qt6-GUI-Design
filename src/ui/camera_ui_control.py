@@ -594,25 +594,30 @@ class CameraWidget(QWidget):
         
         # Track the results of stopping cameras
         stopped_cameras = []
+        failed_cameras = []
         
         # Stop each camera thread that is running
         for camera_name in camera_names:
             try:
                 thread = self.camera_threads.get(camera_name)
-                print(thread.connection_status_signal())
-                # Only stop if the thread is actually running
-                # if thread and thread.isRunning():  # Fixed: Check if thread is running instead of status
-                #     self.stop_camera(camera_name)
-                #     stopped_cameras.append(camera_name)
-            
+                # Only stop if the thread exists and is running
+                if thread and thread.isRunning():
+                    success = self.stop_camera(camera_name)
+                    if success:
+                        stopped_cameras.append(camera_name)
+                    else:
+                        failed_cameras.append(camera_name)
             except Exception as e:
                 print(f"❌ Error stopping {camera_name}: {str(e)}")
+                failed_cameras.append(camera_name)
         
         # Print summary of stopped cameras
         if stopped_cameras:
-            print(f"🛑 Stopped connected cameras: {', '.join(stopped_cameras)}")
-        else:
-            print("ℹ️ No connected cameras to stop")
+            print(f"🛑 Stopped cameras: {', '.join(stopped_cameras)}")
+        if failed_cameras:
+            print(f"⚠️ Failed to stop cameras: {', '.join(failed_cameras)}")
+        if not stopped_cameras and not failed_cameras:
+            print("No connected cameras to stop")
         
         # Clear the display
         self._clear_display()
@@ -650,7 +655,7 @@ class CameraWidget(QWidget):
         # Only update the display if this is the current camera AND display is enabled
         if self.displaying and camera_name == self.current_camera:
             self.ui.label.setPixmap(pixmap)
-        
+       
     def stop_camera(self, specific_camera=None):
         """Stop streaming for the selected or specified camera with proper isolation."""
         # If a specific camera was provided, use it, otherwise get from selection
@@ -668,39 +673,12 @@ class CameraWidget(QWidget):
             return False
             
         # Get the thread reference
-        thread = self.camera_threads[camera_name]
-        
-        # Make a copy of the thread reference before removal
-        # to prevent affecting dictionary during operations
-        thread_ref = thread
+        thread_ref = self.camera_threads[camera_name]
         
         try:
             print(f"🛑 Stopping {camera_name}...")
             
-            # Now stop the thread's operation
-            thread_ref.stop()
-            
-            # Update icon to offline before waiting (for UI responsiveness)
-            self._update_camera_icon(camera_name, "disconnected")
-            
-            # Clear the display if this was the current camera being displayed
-            if self.displaying and self.current_camera == camera_name:
-                self._clear_display()
-                
-            # Remove the thread from our dictionary BEFORE waiting
-            # This ensures other code won't try to use this thread anymore
-            del self.camera_threads[camera_name]
-            
-            # Wait for the thread to finish, with a reasonable timeout
-            if thread_ref.isRunning():
-                print(f"⏱️ Waiting for {camera_name} thread to finish...")
-                success = thread_ref.wait(2000)  # Wait up to 2 seconds
-                if not success:
-                    print(f"⚠️ Thread for {camera_name} didn't stop properly, forcing termination")
-                    thread_ref.terminate()  # Force termination as a last resort
-                    thread_ref.wait(500)   # Give it a moment to clean up
-            
-            # Disconnect all signals AFTER the thread has stopped to prevent deadlocks
+            # 1. Disconnect signals FIRST to prevent callbacks during shutdown
             try:
                 thread_ref.frame_signal.disconnect()
                 thread_ref.log_signal.disconnect()
@@ -712,12 +690,41 @@ class CameraWidget(QWidget):
                 # It's okay if some signals were not connected or already disconnected
                 pass
                 
+            # 2. Force any GPU memory cleanup for YOLO
+            if thread_ref.yolo_detector is not None:
+                try:
+                    import torch
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                except (ImportError, AttributeError):
+                    pass
+            
+            # 3. Update UI immediately for responsiveness
+            self._update_camera_icon(camera_name, "disconnected")
+            if self.displaying and self.current_camera == camera_name:
+                self._clear_display()
+            
+            # 4. Remove from dictionary before stopping to prevent other code from using it
+            del self.camera_threads[camera_name]
+            
+            # 5. Stop the thread
+            thread_ref.stop()
+            
+            # 6. Wait with a shorter timeout
+            if thread_ref.isRunning():
+                print(f"⏱️ Waiting for {camera_name} thread to finish...")
+                success = thread_ref.wait(500)  # Shorter timeout (500ms instead of 2000ms)
+                if not success:
+                    print(f"⚠️ Thread for {camera_name} didn't stop properly, forcing termination")
+                    thread_ref.terminate()
+                    thread_ref.wait(100)
+            
             print(f"✅ Successfully stopped {camera_name}")
             return True
             
         except Exception as e:
             print(f"❌ Error stopping {camera_name}: {str(e)}")
-            # Still try to remove from dictionary if there was an error
+            # Ensure thread is removed from dictionary
             if camera_name in self.camera_threads:
                 del self.camera_threads[camera_name]
             return False
