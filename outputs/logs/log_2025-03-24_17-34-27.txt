@@ -1,0 +1,109 @@
+[2025-03-24 17:34:18] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:18] ❌ No configuration found for Camera
+[2025-03-24 17:34:18] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:18] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:18] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:18] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:18] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:18] ℹ️ Camera home is already connected
+[2025-03-24 17:34:18] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:18] 📊 Total Cameras: 7
+[2025-03-24 17:34:18] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:18]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:19] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:19] ❌ No configuration found for Camera
+[2025-03-24 17:34:19] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera home is already connected
+[2025-03-24 17:34:19] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:19] 📊 Total Cameras: 7
+[2025-03-24 17:34:19] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:19]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:19] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:19] ❌ No configuration found for Camera
+[2025-03-24 17:34:19] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:19] ℹ️ Camera home is already connected
+[2025-03-24 17:34:20] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:20] 📊 Total Cameras: 7
+[2025-03-24 17:34:20] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:20]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:20] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:20] ❌ No configuration found for Camera
+[2025-03-24 17:34:20] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:20] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:20] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:20] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:20] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:20] ℹ️ Camera home is already connected
+[2025-03-24 17:34:20] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:20] 📊 Total Cameras: 7
+[2025-03-24 17:34:20] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:20]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:21] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:21] ❌ No configuration found for Camera
+[2025-03-24 17:34:21] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:21] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:21] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:21] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:21] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:21] ℹ️ Camera home is already connected
+[2025-03-24 17:34:21] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:21] 📊 Total Cameras: 7
+[2025-03-24 17:34:21] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:21]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:22] ❌ Failed to open camera Camera 2
+[2025-03-24 17:34:22] ❌ Failed to connect to Camera 2 (Timeout)
+[2025-03-24 17:34:25] ❌ Failed to open camera tan
+[2025-03-24 17:34:25] ❌ Failed to connect to tan (Timeout)
+[2025-03-24 17:34:25] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:25] ❌ No configuration found for Camera
+[2025-03-24 17:34:25] ✅ Connected tan
+[2025-03-24 17:34:25] 🔌 Connecting to tan at 192.168.1.21...
+[2025-03-24 17:34:25] ✅ Connected Camera 2
+[2025-03-24 17:34:25] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:25] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:25] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:25] ℹ️ Camera home is already connected
+[2025-03-24 17:34:25] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:25] 📊 Total Cameras: 7
+[2025-03-24 17:34:25] ✅ Successfully Connected: 2
+[2025-03-24 17:34:25]    Cameras: tan, Camera 2
+[2025-03-24 17:34:25] ⏩ Skipped Cameras: 5
+[2025-03-24 17:34:25]    Cameras: Camera, Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:25] 🔌 Connecting to Camera 2 at 192.168.1.78...
+[2025-03-24 17:34:26] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:26] ❌ No configuration found for Camera
+[2025-03-24 17:34:26] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:26] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:26] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:26] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:26] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:26] ℹ️ Camera home is already connected
+[2025-03-24 17:34:26] 
+=== Camera Connection Summary ===
+[2025-03-24 17:34:26] 📊 Total Cameras: 7
+[2025-03-24 17:34:26] ⏩ Skipped Cameras: 7
+[2025-03-24 17:34:26]    Cameras: Camera, tan (Already Connected), Camera 2 (Already Connected), Camera 3 (Already Connected), Camera 4 (Already Connected), Camera 5 (Already Connected), home (Already Connected)
+[2025-03-24 17:34:27] 🔌 Initiating connection for 7 cameras
+[2025-03-24 17:34:27] ❌ No configuration found for Camera
+[2025-03-24 17:34:27] ℹ️ Camera tan is already connected
+[2025-03-24 17:34:27] ℹ️ Camera Camera 2 is already connected
+[2025-03-24 17:34:27] ℹ️ Camera Camera 3 is already connected
+[2025-03-24 17:34:27] ℹ️ Camera Camera 4 is already connected
+[2025-03-24 17:34:27] ℹ️ Camera Camera 5 is already connected
+[2025-03-24 17:34:27] ℹ️ Camera home is already connected
+[2025-03-24 17:34:27] 
+=== Camera Connection Summary ===
