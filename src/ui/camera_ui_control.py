@@ -384,37 +384,7 @@ class CameraWidget(QWidget):
     def _update_camera_status(self, camera_name, status):
         """Update the camera icon only."""
         self._update_camera_icon(camera_name, status)
-        self.update_connect_button_state()
-        
-    def update_connect_button_state(self):
-        """Update the state of the connect button based on camera connection status."""
-        # Default to disabled
-        self.ui.connect.setEnabled(False) 
-        # Check if there are any cameras in the list
-        if self.ui.listWidget.count() == 0:
-            return
-        
-        # Track if we have any disconnected (red icon) cameras
-        have_disconnected_cameras = False
-        
-        # Examine each camera in the list
-        for i in range(self.ui.listWidget.count()):
-            item = self.ui.listWidget.item(i)
-            camera_name = item.text()
-            
-            # Check if camera is connected (has a running thread)
-            is_connected = (
-                camera_name in self.camera_threads 
-                and self.camera_threads[camera_name].isRunning()
-            )
-            
-            if not is_connected:
-                # This camera is disconnected (should have red icon)
-                have_disconnected_cameras = True
-                break
-        
-        # Enable button only if we found at least one disconnected camera
-        self.ui.connect.setEnabled(have_disconnected_cameras)
+    
     def closeEvent(self, event):
         """Ensure all camera threads stop when closing the window."""
         # Create a copy of the keys to avoid modification during iteration
