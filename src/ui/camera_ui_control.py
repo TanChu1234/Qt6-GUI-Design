@@ -396,11 +396,11 @@ class CameraWidget(QWidget):
         self.ui.connect.setEnabled(False)
         
         # Check if there are any cameras in the list
-        if self.ui.listWidget.count() == 0:
+        if self.ui.listWidget.count()-1 == 0:
             return
         
         # Look for disconnected cameras
-        for i in range(self.ui.listWidget.count()):
+        for i in range(self.ui.listWidget.count()-1):
             item = self.ui.listWidget.item(i)
             camera_name = item.text()
             
