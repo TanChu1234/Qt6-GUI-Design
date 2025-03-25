@@ -320,7 +320,7 @@ class TCPServerApp(QWidget):
                     result = {
                         "triggered_cameras": triggered_cameras,
                         "f_cameras": failed_cameras,
-                        "skipped_cameras": skipped_cameras,ailed
+                        "skipped_cameras": skipped_cameras,
                         "person_counts": person_counts
                     }
                     
