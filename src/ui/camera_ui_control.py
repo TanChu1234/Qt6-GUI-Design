@@ -514,7 +514,7 @@ class CameraWidget(QWidget):
         """
         # Get the total number of cameras in the list
         total_cameras = self.ui.listWidget.count()
-        
+        self.ui.connect.setEnabled(False) 
         if total_cameras == 0:
             self.log_message("⚠️ No cameras in the list to connect")
             return
