@@ -12,10 +12,9 @@ class CameraThread(QThread):
     # Define signals
     frame_signal = Signal(QPixmap, str)  # For UI updates (pixmap, camera_name)
     log_signal = Signal(str)  # For logging messages
-    person_count = Signal(int)
+    person_count = Signal(int)  # For reporting person counts
     connection_status_signal = Signal(str, str)  # (status, camera_name)
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
-    
     
     def __init__(self, ip, port, username, password, camera_name, protocol, yolo_detector=None):
         """Initialize the camera thread with connection details."""
@@ -54,6 +53,7 @@ class CameraThread(QThread):
     def run(self):
         """Main thread execution method."""
         self.active = True
+        self.last_frame = None  # Clear any previous frame
         
         # Build camera URL based on protocol
         url = self._build_camera_url()
@@ -86,7 +86,14 @@ class CameraThread(QThread):
             self.log_signal.emit(f"❌ Error in {self.camera_name}: {str(e)}")
         finally:
             # Ensure proper cleanup
-            cap.release()
+            try:
+                cap.release()
+                self.log_signal.emit(f"📤 Released camera resources for {self.camera_name}")
+            except Exception as e:
+                self.log_signal.emit(f"⚠️ Error releasing camera resources: {str(e)}")
+                
+            # Make sure we're marked as disconnected
+            self.connection_status_signal.emit("disconnected", self.camera_name)
     
     def _build_camera_url(self):
         """Build the camera URL string based on protocol."""
@@ -206,6 +213,8 @@ class CameraThread(QThread):
         """Stop the camera thread safely."""
         self.mutex.lock()
         self.active = False
+        self.triggered = False  # Reset trigger state
+        self.trigger_action = None  # Clear any pending trigger actions
         self.mutex.unlock()
         self.condition.wakeAll()
     
@@ -249,8 +258,7 @@ class CameraThread(QThread):
                         filename
                     )
                     
-                    # Emit the check_cart signal based on person count (for backward compatibility)
-                    # You can modify this logic as needed
+                    # Emit the person count signal
                     self.person_count.emit(person_count)
                     
                     # Log detection results
@@ -273,19 +281,19 @@ class CameraThread(QThread):
                     cv2.imwrite(filename, self.last_frame)
                     self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
                     
-                    # For regular captures, emit False for check_cart (for backward compatibility)
-                    self.check_cart.emit(False)
+                    # For regular captures, emit 0 for person_count
+                    self.person_count.emit(0)
                     
                     # Include count=0 for regular captures
                     self.trigger_completed_signal.emit(f"{filename}|0", self.camera_name)
                     
             except Exception as e:
                 self.log_signal.emit(f"❌ Error: {str(e)}")
-                # For errors, emit False for check_cart (for backward compatibility)
-                self.check_cart.emit(False)
+                # For errors, emit 0 for person_count
+                self.person_count.emit(0)
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
             self.log_signal.emit("❌ No frame available to capture")
-            # For errors, emit False for check_cart (for backward compatibility)
-            self.check_cart.emit(0)
+            # For errors, emit 0 for person_count
+            self.person_count.emit(0)
             self.trigger_completed_signal.emit("error", self.camera_name)

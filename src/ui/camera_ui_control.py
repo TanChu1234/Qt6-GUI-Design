@@ -49,8 +49,8 @@ class CameraWidget(QWidget):
         self.ui.add_cam.clicked.connect(self.add_camera)
         self.ui.connect.clicked.connect(self.connect_all_cameras)
         self.ui.disconnect.clicked.connect(self.stop_camera)
+        self.ui.stop_all.clicked.connect(self.stop_all_cameras)  # Fixed: Added correct connection
         self.ui.display.clicked.connect(self.toggle_display)
-        # Change from returning a value to a lambda function
         self.ui.trigger.clicked.connect(self.trigger_cameras)
         self.ui.detect.clicked.connect(self.detect_real_time)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
@@ -478,7 +478,7 @@ class CameraWidget(QWidget):
         Connect all cameras listed in the ListWidget
         """
         # Get the total number of cameras in the list
-        total_cameras = self.ui.listWidget.count()-1
+        total_cameras = self.ui.listWidget.count()  # Fixed: removed the -1
         
         if total_cameras == 0:
             self.log_message("⚠️ No cameras in the list to connect")
@@ -496,7 +496,7 @@ class CameraWidget(QWidget):
         self.log_message(f"🔌 Initiating connection for {total_cameras} cameras")
         
         # Iterate through all items in the ListWidget
-        for i in range(1, total_cameras):
+        for i in range(total_cameras):  # Fixed: start from 0 to include all cameras
             # Get the current item
             item = self.ui.listWidget.item(i)
             
@@ -519,6 +519,12 @@ class CameraWidget(QWidget):
             if camera_name not in self.camera_properties:
                 self.log_message(f"❌ No configuration found for {camera_name}")
                 connection_results['skipped'].append(camera_name)
+                continue
+            
+            # Skip cameras that are already connected
+            if camera_name in self.camera_threads and self.camera_threads[camera_name].isRunning():
+                self.log_message(f"ℹ️ Camera {camera_name} is already connected")
+                connection_results['skipped'].append(f"{camera_name} (Already Connected)")
                 continue
             
             # Attempt to connect the camera
@@ -545,6 +551,7 @@ class CameraWidget(QWidget):
                 thread.frame_signal.connect(
                     lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
                 )
+                thread.person_count.connect(self.count_person)  # Fixed: Added missing connection
                 thread.trigger_completed_signal.connect(
                     lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
                 )
@@ -563,7 +570,7 @@ class CameraWidget(QWidget):
                 # self.log_message(f"✅ Connected {camera_name}")
                 
                 # Update list widget item icon to indicate connection status
-                item.setIcon(QIcon(self.icon_online))
+                item.setIcon(QIcon(self.icon_connecting))  # Start with connecting icon
             
             except Exception as e:
                 # Handle connection errors
@@ -580,7 +587,7 @@ class CameraWidget(QWidget):
 
     def stop_all_cameras(self):
         """
-        Stop all cameras that are currently in a 'connected' status.
+        Stop all cameras that are currently running.
         """
         # Create a copy of the keys to avoid modification during iteration
         camera_names = list(self.camera_threads.keys())
@@ -594,7 +601,7 @@ class CameraWidget(QWidget):
                 thread = self.camera_threads.get(camera_name)
                 
                 # Only stop if the thread is actually running
-                if thread and thread.isRunning():
+                if thread and thread.isRunning():  # Fixed: Check if thread is running instead of status
                     self.stop_camera(camera_name)
                     stopped_cameras.append(camera_name)
             
@@ -670,18 +677,6 @@ class CameraWidget(QWidget):
         try:
             print(f"🛑 Stopping {camera_name}...")
             
-            # Disconnect all signals from this thread first to prevent conflicts
-            # Use try/except since some signals may not be connected
-            try:
-                thread_ref.frame_signal.disconnect()
-                thread_ref.log_signal.disconnect()
-                thread_ref.connection_status_signal.disconnect()
-                thread_ref.trigger_completed_signal.disconnect()
-                thread_ref.finished.disconnect()
-            except TypeError:
-                # It's okay if some signals were not connected
-                pass
-                
             # Now stop the thread's operation
             thread_ref.stop()
             
@@ -705,6 +700,18 @@ class CameraWidget(QWidget):
                     thread_ref.terminate()  # Force termination as a last resort
                     thread_ref.wait(500)   # Give it a moment to clean up
             
+            # Disconnect all signals AFTER the thread has stopped to prevent deadlocks
+            try:
+                thread_ref.frame_signal.disconnect()
+                thread_ref.log_signal.disconnect()
+                thread_ref.connection_status_signal.disconnect()
+                thread_ref.trigger_completed_signal.disconnect()
+                thread_ref.person_count.disconnect()
+                thread_ref.finished.disconnect()
+            except (TypeError, RuntimeError):
+                # It's okay if some signals were not connected or already disconnected
+                pass
+                
             print(f"✅ Successfully stopped {camera_name}")
             return True
             
@@ -881,4 +888,46 @@ class CameraWidget(QWidget):
             print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
             
     def detect_real_time(self):
-        print("Add run real time with YOLO")
+        """Implement real-time detection with YOLO."""
+        # Get the currently selected camera
+        item = self.ui.listWidget.currentItem()
+        if not item:
+            self.log_message("⚠️ No camera selected for detection!")
+            return
+            
+        camera_name = item.text()
+        
+        # Check if camera is running
+        if camera_name not in self.camera_threads or not self.camera_threads[camera_name].isRunning():
+            reply = QMessageBox.question(
+                self,
+                "Start Camera for Detection",
+                f"Camera '{camera_name}' is not streaming. Start it now?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            
+            if reply == QMessageBox.Yes:
+                success = self.start_camera(camera_name)
+                if not success:
+                    self.log_message(f"❌ Failed to start {camera_name} for detection")
+                    return
+            else:
+                return
+                
+        # Log that we're starting detection
+        self.log_message(f"🤖 Starting real-time detection on {camera_name}")
+        
+        # Call AI trigger on the camera
+        thread = self.camera_threads[camera_name]
+        result = thread.trigger("ai")
+        
+        if result:
+            self.log_message(f"✅ Started AI detection on {camera_name}")
+            # Display the camera if not already displaying
+            if not self.displaying or self.current_camera != camera_name:
+                self.current_camera = camera_name
+                self.displaying = True
+                self.ui.display.setText("HIDE")
+        else:
+            self.log_message(f"❌ Failed to start AI detection on {camera_name}")
