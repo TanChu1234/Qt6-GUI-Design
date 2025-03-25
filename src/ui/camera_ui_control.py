@@ -52,7 +52,7 @@ class CameraWidget(QWidget):
         self.ui.display.clicked.connect(self.toggle_display)
         # Change from returning a value to a lambda function
         self.ui.trigger.clicked.connect(self.trigger_cameras)
-        self.ui.detect.clicked.connect(self.dtect_real_time)
+        self.ui.detect.clicked.connect(self.detect_real_time)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
         
@@ -373,7 +373,7 @@ class CameraWidget(QWidget):
         
         if status not in icon_map:
             return
-            
+             
         # Update icon in list
         for i in range(self.ui.listWidget.count()):
             item = self.ui.listWidget.item(i)
@@ -475,10 +475,10 @@ class CameraWidget(QWidget):
     
     def connect_all_cameras(self):
         """
-        Optimized method to connect multiple cameras efficiently
+        Connect all cameras listed in the ListWidget
         """
         # Get the total number of cameras in the list
-        total_cameras = self.ui.listWidget.count()
+        total_cameras = self.ui.listWidget.count()-1
         
         if total_cameras == 0:
             self.log_message("⚠️ No cameras in the list to connect")
@@ -492,54 +492,91 @@ class CameraWidget(QWidget):
             'skipped': []
         }
         
-        # Use ThreadPoolExecutor for concurrent connections
-        from concurrent.futures import ThreadPoolExecutor, as_completed
+        # Log start of connection attempt
+        self.log_message(f"🔌 Initiating connection for {total_cameras} cameras")
         
-        # Limit concurrent connections to prevent system overload
-        max_concurrent_connections = min(10, total_cameras)
-        
-        with ThreadPoolExecutor(max_workers=max_concurrent_connections) as executor:
-            # Dictionary to track futures
-            future_to_camera = {}
+        # Iterate through all items in the ListWidget
+        for i in range(1, total_cameras):
+            # Get the current item
+            item = self.ui.listWidget.item(i)
             
-            # Iterate through all cameras in the list widget
-            for i in range(total_cameras):
-                item = self.ui.listWidget.item(i)
-                if not item:
-                    continue
-                
-                camera_name = item.text()
-                
-                # Validate camera exists in properties
-                if camera_name not in self.camera_properties:
-                    self.log_message(f"⚠️ No configuration found for {camera_name}")
-                    connection_results['skipped'].append(camera_name)
-                    continue
-                
-                # Submit connection task using existing start_camera method
-                future = executor.submit(self.start_camera, camera_name)
-                future_to_camera[future] = camera_name
+            # Validate item and camera name
+            if not item:
+                self.log_message(f"⚠️ Invalid item at index {i}")
+                connection_results['skipped'].append(f"Invalid Item {i}")
+                continue
             
-            # Process completed connections
-            for future in as_completed(future_to_camera):
-                camera_name = future_to_camera[future]
-                try:
-                    success = future.result()
-                    if success:
-                        connection_results['successful'].append(camera_name)
-                    else:
-                        connection_results['failed'].append(camera_name)
-                except Exception as e:
-                    print(f"❌ Error connecting {camera_name}: {str(e)}")
-                    connection_results['failed'].append(camera_name)
+            # Get camera name
+            camera_name = item.text().strip()
+            
+            # Skip empty camera names
+            if not camera_name:
+                self.log_message(f"⚠️ Skipping empty camera name")
+                connection_results['skipped'].append("Empty Name")
+                continue
+            
+            # Validate camera exists in properties
+            if camera_name not in self.camera_properties:
+                self.log_message(f"❌ No configuration found for {camera_name}")
+                connection_results['skipped'].append(camera_name)
+                continue
+            
+            # Attempt to connect the camera
+            try:
+                # Get camera properties
+                camera_props = self.camera_properties[camera_name]
+                
+                # Create camera thread
+                thread = CameraThread(
+                    ip=camera_props['ip_address'],
+                    port=camera_props['port'],
+                    username=camera_props['username'],
+                    password=camera_props['password'],
+                    camera_name=camera_props['camera_name'],
+                    protocol=camera_props['protocol'],
+                    yolo_detector= self.yolo_detector
+                )
+                
+                # Connect signals for this thread
+                thread.connection_status_signal.connect(
+                    lambda status, cam=camera_name: self._update_camera_status(cam, status)
+                )
+                thread.log_signal.connect(self.log_message)
+                thread.frame_signal.connect(
+                    lambda pixmap, cam=camera_name: self._handle_new_frame(pixmap, cam)
+                )
+                thread.trigger_completed_signal.connect(
+                    lambda result, cam=camera_name: self._handle_trigger_result(result, cam)
+                )
+                thread.finished.connect(
+                    lambda cam=camera_name: self._handle_camera_stopped(cam)
+                )
+                
+                # Start the thread
+                thread.start()
+                
+                # Store the thread
+                self.camera_threads[camera_name] = thread
+                
+                # Update connection results
+                connection_results['successful'].append(camera_name)
+                # self.log_message(f"✅ Connected {camera_name}")
+                
+                # Update list widget item icon to indicate connection status
+                item.setIcon(QIcon(self.icon_online))
+            
+            except Exception as e:
+                # Handle connection errors
+                error_msg = f"❌ Error connecting {camera_name}: {str(e)}"
+                self.log_message(error_msg)
+                
+                # Update list widget item icon to indicate failure
+                item.setIcon(QIcon(self.icon_offline))
+                
+                connection_results['failed'].append(camera_name)
         
         # Log connection summary
-        self._print_trigger_summary(
-            connection_results, 
-            connection_results['successful'], 
-            connection_results['failed'], 
-            connection_results['skipped']
-        )
+        self.log_connection_summary(connection_results)
 
     def stop_all_cameras(self):
         """
@@ -843,5 +880,5 @@ class CameraWidget(QWidget):
         if skipped_cameras:
             print(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
             
-    def dtect_real_time(self):
+    def detect_real_time(self):
         print("Add run real time with YOLO")
