@@ -58,7 +58,7 @@ class CameraWidget(QWidget):
         
         # Add double-click handler to connect to camera
         self.ui.listWidget.itemDoubleClicked.connect(self.connect_on_double_click)
-        self.update_connect_button_state()
+        
     def load_saved_cameras(self):
         """Load saved camera configurations from file."""
         cameras = self.config_manager.load_config()
@@ -77,7 +77,7 @@ class CameraWidget(QWidget):
             
             # Store camera properties (without status)
             self.camera_properties[camera_name] = camera
-        self.update_connect_button_state()
+    
     """ User Interface Management """
     def log_message(self, message):
         """Append log messages with a timestamp to the log listWidget and export if exceeding 100 lines."""
@@ -302,9 +302,6 @@ class CameraWidget(QWidget):
         # Clean up the ping thread
         self._clean_up_ping_threads()
         
-        # Update connect button state
-        self.update_connect_button_state()
-            
     def _clean_up_ping_threads(self):
         """Remove finished ping threads from the list."""
         self.ping_threads = [thread for thread in self.ping_threads if thread.isRunning()]
@@ -365,8 +362,7 @@ class CameraWidget(QWidget):
         # Clear display if this was the current camera
         if self.current_camera == camera_name:
             self._clear_display()
-        self.update_connect_button_state()
-        
+
     def _update_camera_icon(self, camera_name, status):
         """Update the camera icon based on status."""
         icon_map = {
@@ -395,10 +391,13 @@ class CameraWidget(QWidget):
         # Default to disabled
         self.ui.connect.setEnabled(False) 
         # Check if there are any cameras in the list
-        if self.ui.listWidget.count()-1 == 0:
+        if self.ui.listWidget.count() == 0:
             return
         
-        # Look for disconnected cameras
+        # Track if we have any disconnected (red icon) cameras
+        have_disconnected_cameras = False
+        
+        # Examine each camera in the list
         for i in range(self.ui.listWidget.count()):
             item = self.ui.listWidget.item(i)
             camera_name = item.text()
@@ -498,7 +497,6 @@ class CameraWidget(QWidget):
             
             thread.start()
             print(f"✅ Started streaming {camera_name}")
-            self.update_connect_button_state()
             return True
         
         except Exception as e:
@@ -511,7 +509,7 @@ class CameraWidget(QWidget):
         """
         # Get the total number of cameras in the list
         total_cameras = self.ui.listWidget.count()
-        self.ui.connect.setEnabled(False) 
+        
         if total_cameras == 0:
             self.log_message("⚠️ No cameras in the list to connect")
             return
@@ -572,7 +570,6 @@ class CameraWidget(QWidget):
             connection_results['failed'], 
             connection_results['skipped']
         )
-        self.update_connect_button_state()
 
     def stop_all_cameras(self):
         """
@@ -702,7 +699,6 @@ class CameraWidget(QWidget):
                     thread_ref.wait(500)   # Give it a moment to clean up
             
             print(f"✅ Successfully stopped {camera_name}")
-            self.update_connect_button_state()
             return True
             
         except Exception as e:
@@ -710,7 +706,6 @@ class CameraWidget(QWidget):
             # Still try to remove from dictionary if there was an error
             if camera_name in self.camera_threads:
                 del self.camera_threads[camera_name]
-            self.update_connect_button_state()
             return False
    
     def _handle_camera_stopped(self, camera_name):
@@ -747,7 +742,6 @@ class CameraWidget(QWidget):
             print(f"⚠️ Error cleaning up {camera_name} thread: {str(e)}")
             
         print(f"🛑 Camera {camera_name} stopped")
-        self.update_connect_button_state()
     
     def _handle_trigger_result(self, result, camera_name):
         """
