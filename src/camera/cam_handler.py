@@ -111,17 +111,7 @@ class CameraThread(QThread):
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
     def _connect_with_timeout(self, cap, url):
-        """
-        Attempt to connect to the camera without a strict timeout
-        
-        Args:
-            cap (cv2.VideoCapture): Video capture object
-            url (str): Camera URL or source
-            timeout (optional): Ignored, kept for compatibility
-        
-        Returns:
-            bool: True if connection successful, False otherwise
-        """
+      
         try:
             # Open the camera source
             cap.open(url)
@@ -172,7 +162,7 @@ class CameraThread(QThread):
             # Try to encourage garbage collection
             import gc
             gc.collect()
-
+  
     def _read_frame_with_retries(self, cap):
         """Read frame with retries if initial read fails."""
         ret, frame = cap.read()

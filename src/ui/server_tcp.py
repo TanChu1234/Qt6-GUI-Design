@@ -208,48 +208,17 @@ class TCPServerApp(QWidget):
             # Wait for the command to be processed
             try:
                 # Wait with a timeout to avoid blocking the server
-                await asyncio.wait_for(future, timeout=10.0)
-                return {"status": "success", "message": f"Camera trigger completed for {client_id}"}
-            except asyncio.TimeoutError:
-                return {"status": "success", "message": "Command queued but processing timed out"}
-        
-        # Handle list format
-        elif isinstance(json_data, list):
-            if len(json_data) > 0 and isinstance(json_data[0], dict):
-                camera_dict = json_data[0]
-                if any(isinstance(value, dict) and "type" in value for value in camera_dict.values()):
-                    self.log_message(f"List-wrapped camera command dictionary detected from {client_id}")
-                    
-                    # Add command to the queue with a unique ID
-                    command_id = f"cmd_{client_id}_{hash(str(camera_dict))}"
-                    
-                    # Create a future that will be resolved when the command completes
-                    future = asyncio.Future()
-                    
-                    # Add to the queue
-                    self.command_queue.put((command_id, camera_dict, future))
-                    
-                    # Wait for the command to be processed
-                    try:
-                        await asyncio.wait_for(future, timeout=10.0)
-                        return {"status": "success", "message": f"Camera trigger completed for {client_id}"}
-                    except asyncio.TimeoutError:
-                        return {"status": "success", "message": "Command queued but processing timed out"}
-        
-        # For other command types like status requests
-        command = json_data.get("command") if isinstance(json_data, dict) else None
-        if command == "status":
-            # Status requests can bypass the queue
-            if self.camera_widget:
+                result = await asyncio.wait_for(future, timeout=10)
+                
+                # Return a more detailed response that includes person counts
                 return {
                     "status": "success", 
-                    "cameras": self.get_camera_status()
+                    "message": f"Camera trigger completed for {client_id}",
+                    "data": result  # This will contain triggered_cameras, person_counts, etc.
                 }
-            else:
-                return {"status": "error", "message": "Camera widget not available"}
-        
-        # Unknown command
-        return {"status": "error", "message": "Unknown command format"}
+            except asyncio.TimeoutError:
+                return {"status": "success", "message": "Command queued but processing timed out"}
+
     
     def get_camera_status(self):
         """
@@ -307,49 +276,63 @@ class TCPServerApp(QWidget):
         """
         command_type = command_data.get("command")
         
-        if command_type == "trigger":
-            # Get the data (which could be a dict)
-            trigger_data = command_data.get("data", {})
-            command_id = command_data.get("id", "unknown")
-            future = command_data.get("future")
-            
-            self.log_message(f"Processing trigger data for command {command_id}")
-            
-            # Process the trigger commands
-            if self.camera_widget:
-                triggered_cameras, failed_cameras, skipped_cameras, person_counts = self.camera_widget._process_trigger_configs(
-                    trigger_data
-                )
-                # print(person_counts)
-                # Log the summary
-                self.log_message(f"\n=== Trigger Summary for {command_id} ===")
+        try:
+            if command_type == "trigger":
+                # Get the data (which could be a dict)
+                trigger_data = command_data.get("data", {})
+                command_id = command_data.get("id", "unknown")
+                future = command_data.get("future")
                 
-                # Use appropriate length calculation based on data type
-                if isinstance(trigger_data, dict):
-                    total_cameras = len(trigger_data)
-                elif isinstance(trigger_data, list):
-                    total_cameras = len(trigger_data)
-                else:
-                    total_cameras = 0
-                    
-                self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{total_cameras} cameras")
+                self.log_message(f"Processing trigger data for command {command_id}")
                 
-                if triggered_cameras:
-                    self.log_message(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
-                
-                if failed_cameras:
-                    self.log_message(f"❌ Failed cameras: {', '.join(failed_cameras)}")
-                    
-                if skipped_cameras:
-                    self.log_message(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
-                
-                # Resolve the future to notify the asyncio thread that processing is complete
-                if future and not future.done():
-                    # This needs to be passed back to the asyncio thread
-                    asyncio.run_coroutine_threadsafe(
-                        self._complete_command(future, triggered_cameras), 
-                        self.event_loop
+                # Process the trigger commands
+                if self.camera_widget:
+                    triggered_cameras, failed_cameras, skipped_cameras, person_counts = self.camera_widget._process_trigger_configs(
+                        trigger_data
                     )
+                    
+                    # Log the summary
+                    self.log_message(f"\n=== Trigger Summary for {command_id} ===")
+                    
+                    # Use appropriate length calculation based on data type
+                    if isinstance(trigger_data, dict):
+                        total_cameras = len(trigger_data)
+                    elif isinstance(trigger_data, list):
+                        total_cameras = len(trigger_data)
+                    else:
+                        total_cameras = 0
+                        
+                    self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{total_cameras} cameras")
+                    
+                    if triggered_cameras:
+                        self.log_message(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
+                    
+                    if failed_cameras:
+                        self.log_message(f"❌ Failed cameras: {', '.join(failed_cameras)}")
+                        
+                    if skipped_cameras:
+                        self.log_message(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+                    
+                    # Include person counts in the log for debugging
+                    self.log_message(f"👤 Person counts: {person_counts}")
+                    
+                    # Create a result object that includes the person counts
+                    result = {
+                        "triggered_cameras": triggered_cameras,
+                        "f_cameras": failed_cameras,
+                        "skipped_cameras": skipped_cameras,ailed
+                        "person_counts": person_counts
+                    }
+                    
+                    # Resolve the future to notify the asyncio thread that processing is complete
+                    if future and not future.done():
+                        # This needs to be passed back to the asyncio thread
+                        asyncio.run_coroutine_threadsafe(
+                            self._complete_command(future, result), 
+                            self.event_loop
+                        )
+        except Exception as e:
+            self.log_message(f"Error in process_command: {e}")
     
     async def _complete_command(self, future, result):
         """
