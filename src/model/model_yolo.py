@@ -42,6 +42,24 @@ class YOLODetector:
         annotated_frame = frame.copy()
         
         # Draw bounding boxes and labels
+        self._draw_boxes_and_labels(results, annotated_frame)
+        
+        # Count detected items
+        detected_items, person_count = self._count_detected_items(results)
+        
+        # Create detection summary
+        detection_summary = self._create_detection_summary(detected_items)
+        
+        # Save the annotated image if path is provided
+        if save_path and annotated_frame is not None:
+            # Make sure the directory exists
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            cv2.imwrite(save_path, annotated_frame)
+        
+        return annotated_frame, detection_summary, person_count
+
+    def _draw_boxes_and_labels(self, results, annotated_frame):
+        """Draw bounding boxes and labels on the annotated frame."""
         for r in results:
             boxes = r.boxes
             for box in boxes:
@@ -67,8 +85,9 @@ class YOLODetector:
                     cv2.putText(annotated_frame, f"{class_name} {conf:.2f}", 
                                 (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 
                                 (0, 255, 0), 2)
-        
-        # Count detected items
+
+    def _count_detected_items(self, results):
+        """Count detected items and persons."""
         detected_items = {}
         person_count = 0  # Total person count
         
@@ -85,16 +104,10 @@ class YOLODetector:
                         detected_items[class_name] += 1
                     else:
                         detected_items[class_name] = 1
-        
-        # Create detection summary
-        detection_summary = ""
+        return detected_items, person_count
+
+    def _create_detection_summary(self, detected_items):
+        """Create a summary of detected items."""
         if detected_items:
-            detection_summary = ", ".join([f"{count} {item}" for item, count in detected_items.items()])
-        
-        # Save the annotated image if path is provided
-        if save_path and annotated_frame is not None:
-            # Make sure the directory exists
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            cv2.imwrite(save_path, annotated_frame)
-        
-        return annotated_frame, detection_summary, person_count
+            return ", ".join([f"{count} {item}" for item, count in detected_items.items()])
+        return ""

@@ -652,76 +652,82 @@ class CameraWidget(QWidget):
        
     def stop_camera(self, specific_camera=None):
         """Stop streaming for the selected or specified camera with proper isolation."""
-        # If a specific camera was provided, use it, otherwise get from selection
-        camera_name = specific_camera
+        camera_name = self._get_camera_name(specific_camera)
         if not camera_name:
-            item = self.ui.listWidget.currentItem()
-            if not item:
-                print("⚠️ No camera selected!")
-                return False
-            camera_name = item.text()
+            return False
 
-        # Check if camera thread exists
         if camera_name not in self.camera_threads:
             print(f"ℹ️ No active stream for {camera_name}")
             return False
-            
-        # Get the thread reference
+
         thread_ref = self.camera_threads[camera_name]
-        
+        return self._stop_camera_thread(camera_name, thread_ref)
+
+    def _get_camera_name(self, specific_camera):
+        """Get the camera name from the specific camera or the current selection."""
+        if specific_camera:
+            return specific_camera
+        item = self.ui.listWidget.currentItem()
+        if not item:
+            print("⚠️ No camera selected!")
+            return None
+        return item.text()
+
+    def _stop_camera_thread(self, camera_name, thread_ref):
+        """Stop the camera thread and handle cleanup."""
         try:
             print(f"🛑 Stopping {camera_name}...")
-            
-            # 1. Disconnect signals FIRST to prevent callbacks during shutdown
-            try:
-                thread_ref.frame_signal.disconnect()
-                thread_ref.log_signal.disconnect()
-                thread_ref.connection_status_signal.disconnect()
-                thread_ref.trigger_completed_signal.disconnect()
-                thread_ref.person_count.disconnect()
-                thread_ref.finished.disconnect()
-            except (TypeError, RuntimeError):
-                # It's okay if some signals were not connected or already disconnected
-                pass
-                
-            # 2. Force any GPU memory cleanup for YOLO
-            if thread_ref.yolo_detector is not None:
-                try:
-                    import torch
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                except (ImportError, AttributeError):
-                    pass
-            
-            # 3. Update UI immediately for responsiveness
-            self._update_camera_icon(camera_name, "disconnected")
-            if self.displaying and self.current_camera == camera_name:
-                self._clear_display()
-            
-            # 4. Remove from dictionary before stopping to prevent other code from using it
+            self._disconnect_signals(thread_ref)
+            self._cleanup_gpu_memory(thread_ref)
+            self._update_ui_on_stop(camera_name)
             del self.camera_threads[camera_name]
-            
-            # 5. Stop the thread
-            thread_ref.stop()
-            
-            # 6. Wait with a shorter timeout
-            if thread_ref.isRunning():
-                print(f"⏱️ Waiting for {camera_name} thread to finish...")
-                success = thread_ref.wait(500)  # Shorter timeout (500ms instead of 2000ms)
-                if not success:
-                    print(f"⚠️ Thread for {camera_name} didn't stop properly, forcing termination")
-                    thread_ref.terminate()
-                    thread_ref.wait(100)
-            
-            print(f"✅ Successfully stopped {camera_name}")
-            return True
-            
+            return self._terminate_thread(camera_name, thread_ref)
         except Exception as e:
             print(f"❌ Error stopping {camera_name}: {str(e)}")
-            # Ensure thread is removed from dictionary
             if camera_name in self.camera_threads:
                 del self.camera_threads[camera_name]
             return False
+
+    def _disconnect_signals(self, thread_ref):
+        """Disconnect signals to prevent callbacks during shutdown."""
+        try:
+            thread_ref.frame_signal.disconnect()
+            thread_ref.log_signal.disconnect()
+            thread_ref.connection_status_signal.disconnect()
+            thread_ref.trigger_completed_signal.disconnect()
+            thread_ref.person_count.disconnect()
+            thread_ref.finished.disconnect()
+        except (TypeError, RuntimeError):
+            pass
+
+    def _cleanup_gpu_memory(self, thread_ref):
+        """Force any GPU memory cleanup for YOLO."""
+        if thread_ref.yolo_detector is not None:
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except (ImportError, AttributeError):
+                pass
+
+    def _update_ui_on_stop(self, camera_name):
+        """Update the UI immediately for responsiveness."""
+        self._update_camera_icon(camera_name, "disconnected")
+        if self.displaying and self.current_camera == camera_name:
+            self._clear_display()
+
+    def _terminate_thread(self, camera_name, thread_ref):
+        """Terminate the camera thread."""
+        thread_ref.stop()
+        if thread_ref.isRunning():
+            print(f"⏱️ Waiting for {camera_name} thread to finish...")
+            success = thread_ref.wait(500)
+            if not success:
+                print(f"⚠️ Thread for {camera_name} didn't stop properly, forcing termination")
+                thread_ref.terminate()
+                thread_ref.wait(100)
+        print(f"✅ Successfully stopped {camera_name}")
+        return True
    
     def _handle_camera_stopped(self, camera_name):
         """Handle when a camera thread stops by itself (due to disconnection or error)"""
