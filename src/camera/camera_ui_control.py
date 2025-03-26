@@ -1,11 +1,12 @@
-from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox, QFileDialog
+from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox, QFileDialog, QProgressDialog
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread
 from camera.check_ping import PingThread
 from camera.camera_configuration_manager import CameraConfigManager
+from camera.stopCam import CameraStopWorker
 from datetime import datetime
 from model.model_yolo import YOLODetector
 import os
@@ -580,41 +581,65 @@ class CameraWidget(QWidget):
         self.log_connection_summary(connection_results)
 
     def stop_all_cameras(self):
-        """
-        Stop all cameras that are currently running.
-        """
-        # Create a copy of the keys to avoid modification during iteration
-        camera_names = list(self.camera_threads.keys())
-        
-        # Track the results of stopping cameras
-        stopped_cameras = []
-        failed_cameras = []
-        
-        # Stop each camera thread that is running
-        for camera_name in camera_names:
-            try:
-                thread = self.camera_threads.get(camera_name)
-                # Only stop if the thread exists and is running
-                if thread and thread.isRunning():
-                    success = self.stop_camera(camera_name)
-                    if success:
-                        stopped_cameras.append(camera_name)
-                    else:
-                        failed_cameras.append(camera_name)
-            except Exception as e:
-                print(f"❌ Error stopping {camera_name}: {str(e)}")
-                failed_cameras.append(camera_name)
-        
-        # Print summary of stopped cameras
+        """Show confirmation dialog before stopping all connected cameras."""
+        connected_cameras = [name for name, thread in self.camera_threads.items() if thread.isRunning()]
+        total_cameras = len(connected_cameras)
+
+        if total_cameras == 0:
+            QMessageBox.information(self, "No Cameras Connected", "ℹ️ No connected cameras to stop.")
+            return
+
+        # Show confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Confirm Stop",
+            f"⚠️ Are you sure you want to stop all {total_cameras} connected cameras?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.No:
+            print("⏹️ Stop process canceled.")
+            return
+
+        # Set up progress dialog
+        self.progress_dialog = QProgressDialog("Stopping cameras...", "Cancel", 0, total_cameras, self)
+        self.progress_dialog.setWindowTitle("Stopping Cameras")
+        self.progress_dialog.setWindowModality(Qt.WindowModal)
+        self.progress_dialog.setMinimumDuration(500)  # Show after 0.5s
+        self.progress_dialog.show()
+
+        # Start the worker in a separate thread
+        self.worker_thread = QThread()
+        self.worker = CameraStopWorker(self.camera_threads, self.stop_camera)
+
+        self.worker.moveToThread(self.worker_thread)
+        self.worker.progress_signal.connect(self.update_progress)
+        self.worker.finished_signal.connect(self.on_stop_completed)
+
+        self.worker_thread.started.connect(self.worker.run)
+        self.worker_thread.start()
+
+    def update_progress(self, progress, camera_name):
+        """Update progress dialog with the current camera being stopped."""
+        self.progress_dialog.setValue(progress)
+        self.progress_dialog.setLabelText(f"Stopping {camera_name}...")
+
+    def on_stop_completed(self, stopped_cameras, failed_cameras):
+        """Handle the completion of camera stopping."""
+        self.progress_dialog.setValue(self.progress_dialog.maximum())  # Complete progress
+        self.progress_dialog.close()
+
         if stopped_cameras:
-            print(f"🛑 Stopped cameras: {', '.join(stopped_cameras)}")
+            QMessageBox.information(self, "Stop Completed", f"🛑 Stopped: {', '.join(stopped_cameras)}")
         if failed_cameras:
-            print(f"⚠️ Failed to stop cameras: {', '.join(failed_cameras)}")
-        if not stopped_cameras and not failed_cameras:
-            print("No connected cameras to stop")
-        
-        # Clear the display
-        self._clear_display()
+            QMessageBox.warning(self, "Stop Failed", f"⚠️ Failed to stop: {', '.join(failed_cameras)}")
+
+        # Cleanup thread
+        self.worker_thread.quit()
+        self.worker_thread.wait()
+        self.worker_thread = None
+        self.worker = None
     
     def log_connection_summary(self, connection_results):
         """
