@@ -32,8 +32,8 @@
         "protocol": "HTTP"
     },
     {
-        "camera_name": "home3",
-        "ip_address": "192.168.1.123",
+        "camera_name": "home",
+        "ip_address": "192.168.1.22",
         "port": "8080",
         "username": "",
         "password": "",
@@ -66,14 +66,6 @@
     {
         "camera_name": "Camera 5",
         "ip_address": "192.168.3.69",
-        "port": "8080",
-        "username": "",
-        "password": "",
-        "protocol": "HTTP"
-    },
-    {
-        "camera_name": "home",
-        "ip_address": "192.168.10.23",
         "port": "8080",
         "username": "",
         "password": "",
