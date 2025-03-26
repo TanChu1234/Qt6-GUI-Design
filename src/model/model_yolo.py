@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import torch
 import numpy as np
 import cv2
 import os
@@ -14,6 +15,8 @@ class YOLODetector:
             
         # Load and configure the model
         self.model = YOLO(model_path)
+        # Move model to GPU
+        self.model.to("cuda")
         # self.model.overrides['conf'] = 0.5  # Confidence threshold
         # self.model.overrides['iou'] = 0.5   # IoU threshold
         # self.model.overrides['agnostic_nms'] = True  # Class-agnostic NMS
@@ -25,10 +28,13 @@ class YOLODetector:
     
     def _warmup_model(self):
         """Warm up the model with a dummy frame to reduce initial inference time."""
+        # dummy_frame = np.zeros((1, 3, 640, 640), dtype=np.uint8)
+        # dummy_frame = torch.from_numpy(dummy_frame).float().to("cuda")/255
         dummy_frame = np.zeros((640, 640, 3), dtype=np.uint8)
         _ = self.model(dummy_frame)
     
     def detect(self, frame, save_path=None):
+        # image_tensor = self.preprocess_image(frame)
         # Run inference
         results = self.model(frame)
         

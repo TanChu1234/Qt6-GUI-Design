@@ -183,44 +183,6 @@ class CameraWidget(QWidget):
         self.ui.display.setText("HIDE")
         print(f"🖥️ Now displaying {camera_name}")
     
-    def toggle_run_ai(self):
-        """Toggle display of the currently selected camera."""
-        # Check if we currently have a displayed camera
-        if self.displaying:
-            # Stop displaying but keep threads running
-            self._clear_display()
-            print("🔍 Display turned off")
-            return
-            
-        # Start displaying a camera
-        item = self.ui.listWidget.currentItem()
-        if not item:
-            print("⚠️ No camera selected to display!")
-            return
-
-        camera_name = item.text()
-
-        # Check if camera is running, if not, suggest starting it
-        if camera_name not in self.camera_threads:
-            reply = QMessageBox.question(
-                self,
-                "Start Camera",
-                f"Camera '{camera_name}' is not streaming. Start it now?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes
-            )
-            
-            if reply == QMessageBox.Yes:
-                self.start_camera(camera_name)
-            else:
-                return
-                
-        # Set this as the current camera to display
-        self.current_camera = camera_name
-        self.displaying = True
-        self.ui.display.setText("HIDE")
-        print(f"🖥️ Now displaying {camera_name}")
-    
     def _clear_display(self):
         """Helper method to clear the display and reset display state."""
         self.ui.label.clear()
