@@ -73,8 +73,9 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        self.stackedWidget.setGeometry(QRect(300, 100, 1585, 866))
+        self.stackedWidget.setGeometry(QRect(250, 130, 1651, 840))
         self.stackedWidget.setMinimumSize(QSize(1315, 800))
+        self.stackedWidget.setMaximumSize(QSize(1651, 16777215))
         self.stackedWidget.setStyleSheet(u"")
         self.stackedWidget.setFrameShape(QFrame.NoFrame)
         self.stackedWidget.setLineWidth(1)
@@ -89,7 +90,7 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.page_2)
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(30, 100, 231, 622))
+        self.layoutWidget.setGeometry(QRect(30, 131, 191, 622))
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setSpacing(30)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -98,7 +99,7 @@ class Ui_MainWindow(object):
         self.http_page_2.setObjectName(u"http_page_2")
         self.http_page_2.setMinimumSize(QSize(180, 100))
         icon = QIcon()
-        icon.addFile(u"../asset/images/icons8-dashboard-100.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"src/asset/images/icons8-dashboard-100.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.http_page_2.setIcon(icon)
         self.http_page_2.setIconSize(QSize(48, 36))
 
@@ -110,7 +111,7 @@ class Ui_MainWindow(object):
         self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.camera_page.setLayoutDirection(Qt.LeftToRight)
         icon1 = QIcon()
-        icon1.addFile(u"../asset/images/cam.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon1.addFile(u"src/asset/images/cam.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.camera_page.setIcon(icon1)
         self.camera_page.setIconSize(QSize(32, 32))
 
@@ -123,7 +124,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         self.tcp_page.setFont(font)
         icon2 = QIcon()
-        icon2.addFile(u"../asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon2.addFile(u"src/asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.tcp_page.setIcon(icon2)
         self.tcp_page.setIconSize(QSize(32, 32))
 
@@ -133,7 +134,7 @@ class Ui_MainWindow(object):
         self.http_page.setObjectName(u"http_page")
         self.http_page.setMinimumSize(QSize(180, 100))
         icon3 = QIcon()
-        icon3.addFile(u"../asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon3.addFile(u"src/asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.http_page.setIcon(icon3)
         self.http_page.setIconSize(QSize(48, 32))
 
@@ -143,7 +144,7 @@ class Ui_MainWindow(object):
         self.model_page.setObjectName(u"model_page")
         self.model_page.setMinimumSize(QSize(180, 100))
         icon4 = QIcon()
-        icon4.addFile(u"../asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon4.addFile(u"src/asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.model_page.setIcon(icon4)
         self.model_page.setIconSize(QSize(38, 38))
 
@@ -151,12 +152,16 @@ class Ui_MainWindow(object):
 
         self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(590, 10, 771, 61))
+        self.label.setGeometry(QRect(30, 30, 771, 61))
         font1 = QFont()
         font1.setPointSize(36)
         font1.setBold(True)
         self.label.setFont(font1)
         self.label.setStyleSheet(u"color: white;")
+        self.label_2 = QLabel(self.centralwidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(1610, 20, 291, 71))
+        self.label_2.setPixmap(QPixmap(u"src/asset/images/logo.png"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -169,11 +174,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Camera Management", None))
-        self.http_page_2.setText(QCoreApplication.translate("MainWindow", u"  DASH BOARD", None))
+        self.http_page_2.setText(QCoreApplication.translate("MainWindow", u"  DASH \n"
+"  BOARD", None))
         self.camera_page.setText(QCoreApplication.translate("MainWindow", u"  CAMERA", None))
         self.tcp_page.setText(QCoreApplication.translate("MainWindow", u"  TCP", None))
         self.http_page.setText(QCoreApplication.translate("MainWindow", u"  HTTP", None))
         self.model_page.setText(QCoreApplication.translate("MainWindow", u"  AI", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"CAMERA MANAGEMENT SYSTEM", None))
+        self.label_2.setText("")
     # retranslateUi
 

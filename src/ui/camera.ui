@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1585</width>
-    <height>867</height>
+    <width>1650</width>
+    <height>830</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -85,8 +85,14 @@ QListWidget#listWidget {
     border-radius: 10px;
     padding: 5px;
     color: black;
-    font-size: 11px;
+    font-size: 14px;
 }
+
+QListWidget#listWidget::item:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #66BFFF, stop:1 #80D5FF);
+}
+
 QListWidget#log_list {
     background-color: rgb(255, 255, 255);
 	border-radius:10px;
@@ -100,8 +106,8 @@ QListWidget#log_list {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1581</width>
-     <height>861</height>
+     <width>1641</width>
+     <height>821</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -109,63 +115,58 @@ QListWidget#log_list {
      <number>2</number>
     </property>
     <property name="spacing">
-     <number>10</number>
+     <number>20</number>
     </property>
-    <item row="9" column="0">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="horizontalSpacing">
-       <number>10</number>
+    <item row="4" column="0" rowspan="5">
+     <widget class="QListWidget" name="listWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="verticalSpacing">
-       <number>0</number>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
       </property>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="add_cam">
-        <property name="minimumSize">
-         <size>
-          <width>90</width>
-          <height>70</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>-1</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>ADD CAM</string>
-        </property>
-       </widget>
+      <property name="maximumSize">
+       <size>
+        <width>220</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>-1</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="flow">
+       <enum>QListView::TopToBottom</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>Camera </string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
       </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="remove_cam">
-        <property name="minimumSize">
-         <size>
-          <width>90</width>
-          <height>70</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>-1</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>DEL CAM</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </widget>
     </item>
     <item row="4" column="8" rowspan="5">
      <widget class="QListWidget" name="log_list">
@@ -177,124 +178,6 @@ QListWidget#log_list {
       </property>
       <property name="styleSheet">
        <string notr="true"/>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="6">
-     <widget class="QPushButton" name="detect">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>DETECT</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1" rowspan="5" colspan="7">
-     <widget class="QLabel" name="label">
-      <property name="minimumSize">
-       <size>
-        <width>972</width>
-        <height>648</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>1080</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="4">
-     <widget class="QPushButton" name="trigger">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>TRIGGER</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="3">
-     <widget class="QPushButton" name="stop_all">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>STOP ALL</string>
       </property>
      </widget>
     </item>
@@ -327,76 +210,251 @@ QListWidget#log_list {
       </property>
      </widget>
     </item>
-    <item row="9" column="1">
-     <widget class="QPushButton" name="connect">
+    <item row="9" column="0" colspan="8">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>20</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="add_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>ADD CAM</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="remove_cam">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DEL CAM</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="connect">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>CONNECT</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="disconnect">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DISCONNECT</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stop_all">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>STOP ALL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="trigger">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>TRIGGER</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="display">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DISPLAY</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="detect">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>-1</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>DETECT</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="1" rowspan="5" colspan="7">
+     <widget class="QLabel" name="label">
       <property name="minimumSize">
        <size>
-        <width>90</width>
-        <height>70</height>
+        <width>1080</width>
+        <height>720</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>134</width>
+        <width>1080</width>
         <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>CONNECT</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="7">
-     <widget class="QPushButton" name="realtime">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>REALTIME</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" rowspan="5">
-     <widget class="QListWidget" name="listWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>280</width>
-        <height>0</height>
        </size>
       </property>
       <property name="sizeIncrement">
@@ -405,124 +463,14 @@ QListWidget#log_list {
         <height>0</height>
        </size>
       </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QListWidget {
-    background-color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px;
-    color: #333333;
-    font-size: 14px;
-}
-
-QListWidget::item {
-    height: 30px;
-    padding-left: 5px;
-    border-radius: 4px;
-}
-
-QListWidget::item:selected {
-    background-color: #2979FF;
-    color: white;
-}
-
-QListWidget::item:hover:!selected {
-    background-color: #F5F5F5;
-}
-
-QListWidget QScrollBar:vertical {
-    background-color: white;
-    width: 8px;
-    border-radius: 4px;
-}
-
-QListWidget QScrollBar::handle:vertical {
-    background-color: #CCCCCC;
-    border-radius: 4px;
-}
-
-QListWidget QScrollBar::add-line:vertical, 
-QListWidget QScrollBar::sub-line:vertical {
-    height: 0px;
-}s</string>
-      </property>
-      <property name="flow">
-       <enum>QListView::TopToBottom</enum>
-      </property>
-      <item>
-       <property name="text">
-        <string>Camera </string>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>18</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="9" column="5">
-     <widget class="QPushButton" name="display">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>DISPLAY</string>
+       <string/>
       </property>
-     </widget>
-    </item>
-    <item row="9" column="2">
-     <widget class="QPushButton" name="disconnect">
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>134</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>-1</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>DISCONNECT</string>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>

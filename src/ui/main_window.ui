@@ -63,16 +63,22 @@ QWidget#widget_2 {
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>100</y>
-      <width>1585</width>
-      <height>866</height>
+      <x>250</x>
+      <y>130</y>
+      <width>1651</width>
+      <height>840</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>1315</width>
       <height>800</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>1651</width>
+      <height>16777215</height>
      </size>
     </property>
     <property name="styleSheet">
@@ -92,8 +98,8 @@ QWidget#widget_2 {
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>100</y>
-      <width>231</width>
+      <y>131</y>
+      <width>191</width>
       <height>622</height>
      </rect>
     </property>
@@ -113,7 +119,8 @@ QWidget#widget_2 {
         </size>
        </property>
        <property name="text">
-        <string>  DASH BOARD</string>
+        <string>  DASH 
+  BOARD</string>
        </property>
        <property name="icon">
         <iconset>
@@ -236,8 +243,8 @@ QWidget#widget_2 {
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>10</y>
+      <x>30</x>
+      <y>30</y>
       <width>771</width>
       <height>61</height>
      </rect>
@@ -253,6 +260,22 @@ QWidget#widget_2 {
     </property>
     <property name="text">
      <string>CAMERA MANAGEMENT SYSTEM</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>20</y>
+      <width>291</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>../asset/images/logo.png</pixmap>
     </property>
    </widget>
   </widget>
