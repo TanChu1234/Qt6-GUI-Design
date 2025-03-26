@@ -231,18 +231,49 @@ class CameraWidget(QWidget):
     """ Camera Management (Add, Remove, Save, Check Connection) """
     def add_camera(self):
         """Show the custom camera dialog and get user input."""
-        dialog = CameraDialog()
-        if not dialog.exec():  # If user cancels
+        # Check if we've reached the 40 camera limit
+        if self.ui.listWidget.count() >= 40:
+            QMessageBox.warning(
+                self,
+                "Camera Limit Reached",
+                "Maximum number of cameras (40) has been reached. Remove some cameras before adding new ones.",
+                QMessageBox.Ok
+            )
+            self.log_message("⚠️ Cannot add camera: Maximum limit of 40 cameras reached")
             return
-            
-        camera_info = dialog.get_camera_info()
-        ip_address = camera_info["ip_address"]
         
-        # Generate default name if empty
-        camera_name = camera_info["camera_name"]
-        if not camera_name:
-            camera_name = f"Camera {self.ui.listWidget.count()}"
-            camera_info["camera_name"] = camera_name
+        while True:  # Loop until user cancels or provides valid data
+            dialog = CameraDialog()
+            if not dialog.exec():  # If user cancels
+                return
+                
+            camera_info = dialog.get_camera_info()
+            ip_address = camera_info["ip_address"]
+            
+            # Generate default name if empty
+            camera_name = camera_info["camera_name"]
+            if not camera_name:
+                camera_name = f"Camera {self.ui.listWidget.count()}"
+                camera_info["camera_name"] = camera_name
+            
+            # Check if a camera with this name already exists
+            duplicate_found = False
+            for i in range(self.ui.listWidget.count()):
+                existing_item = self.ui.listWidget.item(i)
+                if existing_item.text() == camera_name:
+                    QMessageBox.warning(
+                        self,
+                        "Duplicate Camera Name",
+                        f"A camera with name '{camera_name}' already exists. Please use a different name.",
+                        QMessageBox.Ok
+                    )
+                    self.log_message(f"⚠️ Cannot add camera: Name '{camera_name}' already exists")
+                    duplicate_found = True
+                    break
+            
+            # If no duplicate, break out of the loop
+            if not duplicate_found:
+                break
         
         # Add item with connecting icon
         item = QListWidgetItem(QIcon(self.icon_connecting), camera_name)
@@ -252,13 +283,13 @@ class CameraWidget(QWidget):
         self.camera_properties[camera_name] = camera_info
 
         print(f"🔍 Checking connection to {ip_address}...")
+        self.log_message(f"🔍 Checking connection to camera '{camera_name}' at {ip_address}...")
 
         # Ping the camera
         ping_thread = PingThread(ip_address)
         ping_thread.result_signal.connect(self._handle_ping_result)
         self.ping_threads.append(ping_thread)
         ping_thread.start()
- 
     def _handle_ping_result(self, camera_ip, is_reachable):
         """Handle result of ping test."""
         # Find the camera in our list that matches this IP
@@ -279,6 +310,7 @@ class CameraWidget(QWidget):
                 break
         
         if not found_camera or not found_item:
+            self.log_message(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
             print(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
             return
             

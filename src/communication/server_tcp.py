@@ -1,6 +1,6 @@
 import json
 import asyncio
-import socket
+# import socket
 import threading
 import queue
 from PySide6.QtWidgets import QWidget

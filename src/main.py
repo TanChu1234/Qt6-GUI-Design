@@ -1,14 +1,14 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QSizePolicy
-from ui.camera_ui_control import CameraWidget  # ✅ Import CameraWidget
-from ui.server_tcp import TCPServerApp
+from camera.camera_ui_control import CameraWidget  # ✅ Import CameraWidget
+from communication.server_tcp import TCPServerApp
 from ui.main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Camera Management")
-        self.resize(1330, 830)
+        # self.resize(1330, 830)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # ✅ Initialize UI
