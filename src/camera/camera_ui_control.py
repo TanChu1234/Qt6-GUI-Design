@@ -3,10 +3,9 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
-from camera.cam_handler import CameraThread
+from camera.cam_handler import CameraThread, CameraStopWorker
 from camera.check_ping import PingThread
 from camera.camera_configuration_manager import CameraConfigManager
-from camera.stopCam import CameraStopWorker
 from datetime import datetime
 from model.model_yolo import YOLODetector
 import os
