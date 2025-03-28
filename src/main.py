@@ -70,6 +70,12 @@ class MainWindow(QMainWindow):
             "    text-align: left;"
             "    padding-left: 10px;"
             "}"
+            "\n"
+            "/* Button Hover Effect */\n"
+            "QPushButton:hover {\n"
+            "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+            "                                stop:0 #66BFFF, stop:1 #80D5FF);\n"
+            "}\n"
         )
         for button in self.nav_buttons:
             button.setStyleSheet(default_style)
@@ -89,7 +95,7 @@ class MainWindow(QMainWindow):
             "    min-width: 150px;"
             "    text-align: left;"
             "    padding-left: 10px;"
-            "}"
+            "}"            
         )
         # Reset all buttons first
         self.reset_button_styles()
