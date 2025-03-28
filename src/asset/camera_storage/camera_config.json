@@ -24,8 +24,8 @@
         "protocol": "HTTP"
     },
     {
-        "camera_name": "Camera 4",
-        "ip_address": "192.168.3.7",
+        "camera_name": "Camera_work",
+        "ip_address": "192.168.3.17",
         "port": "8080",
         "username": "",
         "password": "",

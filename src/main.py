@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
     
         # Set initial button style
         self.reset_button_styles()
-        self.highlight_current_button(self.ui.dashboard_page)
+        self.highlight_current_button(self.ui.camera_page)
         
     def reset_button_styles(self):
         """Reset all navigation buttons to default style."""
