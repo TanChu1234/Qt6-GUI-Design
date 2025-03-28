@@ -4,11 +4,12 @@ from PySide6.QtCore import Qt, QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
 from camera.cam_handler import CameraThread, CameraStopWorker
-from camera.check_ping import PingThread
+from camera.check_ping import ping_camera
 from camera.camera_configuration_manager import CameraConfigManager
 from datetime import datetime
 from model.model_yolo import YOLODetector
 import os
+import psutil
 import json
 
 class CameraWidget(QWidget):
@@ -39,7 +40,7 @@ class CameraWidget(QWidget):
         self._setup_ui()
         # Create a single YOLODetector instance to be shared by all camera threads
         
-        self.yolo_detector = YOLODetector(model_path="src/model/yolov8s.pt")
+        self.yolo_detector = YOLODetector(model_path="src/model/best100.pt")
         self.person = None
         self.load_saved_cameras()
     
@@ -55,10 +56,19 @@ class CameraWidget(QWidget):
         self.ui.detect.clicked.connect(self.detect_real_time)
         self.ui.listWidget.itemClicked.connect(self.select_camera)
         self.ui.remove_cam.clicked.connect(self.remove_camera)
-        
         # Add double-click handler to connect to camera
         self.ui.listWidget.itemDoubleClicked.connect(self.connect_on_double_click)
-        
+    
+
+
+    def print_memory_usage(self, tag=""):
+        process = psutil.Process(os.getpid())
+        print(f"🛠️ [Memory Debug] {tag}: {process.memory_info().rss / (1024 * 1024)} MB")  # in MB
+
+    # Before connecting cameras
+    print_memory_usage("Before connecting cameras")
+
+    
     def load_saved_cameras(self):
         """Load saved camera configurations from file."""
         cameras = self.config_manager.load_config()
@@ -193,112 +203,35 @@ class CameraWidget(QWidget):
     """ Camera Management (Add, Remove, Save, Check Connection) """
     def add_camera(self):
         """Show the custom camera dialog and get user input."""
-        # Check if we've reached the 40 camera limit
-        if self.ui.listWidget.count() >= 40:
-            QMessageBox.warning(
-                self,
-                "Camera Limit Reached",
-                "Maximum number of cameras (40) has been reached. Remove some cameras before adding new ones.",
-                QMessageBox.Ok
-            )
-            self.log_message("⚠️ Cannot add camera: Maximum limit of 40 cameras reached")
+        if self.ui.listWidget.count() >= 50:
+            QMessageBox.warning(self, "Camera Limit Reached", "Max 40 cameras allowed.", QMessageBox.Ok)
             return
         
-        while True:  # Loop until user cancels or provides valid data
+        while True:
             dialog = CameraDialog()
-            if not dialog.exec():  # If user cancels
-                return
-                
+            if not dialog.exec():
+                return  # User canceled
+
             camera_info = dialog.get_camera_info()
             ip_address = camera_info["ip_address"]
-            
-            # Generate default name if empty
-            camera_name = camera_info["camera_name"]
-            if not camera_name:
-                camera_name = f"Camera {self.ui.listWidget.count()}"
-                camera_info["camera_name"] = camera_name
-            
-            # Check if a camera with this name already exists
-            duplicate_found = False
-            for i in range(self.ui.listWidget.count()):
-                existing_item = self.ui.listWidget.item(i)
-                if existing_item.text() == camera_name:
-                    QMessageBox.warning(
-                        self,
-                        "Duplicate Camera Name",
-                        f"A camera with name '{camera_name}' already exists. Please use a different name.",
-                        QMessageBox.Ok
-                    )
-                    self.log_message(f"⚠️ Cannot add camera: Name '{camera_name}' already exists")
-                    duplicate_found = True
-                    break
-            
-            # If no duplicate, break out of the loop
-            if not duplicate_found:
-                break
-        
-        # Add item with connecting icon
-        item = QListWidgetItem(QIcon(self.icon_connecting), camera_name)
-        self.ui.listWidget.addItem(item)
-        
-        # Store camera properties without status
-        self.camera_properties[camera_name] = camera_info
+            camera_name = camera_info["camera_name"] or f"Camera {self.ui.listWidget.count()}"
 
-        print(f"🔍 Checking connection to {ip_address}...")
-        self.log_message(f"🔍 Checking connection to camera '{camera_name}' at {ip_address}...")
+            # Check for duplicate name
+            if any(self.ui.listWidget.item(i).text() == camera_name for i in range(self.ui.listWidget.count())):
+                QMessageBox.warning(self, "Duplicate Name", f"Camera '{camera_name}' already exists.", QMessageBox.Ok)
+                continue  # Ask for a different name
 
-        # Ping the camera
-        ping_thread = PingThread(ip_address)
-        ping_thread.result_signal.connect(self._handle_ping_result)
-        self.ping_threads.append(ping_thread)
-        ping_thread.start()
-    def _handle_ping_result(self, camera_ip, is_reachable):
-        """Handle result of ping test."""
-        # Find the camera in our list that matches this IP
-        found_camera = None
-        found_item = None
-        found_index = -1
-        
-        # Search for camera with this IP in our properties
-        for i in range(self.ui.listWidget.count()):
-            item = self.ui.listWidget.item(i)
-            camera_name = item.text()
-            props = self.camera_properties.get(camera_name)
-            
-            if props and props["ip_address"] == camera_ip:
-                found_camera = camera_name
-                found_item = item
-                found_index = i
-                break
-        
-        if not found_camera or not found_item:
-            self.log_message(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
-            print(f"⚠️ Could not find camera with IP {camera_ip} in the list!")
-            return
-            
-        if is_reachable:
-            # Update to offline icon initially (will update when connected)
-            found_item.setIcon(QIcon(self.icon_offline))
-            
-            # Save to config
-            self.config_manager.add_camera(self.camera_properties[found_camera])
-            print(f"✅ Camera {found_camera} is reachable at {camera_ip}")
+            break  # Exit loop if all checks pass
+
+        # Check if the camera is reachable **without threading**
+        if ping_camera(ip_address):
+            self.ui.listWidget.addItem(QListWidgetItem(QIcon(self.icon_offline), camera_name))
+            self.camera_properties[camera_name] = camera_info
+            self.config_manager.add_camera(camera_info)
+            print(f"✅ Camera {camera_name} is reachable at {ip_address}")
         else:
-            # Remove the camera from the list since it's unreachable
-            self.ui.listWidget.takeItem(found_index)
-            
-            # Remove from properties dictionary
-            if found_camera in self.camera_properties:
-                del self.camera_properties[found_camera]
-                
-            print(f"❌ Camera {found_camera} at {camera_ip} is unreachable! Camera removed.")
-            
-        # Clean up the ping thread
-        self._clean_up_ping_threads()
-        
-    def _clean_up_ping_threads(self):
-        """Remove finished ping threads from the list."""
-        self.ping_threads = [thread for thread in self.ping_threads if thread.isRunning()]
+            QMessageBox.warning(self, "Camera Unreachable", f"Camera at {ip_address} is not responding.", QMessageBox.Ok)
+            print(f"❌ Camera at {ip_address} is unreachable!")
     
     def remove_camera(self):
         """Remove the selected camera from the list and configuration."""
@@ -468,6 +401,8 @@ class CameraWidget(QWidget):
             return False
     
     def connect_all_cameras(self):
+        # Before connecting cameras
+        self.print_memory_usage("Before connecting cameras")
         """
         Connect all cameras listed in the ListWidget
         """
@@ -578,7 +513,7 @@ class CameraWidget(QWidget):
         
         # Log connection summary
         self.log_connection_summary(connection_results)
-
+        self.print_memory_usage("After connecting cameras")
     def stop_all_cameras(self):
         """Show confirmation dialog before stopping all connected cameras."""
         connected_cameras = [name for name, thread in self.camera_threads.items() if thread.isRunning()]

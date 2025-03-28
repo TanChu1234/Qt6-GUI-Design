@@ -111,7 +111,7 @@ QWidget#widget_2 {
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="http_page_2">
+      <widget class="QPushButton" name="dashboard_page">
        <property name="minimumSize">
         <size>
          <width>180</width>
