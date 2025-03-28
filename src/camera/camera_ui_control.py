@@ -515,12 +515,29 @@ class CameraWidget(QWidget):
         self.log_connection_summary(connection_results)
         self.print_memory_usage("After connecting cameras")
     def stop_all_cameras(self):
-        """Show confirmation dialog before stopping all connected cameras."""
-        connected_cameras = [name for name, thread in self.camera_threads.items() if thread.isRunning()]
+        """Stop only fully connected cameras (green icon) and skip connecting ones."""
+        # Find only fully connected cameras
+        connected_cameras = []
+        
+        # Start from index 0 to include all cameras
+        for i in range(self.ui.listWidget.count()):
+            item = self.ui.listWidget.item(i)
+            camera_name = item.text()
+            
+            # Check if camera is in threads and running
+            if (camera_name in self.camera_threads and 
+                self.camera_threads[camera_name].isRunning()):
+                
+                # Use the connection_status attribute directly
+                if self.camera_threads[camera_name].connection_status == "connected":
+                    connected_cameras.append(camera_name)
+                    print(f"Adding camera {camera_name} to stop list (connected)")
+
         total_cameras = len(connected_cameras)
 
         if total_cameras == 0:
-            QMessageBox.information(self, "No Cameras Connected", "ℹ️ No connected cameras to stop.")
+            QMessageBox.information(self, "No Cameras Connected", 
+                                "ℹ️ No fully connected cameras to stop.")
             return
 
         # Show confirmation dialog
@@ -550,6 +567,9 @@ class CameraWidget(QWidget):
         self.worker.moveToThread(self.worker_thread)
         self.worker.progress_signal.connect(self.update_progress)
         self.worker.finished_signal.connect(self.on_stop_completed)
+        
+        # Update worker to only stop the selected cameras
+        self.worker.cameras_to_stop = connected_cameras
 
         self.worker_thread.started.connect(self.worker.run)
         self.worker_thread.start()
@@ -637,6 +657,10 @@ class CameraWidget(QWidget):
         try:
             print(f"🛑 Stopping {camera_name}...")
             self._disconnect_signals(thread_ref)
+            
+            # Ensure connection status is updated
+            thread_ref.connection_status = "disconnected"
+            
             self._cleanup_gpu_memory(thread_ref)
             self._update_ui_on_stop(camera_name)
             del self.camera_threads[camera_name]
@@ -696,6 +720,9 @@ class CameraWidget(QWidget):
         # Store a reference to the thread
         thread = self.camera_threads[camera_name]
         
+        # Make sure the thread's connection_status is updated
+        thread.connection_status = "disconnected"
+        
         # Remove the thread reference FIRST to prevent other code from using it
         del self.camera_threads[camera_name]
         
@@ -722,6 +749,7 @@ class CameraWidget(QWidget):
             print(f"⚠️ Error cleaning up {camera_name} thread: {str(e)}")
             
         print(f"🛑 Camera {camera_name} stopped")
+        
     
     def _handle_trigger_result(self, result, camera_name):
         """
@@ -842,7 +870,7 @@ class CameraWidget(QWidget):
     def _print_trigger_summary(self, trigger_configs, triggered_cameras, failed_cameras, skipped_cameras):
         """Print a summary of trigger results."""
         print("\n=== Trigger Summary ===")
-        print(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
+        # print(f"✅ Successfully triggered: {len(triggered_cameras)}/{len(trigger_configs)} cameras")
         
         if triggered_cameras:
             print(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")

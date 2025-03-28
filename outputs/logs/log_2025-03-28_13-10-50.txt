@@ -1,0 +1,102 @@
+[2025-03-28 13:10:34] Connection timeout for Camera_work
+[2025-03-28 13:10:34] Connection timeout for home
+[2025-03-28 13:10:34] ❌ Failed to connect to home (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera_work (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera435
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera435 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for home323
+[2025-03-28 13:10:34] ❌ Failed to connect to home323 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camerah474
+[2025-03-28 13:10:34] ❌ Failed to connect to Camerah474 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera53
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera53 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for hom23e
+[2025-03-28 13:10:34] ❌ Failed to connect to hom23e (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera79
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera79 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera59
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera59 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for home5f
+[2025-03-28 13:10:34] Connection timeout for Camerag53
+[2025-03-28 13:10:34] ❌ Failed to connect to Camerag53 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera05
+[2025-03-28 13:10:34] Connection timeout for Camera40
+[2025-03-28 13:10:34] Connection timeout for Camera323
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera323 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for 8424
+[2025-03-28 13:10:34] ❌ Failed to connect to 8424 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera474
+[2025-03-28 13:10:34] Connection timeout for Camera3432
+[2025-03-28 13:10:34] Connection timeout for Camera29
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera40 (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera05 (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to home5f (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera474 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera 5
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera 5 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camerai5
+[2025-03-28 13:10:34] ❌ Failed to connect to Camerai5 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for home653
+[2025-03-28 13:10:34] ❌ Failed to connect to home653 (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera29 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for Camera35
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera35 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for phongka2
+[2025-03-28 13:10:34] ❌ Failed to connect to phongka2 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for user
+[2025-03-28 13:10:34] ❌ Failed to connect to user (Timeout)
+[2025-03-28 13:10:34] Connection timeout for nha43
+[2025-03-28 13:10:34] ❌ Failed to connect to nha43 (Timeout)
+[2025-03-28 13:10:34] Connection timeout for homehg
+[2025-03-28 13:10:34] ❌ Failed to connect to homehg (Timeout)
+[2025-03-28 13:10:34] ❌ Failed to connect to Camera3432 (Timeout)
+[2025-03-28 13:10:45] Connecting to Camera_work...
+[2025-03-28 13:10:45] 🔌 Connecting to Camera_work at 192.168.3.17...
+[2025-03-28 13:10:45] Set connection timeout to 5 seconds
+[2025-03-28 13:10:45] Attempting to connect to Camera_work at http://:@192.168.3.17:8080/video
+[2025-03-28 13:10:50] 🔌 Initiating connection for 30 cameras
+[2025-03-28 13:10:50] ❌ No configuration found for Camera
+[2025-03-28 13:10:50] ℹ️ Camera Camera_work is already connected
+[2025-03-28 13:10:50] 
+=== Camera Connection Summary ===
+[2025-03-28 13:10:50] 📊 Total Cameras: 30
+[2025-03-28 13:10:50] ✅ Successfully Connected: 28
+[2025-03-28 13:10:50]    Cameras: tan, Camera 2, Camera 3, home, Camera29, Camera53, Camera474, Camera 5, Camera05, hom23e, 8424, Camera3432, Camera59, Camera323, home323, nha43, phongka2, Camera435, Camera40, Camera35, home653, Camerag53, Camerah474, Camerai5, homehg, Camera79, home5f, user
+[2025-03-28 13:10:50] ⏩ Skipped Cameras: 2
+[2025-03-28 13:10:50]    Cameras: Camera, Camera_work (Already Connected)
+[2025-03-28 13:10:50] 🔌 Connecting to tan at 192.168.1.21...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] 🔌 Connecting to Camera 3 at 192.168.3.5...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] 🔌 Connecting to Camera 2 at 192.168.1.78...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to tan at http://:@192.168.1.21:8080/video
+[2025-03-28 13:10:50] Attempting to connect to Camera 3 at http://:@192.168.3.5:8080/video
+[2025-03-28 13:10:50] Attempting to connect to Camera 2 at http://:@192.168.1.78:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to home at 192.168.1.22...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to home at http://:@192.168.1.22:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to Camera29 at 192.168.5.78...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to Camera29 at http://:@192.168.5.78:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to Camera53 at 192.168.7.5...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to Camera53 at http://:@192.168.7.5:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to Camera 5 at 192.168.3.69...
+[2025-03-28 13:10:50] 🔌 Connecting to Camera05 at 192.168.2.32...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to Camera05 at http://:@192.168.2.32:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to Camera474 at 192.168.3.74...
+[2025-03-28 13:10:50] 🔌 Connecting to 8424 at 192.168.3.21...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to Camera 5 at http://:@192.168.3.69:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to Camera3432 at 192.168.1.73...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] 🔌 Connecting to Camera40 at 192.168.5.75...
+[2025-03-28 13:10:50] Attempting to connect to 8424 at http://:@192.168.3.21:8080/video
+[2025-03-28 13:10:50] 🔌 Connecting to home323 at 192.168.12.59...
+[2025-03-28 13:10:50] 🔌 Connecting to user at 192.168.249.217...
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to user at http://:@192.168.249.217:8080/video
+[2025-03-28 13:10:50] Set connection timeout to 5 seconds
+[2025-03-28 13:10:50] Attempting to connect to Camera40 at http://:@192.168.5.75:8080/video

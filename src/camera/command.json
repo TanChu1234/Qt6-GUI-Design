@@ -1,6 +1,6 @@
 
 {
     "tan": {"type": "ai"},
-    "Camera 2": {"type": "capture"},
+    "Camera_work": {"type": "ai"},
     "home": {"type": "ai"}
 }

@@ -29,6 +29,7 @@ class CameraThread(QThread):
         self.active = False  # Controls thread main loop
         self.triggered = False  # Flag for trigger operations
         self.trigger_action = None  # What action to perform when triggered
+        self.connection_status = "disconnected"  # Track connection status: "disconnected", "connecting", "connected"
         
         # Thread synchronization
         self.mutex = QMutex()
@@ -58,6 +59,7 @@ class CameraThread(QThread):
         
         # Log that we're connecting
         self.log_signal.emit(f"🔌 Connecting to {self.camera_name} at {self.ip}...")
+        self.connection_status = "connecting"
         self.connection_status_signal.emit("connecting", self.camera_name)
         
         # Initialize capture object
@@ -69,12 +71,14 @@ class CameraThread(QThread):
         # Attempt to connect to camera with timeout
         if not self._connect_with_timeout(cap, url):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
+            self.connection_status = "disconnected"
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False
             cap.release()
             return
             
         self.log_signal.emit(f"✅ Connected to {self.camera_name}")
+        self.connection_status = "connected"
         self.connection_status_signal.emit("connected", self.camera_name)     
         
         # Main frame capture loop
@@ -91,6 +95,7 @@ class CameraThread(QThread):
                 self.log_signal.emit(f"⚠️ Error releasing camera resources: {str(e)}")
                 
             # Make sure we're marked as disconnected
+            self.connection_status = "disconnected"
             self.connection_status_signal.emit("disconnected", self.camera_name)
     
     def _build_camera_url(self):
@@ -319,21 +324,26 @@ class CameraStopWorker(QObject):
         super().__init__()
         self.camera_threads = camera_threads
         self.stop_camera_method = stop_camera_method  # Pass stop_camera function
+        self.cameras_to_stop = []  # Will be set by the caller
 
     def run(self):
-        """Stops cameras in a background thread."""
-        connected_cameras = [name for name, thread in self.camera_threads.items() if thread.isRunning()]
-        # total_cameras = len(connected_cameras)
-
+        """Stops only the specified cameras in a background thread."""
         stopped_cameras = []
         failed_cameras = []
 
-        for i, camera_name in enumerate(connected_cameras):
-            success = self.stop_camera_method(camera_name)
-            if success:
-                stopped_cameras.append(camera_name)
+        for i, camera_name in enumerate(self.cameras_to_stop):
+            # Double-check that the camera is still running before attempting to stop
+            if (camera_name in self.camera_threads and 
+                self.camera_threads[camera_name].isRunning()):
+                
+                success = self.stop_camera_method(camera_name)
+                if success:
+                    stopped_cameras.append(camera_name)
+                else:
+                    failed_cameras.append(camera_name)
             else:
-                failed_cameras.append(camera_name)
+                # The camera is no longer running, consider it "stopped"
+                stopped_cameras.append(camera_name)
 
             # Emit progress update
             self.progress_signal.emit(i + 1, camera_name)
