@@ -315,38 +315,3 @@ class CameraThread(QThread):
             self.person_count.emit(0)
             self.trigger_completed_signal.emit("error", self.camera_name)
                   
-class CameraStopWorker(QObject):
-    """Worker class to stop cameras in a separate thread."""
-    progress_signal = Signal(int, str)  # (progress value, camera name)
-    finished_signal = Signal(list, list)  # (stopped_cameras, failed_cameras)
-
-    def __init__(self, camera_threads, stop_camera_method):
-        super().__init__()
-        self.camera_threads = camera_threads
-        self.stop_camera_method = stop_camera_method  # Pass stop_camera function
-        self.cameras_to_stop = []  # Will be set by the caller
-
-    def run(self):
-        """Stops only the specified cameras in a background thread."""
-        stopped_cameras = []
-        failed_cameras = []
-
-        for i, camera_name in enumerate(self.cameras_to_stop):
-            # Double-check that the camera is still running before attempting to stop
-            if (camera_name in self.camera_threads and 
-                self.camera_threads[camera_name].isRunning()):
-                
-                success = self.stop_camera_method(camera_name)
-                if success:
-                    stopped_cameras.append(camera_name)
-                else:
-                    failed_cameras.append(camera_name)
-            else:
-                # The camera is no longer running, consider it "stopped"
-                stopped_cameras.append(camera_name)
-
-            # Emit progress update
-            self.progress_signal.emit(i + 1, camera_name)
-
-        # Emit finished signal
-        self.finished_signal.emit(stopped_cameras, failed_cameras)

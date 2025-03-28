@@ -1,9 +1,8 @@
 from PySide6.QtWidgets import QWidget, QListWidgetItem, QMessageBox, QFileDialog, QProgressDialog
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QThread
 from ui.camera_design import Ui_Form
 from ui.camera_dialog import CameraDialog
-from camera.cam_handler import CameraThread, CameraStopWorker
+from camera.cam_handler import CameraThread
 from camera.check_ping import ping_camera
 from camera.camera_configuration_manager import CameraConfigManager
 from datetime import datetime
@@ -425,7 +424,7 @@ class CameraWidget(QWidget):
         self.log_message(f"🔌 Initiating connection for {total_cameras} cameras")
         
         # Iterate through all items in the ListWidget
-        for i in range(total_cameras):  # Fixed: start from 0 to include all cameras
+        for i in range(1,total_cameras):  # Fixed: start from 0 to include all cameras
             # Get the current item
             item = self.ui.listWidget.item(i)
             
@@ -515,8 +514,8 @@ class CameraWidget(QWidget):
         self.log_connection_summary(connection_results)
         self.print_memory_usage("After connecting cameras")
     def stop_all_cameras(self):
-        """Stop only fully connected cameras (green icon) and skip connecting ones."""
-        # Find only fully connected cameras
+        """Stop all connected cameras using a simple direct approach without progress dialog."""
+        # Find fully connected cameras
         connected_cameras = []
         
         # Start from index 0 to include all cameras
@@ -553,26 +552,31 @@ class CameraWidget(QWidget):
             print("⏹️ Stop process canceled.")
             return
 
-        # Set up progress dialog
-        self.progress_dialog = QProgressDialog("Stopping cameras...", "Cancel", 0, total_cameras, self)
-        self.progress_dialog.setWindowTitle("Stopping Cameras")
-        self.progress_dialog.setWindowModality(Qt.WindowModal)
-        self.progress_dialog.setMinimumDuration(500)  # Show after 0.5s
-        self.progress_dialog.show()
-
-        # Start the worker in a separate thread
-        self.worker_thread = QThread()
-        self.worker = CameraStopWorker(self.camera_threads, self.stop_camera)
-
-        self.worker.moveToThread(self.worker_thread)
-        self.worker.progress_signal.connect(self.update_progress)
-        self.worker.finished_signal.connect(self.on_stop_completed)
+        # Track results
+        stopped_cameras = []
+        failed_cameras = []
         
-        # Update worker to only stop the selected cameras
-        self.worker.cameras_to_stop = connected_cameras
+        # Log start of operation
+        self.log_message(f"🛑 Stopping all {total_cameras} connected cameras...")
+        
+        # Process each camera directly
+        for camera_name in connected_cameras:
+            # Stop the camera
+            success = self.stop_camera(camera_name)
+            
+            if success:
+                stopped_cameras.append(camera_name)
+            else:
+                failed_cameras.append(camera_name)
+        
+        # Show results
+        if stopped_cameras and failed_cameras:
+            self.log_message(f"✅ Stopped {len(stopped_cameras)} cameras, {len(failed_cameras)} failed")
+        elif stopped_cameras:
+            self.log_message(f"✅ Successfully stopped all {len(stopped_cameras)} cameras")
+        else:
+            self.log_message("❌ Failed to stop any cameras")
 
-        self.worker_thread.started.connect(self.worker.run)
-        self.worker_thread.start()
 
     def update_progress(self, progress, camera_name):
         """Update progress dialog with the current camera being stopped."""
@@ -631,16 +635,29 @@ class CameraWidget(QWidget):
        
     def stop_camera(self, specific_camera=None):
         """Stop streaming for the selected or specified camera with proper isolation."""
-        camera_name = self._get_camera_name(specific_camera)
-        if not camera_name:
-            return False
+        try:
+            camera_name = self._get_camera_name(specific_camera)
+            if not camera_name:
+                return False
+                
+            # Check if camera exists in threads
+            if camera_name not in self.camera_threads:
+                print(f"ℹ️ No active stream for {camera_name}")
+                return False
+                
+            # Check if camera is running and connected
+            if self.camera_threads[camera_name].connection_status == "connected":      
+                    thread_ref = self.camera_threads[camera_name]
+                    return self._stop_camera_thread(camera_name, thread_ref)
+            else:
+                # Thread exists but not running
+                self.log_message(f"⚠️ Camera thread for {camera_name} exists but is not running")
+                return False
+                
+        except Exception as e:
 
-        if camera_name not in self.camera_threads:
-            print(f"ℹ️ No active stream for {camera_name}")
+            self.log_message(f"Error stopping camera: {str(e)}")
             return False
-
-        thread_ref = self.camera_threads[camera_name]
-        return self._stop_camera_thread(camera_name, thread_ref)
 
     def _get_camera_name(self, specific_camera):
         """Get the camera name from the specific camera or the current selection."""
