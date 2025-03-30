@@ -143,7 +143,7 @@ class CameraThread(QThread):
         
         try:
             while self.active:
-                # Check for stop condition more frequently
+                # Check for stop condition more     
                 if not self._should_continue():
                     break
                     
