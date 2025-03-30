@@ -10,7 +10,7 @@ class CameraThread(QThread):
     # Define signals
     frame_signal = Signal(QPixmap, str)  # For UI updates (pixmap, camera_name)
     log_signal = Signal(str)  # For logging messages
-    person_count = Signal(int)  # For reporting person counts
+    cart_count = Signal(int)  # For reporting cart counts
     connection_status_signal = Signal(str, str)  # (status, camera_name)
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
@@ -121,7 +121,7 @@ class CameraThread(QThread):
             
             # Check if the capture is opened successfully
             if not cap.isOpened():
-                self.log_signal.emit(f"❌ Failed to open camera {self.camera_name}")
+                # self.log_signal.emit(f"❌ Failed to open camera {self.camera_name}")
                 return False
             
             # Attempt to read a frame to verify connection
@@ -269,14 +269,14 @@ class CameraThread(QThread):
                 if trigger_action == "ai" and self.yolo_detector is not None:
                     filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
                     
-                    # Run inference - now only returns person_count
-                    _, detection_summary, person_count = self.yolo_detector.detect(
+                    # Run inference - now only returns cart_count
+                    _, detection_summary, cart_count, regions_status = self.yolo_detector.detect(
                         self.last_frame, 
                         filename
                     )
                     
-                    # Emit the person count signal
-                    self.person_count.emit(person_count)
+                    # Emit the cart count signal
+                    self.cart_count.emit(cart_count)
                     
                     # Log detection results
                     if detection_summary:
@@ -284,34 +284,36 @@ class CameraThread(QThread):
                     else:
                         self.log_signal.emit(f"🤖 No objects detected with confidence > 0.6 in {self.camera_name}")
                     
-                    # Log the person count value
-                    self.log_signal.emit(f"🔍 Person count for {self.camera_name}: {person_count}")
+                    # Log the cart count value
+                    self.log_signal.emit(f"🔍 cart count for {self.camera_name}: {cart_count}")
+                    self.log_signal.emit(f"Regions of {self.camera_name}: {regions_status}")
                     
                     self.log_signal.emit(f"🤖 Detection results saved to: {filename}")
                     
-                    # Include the person count in the trigger_completed_signal
-                    # Format: "filename|person_count"
-                    self.trigger_completed_signal.emit(f"{filename}|{person_count}", self.camera_name)
+                    # Include the cart count in the trigger_completed_signal
+                    # Format: "filename|cart_count"
+                    self.trigger_completed_signal.emit(f"{filename}|{cart_count}", self.camera_name)
                 
                 elif trigger_action == "capture":
                     filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
                     cv2.imwrite(filename, self.last_frame)
                     self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
                     
-                    # For regular captures, emit 0 for person_count
-                    self.person_count.emit(0)
+                    # For regular captures, emit 0 for cart_count
+                    self.cart_count.emit(0)
                     
                     # Include count=0 for regular captures
                     self.trigger_completed_signal.emit(f"{filename}|0", self.camera_name)
                     
             except Exception as e:
                 self.log_signal.emit(f"❌ Error: {str(e)}")
-                # For errors, emit 0 for person_count
-                self.person_count.emit(0)
+                # For errors, emit 0 for cart_count
+                self.cart_count.emit(0)
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
             self.log_signal.emit("❌ No frame available to capture")
-            # For errors, emit 0 for person_count
-            self.person_count.emit(0)
+            # For errors, emit 0 for cart_count
+            self.cart_count.emit(0)
             self.trigger_completed_signal.emit("error", self.camera_name)
                   
+    
