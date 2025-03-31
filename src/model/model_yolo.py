@@ -6,7 +6,7 @@ import os
 class YOLODetector:
     """Class for handling YOLO model   operations and detections with ROI support."""
     
-    def __init__(self, model_path="src/model/yolov8s.pt", rois=None):
+    def __init__(self, model_path="src/model/bestv11.pt", rois=None):
         """Initialize the YOLO detector with model and configuration.
         
         Args:
@@ -21,8 +21,8 @@ class YOLODetector:
         # Load and configure the model
         self.model = YOLO(model_path)
         # Move model to GPU
-        self.model.to("cuda")
-        self.model.overrides['max_det'] = 100  # Maximum number of detections
+        # self.model.to("cuda")
+        self.model.overrides['max_det'] = 10  # Maximum number of detections
         
         # Store ROIs
         self.rois = rois if rois is not None else []
@@ -132,7 +132,7 @@ class YOLODetector:
                 class_name = r.names[cls]
                 
                 # Count all persons with confidence > 0.6
-                if conf > 0.6 and cls == 0 and class_name == "person":
+                if conf > 0.6 and cls == 0:
                     person_count += 1
                     if class_name in detected_items:
                         detected_items[class_name] += 1

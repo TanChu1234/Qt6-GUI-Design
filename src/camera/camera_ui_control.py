@@ -4,9 +4,10 @@ from datetime import datetime
 
 import cv2
 import psutil
-from PySide6.QtGui import QIcon, QPixmap, QImage
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QImage, QPixmap
 from PySide6.QtWidgets import (QFileDialog, QListWidgetItem, QMessageBox,
-                               QProgressDialog, QWidget)
+                               QWidget)
 
 from camera.cam_handler import CameraThread
 from camera.camera_configuration_manager import CameraConfigManager
@@ -44,9 +45,9 @@ class CameraWidget(QWidget):
         self._setup_ui()
         # Create a single YOLODetector instance to be shared by all camera threads
 
-        self.yolo_detector = YOLODetector(model_path="src/model/best100.pt", rois = [(13, 148, 224, 418), 
+        self.yolo_detector = YOLODetector(model_path="src/model/bestv11.pt", rois = [(13, 148, 224, 418), 
                                                                                      (172, 132, 395, 402), 
-                                                                                     (391, 98, 642, 366), 
+                                                                                     (391, 98, 642, 420), 
                                                                                      (625, 107, 870, 377), 
                                                                                      (849, 137, 1088, 408), 
                                                                                      (1065, 136, 1245, 402)])
@@ -930,20 +931,17 @@ class CameraWidget(QWidget):
             height, width, _ = annotated_frame.shape
             bytes_per_line = 3 * width
             q_image = QImage(annotated_frame.data, width, height, bytes_per_line, QImage.Format.Format_RGB888)
+            qpixmap = QPixmap.fromImage(q_image) 
+            scaled_pixmap = qpixmap.scaled(self.ui.label.width(), self.ui.label.height(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             
             # Set image to QLabel
-            self.ui.label.setPixmap(QPixmap.fromImage(q_image))
+            self.ui.label.setPixmap(scaled_pixmap)
             # Log results
             self.log_message(f"🖼️ Processed image: {image_path}")
             if detection_summary:
                 self.log_message(f"🔍 Detection results: {detection_summary}")
             self.log_message(f"👥 cart count: {cart_count}")
             self.log_message(f"📌 ROI status: {roi_status}")
-
-            return (result_path if save_result else None,
-                    detection_summary,
-                    cart_count,
-                    roi_status)
 
         except Exception as e:
             self.log_message(f"❌ Error processing image: {str(e)}")
