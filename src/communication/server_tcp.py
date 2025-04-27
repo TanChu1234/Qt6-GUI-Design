@@ -1,6 +1,5 @@
 import json
 import asyncio
-# import socket
 import threading
 import queue
 from PySide6.QtWidgets import QWidget
@@ -78,7 +77,7 @@ class TCPServerApp(QWidget):
         
         try:
             # Get IP from text field or use default
-            ip_address = '192.168.1.26'  # Use the requested IP
+            ip_address = '192.168.2.20'  # Use the requested IP
             port = 502  # You can change port or make it configurable
             
             # Update UI
@@ -178,7 +177,7 @@ class TCPServerApp(QWidget):
             writer.close()
             try:
                 await writer.wait_closed()
-            except:
+            except Exception:
                 pass  # Ignore errors on close
     
     async def async_handle_command(self, json_data, client_id):
@@ -278,61 +277,80 @@ class TCPServerApp(QWidget):
         
         try:
             if command_type == "trigger":
-                # Get the data (which could be a dict)
-                trigger_data = command_data.get("data", {})
-                command_id = command_data.get("id", "unknown")
-                future = command_data.get("future")
-                
-                self.log_message(f"Processing trigger data for command {command_id}")
-                
-                # Process the trigger commands
-                if self.camera_widget:
-                    triggered_cameras, failed_cameras, skipped_cameras, person_counts = self.camera_widget._process_trigger_configs(
-                        trigger_data
-                    )
-                    
-                    # Log the summary
-                    self.log_message(f"\n=== Trigger Summary for {command_id} ===")
-                    
-                    # Use appropriate length calculation based on data type
-                    if isinstance(trigger_data, dict):
-                        total_cameras = len(trigger_data)
-                    elif isinstance(trigger_data, list):
-                        total_cameras = len(trigger_data)
-                    else:
-                        total_cameras = 0
-                        
-                    self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{total_cameras} cameras")
-                    
-                    if triggered_cameras:
-                        self.log_message(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
-                    
-                    if failed_cameras:
-                        self.log_message(f"❌ Failed cameras: {', '.join(failed_cameras)}")
-                        
-                    if skipped_cameras:
-                        self.log_message(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
-                    
-                    # Include person counts in the log for debugging
-                    self.log_message(f"👤 Person counts: {person_counts}")
-                    
-                    # Create a result object that includes the person counts
-                    result = {
-                        "triggered_cameras": triggered_cameras,
-                        "f_cameras": failed_cameras,
-                        "skipped_cameras": skipped_cameras,
-                        "person_counts": person_counts
-                    }
-                    
-                    # Resolve the future to notify the asyncio thread that processing is complete
-                    if future and not future.done():
-                        # This needs to be passed back to the asyncio thread
-                        asyncio.run_coroutine_threadsafe(
-                            self._complete_command(future, result), 
-                            self.event_loop
-                        )
+                self._handle_trigger_command(command_data)
         except Exception as e:
             self.log_message(f"Error in process_command: {e}")
+
+    def _handle_trigger_command(self, command_data):
+        """
+        Handle the 'trigger' command type.
+        
+        Args:
+            command_data (dict): The command data to process
+        """
+        trigger_data = command_data.get("data", {})
+        command_id = command_data.get("id", "unknown")
+        future = command_data.get("future")
+        
+        self.log_message(f"Processing trigger data for command {command_id}")
+        
+        if self.camera_widget:
+            triggered_cameras, failed_cameras, skipped_cameras, person_counts = self.camera_widget._process_trigger_configs(
+                trigger_data
+            )
+            self._log_trigger_summary(command_id, trigger_data, triggered_cameras, failed_cameras, skipped_cameras, person_counts)
+            self._resolve_future(future, triggered_cameras, failed_cameras, skipped_cameras, person_counts)
+
+    def _log_trigger_summary(self, command_id, trigger_data, triggered_cameras, failed_cameras, skipped_cameras, person_counts):
+        """
+        Log the summary of the trigger command.
+        
+        Args:
+            command_id (str): The command ID.
+            trigger_data (dict): The trigger data.
+            triggered_cameras (list): List of successfully triggered cameras.
+            failed_cameras (list): List of failed cameras.
+            skipped_cameras (list): List of skipped cameras.
+            person_counts (dict): Person counts for each camera.
+        """
+        self.log_message(f"\n=== Trigger Summary for {command_id} ===")
+        
+        total_cameras = len(trigger_data) if isinstance(trigger_data, (dict, list)) else 0
+        self.log_message(f"✅ Successfully triggered: {len(triggered_cameras)}/{total_cameras} cameras")
+        
+        if triggered_cameras:
+            self.log_message(f"📸 Triggered cameras: {', '.join(triggered_cameras)}")
+        
+        if failed_cameras:
+            self.log_message(f"❌ Failed cameras: {', '.join(failed_cameras)}")
+            
+        if skipped_cameras:
+            self.log_message(f"⏩ Skipped cameras: {', '.join(skipped_cameras)}")
+        
+        self.log_message(f"👤 Person counts: {person_counts}")
+
+    def _resolve_future(self, future, triggered_cameras, failed_cameras, skipped_cameras, person_counts):
+        """
+        Resolve the future with the result of the trigger command.
+        
+        Args:
+            future (asyncio.Future): The future to resolve.
+            triggered_cameras (list): List of successfully triggered cameras.
+            failed_cameras (list): List of failed cameras.
+            skipped_cameras (list): List of skipped cameras.
+            person_counts (dict): Person counts for each camera.
+        """
+        if future and not future.done():
+            result = {
+                "triggered_cameras": triggered_cameras,
+                "f_cameras": failed_cameras,
+                "skipped_cameras": skipped_cameras,
+                "person_counts": person_counts
+            }
+            asyncio.run_coroutine_threadsafe(
+                self._complete_command(future, result), 
+                self.event_loop
+            )
     
     async def _complete_command(self, future, result):
         """

@@ -45,12 +45,7 @@ class CameraWidget(QWidget):
         self._setup_ui()
         # Create a single YOLODetector instance to be shared by all camera threads
 
-        self.yolo_detector = YOLODetector(model_path="src/model/bestv11.pt", rois = [(13, 148, 224, 418), 
-                                                                                     (172, 132, 395, 402), 
-                                                                                     (391, 98, 642, 420), 
-                                                                                     (625, 107, 870, 377), 
-                                                                                     (849, 137, 1088, 408), 
-                                                                                     (1065, 136, 1245, 402)])
+        self.yolo_detector = YOLODetector(model_path="src/model/best100.pt", rois = None)
         self.cart = None
         self.load_saved_cameras()
 
@@ -467,31 +462,46 @@ class CameraWidget(QWidget):
 
     def stop_all_cameras(self):
         """Stop all connected cameras using a simple direct approach without progress dialog."""
-        # Find fully connected cameras
-        connected_cameras = []
+        
+        stopped_cameras = []
+        failed_cameras = []
 
-        # Start from index 0 to include all cameras
+        connected_cameras = self._get_connected_cameras()
+
+        if not connected_cameras:
+            QMessageBox.information(self, "No Cameras Connected", "ℹ️ No fully connected cameras to stop.")
+            return
+
+        if not self._confirm_stop(len(connected_cameras)):
+            print("⏹️ Stop process canceled.")
+            return
+
+        self.log_message(f"🛑 Stopping all {len(connected_cameras)} connected cameras...")
+
+        for camera_name in connected_cameras:
+            success = self.stop_camera(camera_name)
+            if success:
+                stopped_cameras.append(camera_name)
+            else:
+                failed_cameras.append(camera_name)
+
+        self._log_stop_results(stopped_cameras, failed_cameras)
+
+    def _get_connected_cameras(self):
+        """Retrieve a list of fully connected cameras."""
+        connected_cameras = []
         for i in range(self.ui.listWidget.count()):
             item = self.ui.listWidget.item(i)
             camera_name = item.text()
-
-            # Check if camera is in threads and running
             if (camera_name in self.camera_threads and
-                self.camera_threads[camera_name].isRunning()):
+                self.camera_threads[camera_name].isRunning() and
+                self.camera_threads[camera_name].connection_status == "connected"):
+                connected_cameras.append(camera_name)
+                print(f"Adding camera {camera_name} to stop list (connected)")
+        return connected_cameras
 
-                # Use the connection_status attribute directly
-                if self.camera_threads[camera_name].connection_status == "connected":
-                    connected_cameras.append(camera_name)
-                    print(f"Adding camera {camera_name} to stop list (connected)")
-
-        total_cameras = len(connected_cameras)
-
-        if total_cameras == 0:
-            QMessageBox.information(self, "No Cameras Connected",
-                                "ℹ️ No fully connected cameras to stop.")
-            return
-
-        # Show confirmation dialog
+    def _confirm_stop(self, total_cameras):
+        """Show a confirmation dialog to stop all cameras."""
         reply = QMessageBox.question(
             self,
             "Confirm Stop",
@@ -499,29 +509,10 @@ class CameraWidget(QWidget):
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
+        return reply == QMessageBox.Yes
 
-        if reply == QMessageBox.No:
-            print("⏹️ Stop process canceled.")
-            return
-
-        # Track results
-        stopped_cameras = []
-        failed_cameras = []
-
-        # Log start of operation
-        self.log_message(f"🛑 Stopping all {total_cameras} connected cameras...")
-
-        # Process each camera directly
-        for camera_name in connected_cameras:
-            # Stop the camera
-            success = self.stop_camera(camera_name)
-
-            if success:
-                stopped_cameras.append(camera_name)
-            else:
-                failed_cameras.append(camera_name)
-
-        # Show results
+    def _log_stop_results(self, stopped_cameras, failed_cameras):
+        """Log the results of the stop operation."""
         if stopped_cameras and failed_cameras:
             self.log_message(f"✅ Stopped {len(stopped_cameras)} cameras, {len(failed_cameras)} failed")
         elif stopped_cameras:

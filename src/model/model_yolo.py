@@ -6,7 +6,7 @@ import os
 class YOLODetector:
     """Class for handling YOLO model   operations and detections with ROI support."""
     
-    def __init__(self, model_path="src/model/bestv11.pt", rois=None):
+    def __init__(self, model_path="src/model/best100.pt", rois=None):
         """Initialize the YOLO detector with model and configuration.
         
         Args:
@@ -128,16 +128,21 @@ class YOLODetector:
         for r in results:
             for box in r.boxes:
                 conf = float(box.conf[0])
+                print(conf)
                 cls = int(box.cls[0])
                 class_name = r.names[cls]
                 
                 # Count all persons with confidence > 0.6
-                if conf > 0.6 and cls == 0:
+                if conf > 0.9 and cls == 0:
+                    
                     person_count += 1
                     if class_name in detected_items:
                         detected_items[class_name] += 1
                     else:
                         detected_items[class_name] = 1
+                else:
+                    print("không có người")
+            
         return detected_items, person_count
 
     def _create_detection_summary(self, detected_items):

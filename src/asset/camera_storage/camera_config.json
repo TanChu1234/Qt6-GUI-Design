@@ -1,7 +1,7 @@
 [
     {
         "camera_name": "tan",
-        "ip_address": "192.168.237.217",
+        "ip_address": "192.168.2.45",
         "port": "8080",
         "username": "",
         "password": "",
@@ -9,7 +9,7 @@
     },
     {
         "camera_name": "Camera 2",
-        "ip_address": "192.168.1.78",
+        "ip_address": "192.168.2.28",
         "port": "8080",
         "username": "",
         "password": "",
@@ -226,6 +226,14 @@
     {
         "camera_name": "user",
         "ip_address": "192.168.249.217",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "protocol": "HTTP"
+    },
+    {
+        "camera_name": "khu v\u1ef1c a",
+        "ip_address": "192.168.2.6",
         "port": "8080",
         "username": "",
         "password": "",
