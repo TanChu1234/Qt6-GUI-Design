@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1640</width>
+    <height>840</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1390</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Main Window Background */
+QWidget {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #1E1E2E, stop:1 #252836);
+    color: white;
+    font-size: 14px;
+    font-family: &quot;Arial&quot;, sans-serif;
+}
+
+/* Unified Button Style */
+QPushButton {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #007AFF, stop:1 #009FFF);
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    color: white;
+    min-width: 70px;
+    text-align: center;
+}
+
+/* Button Hover Effect */
+QPushButton:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #66BFFF, stop:1 #80D5FF);
+}
+
+/* Button Pressed Effect */
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Labels */
+QLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Camera Display */
+QLabel#label {
+    background-color: rgb(238, 238, 238);
+    border-radius: 10px;
+}
+
+/* Log Label */
+QLabel#label_2 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+/* List Widgets */
+QListWidget#listWidget {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 5px;
+    color: black;
+    font-size: 14px;
+}
+
+QListWidget#log_list {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 5px;
+    color: black;
+    font-size: 9px;
+}
+
+/* Combo Box Styling */
+QComboBox {
+    background-color: #2E2F3A;
+    border: 1px solid #007AFF;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: white;
+    font-size: 14px;
+}
+
+QComboBox:hover {
+    border: 1px solid #66BFFF;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2E2F3A;
+    border: 1px solid #007AFF;
+    selection-background-color: #007AFF;
+    color: white;
+}
+</string>
+  </property>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>731</width>
+     <height>621</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QPushButton" name="start_socket">
+      <property name="text">
+       <string>START SERVER</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="stop_socket">
+      <property name="text">
+       <string>STOP SERVER</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

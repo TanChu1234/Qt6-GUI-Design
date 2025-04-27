@@ -1,4 +1,4 @@
-from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition
+from PySide6.QtCore import QThread, Signal, QMutex, QWaitCondition, QObject
 from PySide6.QtGui import QPixmap, QImage
 import cv2
 import time
@@ -10,11 +10,11 @@ class CameraThread(QThread):
     # Define signals
     frame_signal = Signal(QPixmap, str)  # For UI updates (pixmap, camera_name)
     log_signal = Signal(str)  # For logging messages
+    cart_count = Signal(int)  # For reporting cart counts
     connection_status_signal = Signal(str, str)  # (status, camera_name)
     trigger_completed_signal = Signal(str, str)  # (result, camera_name)
     
-    
-    def __init__(self, ip, port, username, password, camera_name, protocol):
+    def __init__(self, ip, port, username, password, camera_name, protocol, yolo_detector=None):
         """Initialize the camera thread with connection details."""
         super().__init__()
         # Connection parameters
@@ -28,32 +28,38 @@ class CameraThread(QThread):
         # State variables
         self.active = False  # Controls thread main loop
         self.triggered = False  # Flag for trigger operations
-        self.triggered_ai = False
         self.trigger_action = None  # What action to perform when triggered
+        self.connection_status = "disconnected"  # Track connection status: "disconnected", "connecting", "connected"
         
         # Thread synchronization
         self.mutex = QMutex()
         self.condition = QWaitCondition()
-        
+
         # Frame buffer
         self.last_frame = None
         
         # Output configuration
-        self.save_path = "captures"  # Default path for saved images
+        self.save_path = "outputs/captures"  # Default path for saved images
         self.result_path = "outputs/detections"
         # Create the save directory if it doesn't exist
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        for path in [self.save_path, self.result_path]:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            
+        # Store the YOLO detector instance
+        self.yolo_detector = yolo_detector
         
     def run(self):
         """Main thread execution method."""
         self.active = True
+        self.last_frame = None  # Clear any previous frame
         
         # Build camera URL based on protocol
         url = self._build_camera_url()
         
         # Log that we're connecting
         self.log_signal.emit(f"🔌 Connecting to {self.camera_name} at {self.ip}...")
+        self.connection_status = "connecting"
         self.connection_status_signal.emit("connecting", self.camera_name)
         
         # Initialize capture object
@@ -63,14 +69,16 @@ class CameraThread(QThread):
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
         # Attempt to connect to camera with timeout
-        if not self._connect_with_timeout(cap, url, timeout=2):
+        if not self._connect_with_timeout(cap, url):
             self.log_signal.emit(f"❌ Failed to connect to {self.camera_name} (Timeout)")
+            self.connection_status = "disconnected"
             self.connection_status_signal.emit("disconnected", self.camera_name)
             self.active = False
             cap.release()
             return
             
         self.log_signal.emit(f"✅ Connected to {self.camera_name}")
+        self.connection_status = "connected"
         self.connection_status_signal.emit("connected", self.camera_name)     
         
         # Main frame capture loop
@@ -80,7 +88,15 @@ class CameraThread(QThread):
             self.log_signal.emit(f"❌ Error in {self.camera_name}: {str(e)}")
         finally:
             # Ensure proper cleanup
-            cap.release()
+            try:
+                cap.release()
+                self.log_signal.emit(f"📤 Released camera resources for {self.camera_name}")
+            except Exception as e:
+                self.log_signal.emit(f"⚠️ Error releasing camera resources: {str(e)}")
+                
+            # Make sure we're marked as disconnected
+            self.connection_status = "disconnected"
+            self.connection_status_signal.emit("disconnected", self.camera_name)
     
     def _build_camera_url(self):
         """Build the camera URL string based on protocol."""
@@ -97,177 +113,207 @@ class CameraThread(QThread):
                 # Default to generic URL format
                 return f"{self.protocol}://{self.username}:{self.password}@{self.ip}:{self.port}"
     
-    def _connect_with_timeout(self, cap, url, timeout=2):
-        """Try to connect to the camera with a timeout."""
-        start_time = time.time()
-        
-        # First attempt to open
-        cap.open(url)
-        
-        # Check connection with timeout
-        while time.time() - start_time < timeout:
-            if cap.isOpened():
-                # Test if we can actually get a frame
-                ret, _ = cap.read()
-                if ret:
-                    return True
+    def _connect_with_timeout(self, cap, url):
+      
+        try:
+            # Open the camera source
+            cap.open(url)
             
-            # Check if we should stop trying
-            self.mutex.lock()
-            if not self.active:
-                self.mutex.unlock()
+            # Check if the capture is opened successfully
+            if not cap.isOpened():
+                # self.log_signal.emit(f"❌ Failed to open camera {self.camera_name}")
                 return False
-            self.mutex.unlock()
             
-            # Wait a bit before trying again
-            time.sleep(0.1)  # Shorter sleep to be more responsive
+            # Attempt to read a frame to verify connection
+            ret, frame = cap.read()
             
-            # Only try reopening if we're still within timeout
-            if time.time() - start_time < timeout - 0.2:
-                cap.release()  # Make sure to release before reopening
-                cap.open(url)
+            if not ret or frame is None:
+                self.log_signal.emit(f"⚠️ Cannot read frame from {self.camera_name}")
+                return False
+            
+            return True
         
-        # If we get here, we've timed out
-        cap.release()  # Make sure to release the capture
-        return False
+        except Exception as e:
+            # Log any connection errors
+            self.log_signal.emit(f"❌ Connection error for {self.camera_name}: {str(e)}")
+            return False
             
     def _process_frames(self, cap):
         """Process frames from the camera in a loop."""
         
-        while self.active:
-            # Read frame with timeout handling
-            ret, frame = cap.read()
-            
-            if not ret:
-                # Try a couple more times before giving up
-                retries = 3
-                while retries > 0 and self.active:
-                    time.sleep(0.1)
-                    ret, frame = cap.read()
-                    if ret:
-                        break
-                    retries -= 1
-                
+        try:
+            while self.active:
+                # Check for stop condition more     
+                if not self._should_continue():
+                    break
+                    
+                ret, frame = self._read_frame_with_retries(cap)
                 if not ret:
-                    self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
-                    self.connection_status_signal.emit("disconnected", self.camera_name)
                     break
 
-            # Convert to RGB format for display
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                rgb_frame = self._convert_frame_to_rgb(frame)
+                self._handle_frame(rgb_frame, frame)
+                self._emit_frame_signal(rgb_frame)
+                
+                # Shorter sleep time to check active flag more often
+                time.sleep(0.01)  
+        except Exception as e:
+            self.log_signal.emit(f"❌ Error in frame processing: {str(e)}")
+        finally:
+            # Force release resources
+            self.last_frame = None
+            # Try to encourage garbage collection
+            import gc
+            gc.collect()
+  
+    def _read_frame_with_retries(self, cap):
+        """Read frame with retries if initial read fails."""
+        ret, frame = cap.read()
+        if not ret:
+            retries = 3
+            while retries > 0 and self.active:
+                time.sleep(0.1)
+                ret, frame = cap.read()
+                if ret:
+                    break
+                retries -= 1
             
-            # Thread-safe operations on shared state
+            if not ret:
+                self.log_signal.emit(f"🚫 Lost connection to {self.camera_name}")
+                self.connection_status_signal.emit("disconnected", self.camera_name)
+        return ret, frame
+
+    def _convert_frame_to_rgb(self, frame):
+        """Convert BGR frame to RGB format."""
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    def _handle_frame(self, rgb_frame, frame):
+        """Handle frame processing and triggering with proper lock handling."""
+        try:
             self.mutex.lock()
-            
-            # Store the last frame for trigger processing (in BGR format)
-            self.last_frame = frame.copy()
-            
-            # Check if we've been triggered
+            # Only make a copy if needed for a trigger, otherwise just reference
             if self.triggered:
-                self._process_trigger()
+                self.last_frame = frame.copy()
+                self._process_trigger(self.trigger_action)
                 self.triggered = False
-                
-            # Check if run AI
-            if self.triggered_ai:
-                self._process_ai()
-                self.triggered_ai = False
-                
-            # Can release the lock before UI operations
-            self.mutex.unlock()
-            
-            # Convert to QImage - this can be slow so do it outside the lock
-            h, w, ch = rgb_frame.shape
-            bytes_per_line = ch * w
-            qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            
-            # Convert to pixmap and emit signal
-            pixmap = QPixmap.fromImage(qt_image)
-            self.frame_signal.emit(pixmap, self.camera_name)
-            
-            # Reduce CPU usage - adjust based on desired frame rate
-            time.sleep(0.03)  # ~30 fps max
-            
-            # Check if we should stop - thread-safe way
+            else:
+                # Just keep a reference without copying if not triggering
+                self.last_frame = frame
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
+
+    def _emit_frame_signal(self, rgb_frame):
+        """Convert frame to QPixmap and emit frame signal."""
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = ch * w
+        qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qt_image)
+        self.frame_signal.emit(pixmap, self.camera_name)
+
+    def _should_continue(self):
+        """Check if the thread should continue running."""
+        try:
             self.mutex.lock()
             should_continue = self.active
-            self.mutex.unlock()
-            
-            if not should_continue:
-                break
+            return should_continue
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
     
     def stop(self):
         """Stop the camera thread safely."""
-        self.mutex.lock()
-        self.active = False
-        self.mutex.unlock()
+        try:
+            self.mutex.lock()
+            self.active = False
+            self.triggered = False  # Reset trigger state
+            self.trigger_action = None  # Clear any pending trigger actions
+        finally:
+            self.mutex.unlock()  # Always ensure mutex is unlocked
+            
+        # Wake any waiting threads
         self.condition.wakeAll()
+        
+        # Remove frame buffer to free memory
+        self.last_frame = None
     
-    def trigger(self, action="capture"):
-        """Trigger the camera to perform an action on the next frame."""
+    def trigger(self, action):
+        """
+        Trigger the camera to perform an action on the next frame.
+        
+        Args:
+            action (str, optional): The action to perform (e.g., "capture"). Defaults to "capture".
+            use_ai (bool, optional): Whether to trigger AI processing. Defaults to False.
+        
+        Returns:
+            bool: True if trigger was successful, False otherwise.
+        """
         if not self.active:
             self.log_signal.emit(f"⚠️ Cannot trigger {self.camera_name}: Camera not active")
             self.trigger_completed_signal.emit("error", self.camera_name)
             return False
-            
+        
         self.mutex.lock()
+
         self.triggered = True
         self.trigger_action = action
         self.mutex.unlock()
         return True
     
-    def trigger_and_process(self):
-        """Trigger the camera to perform an action on the next frame."""
-        if not self.active:
-            self.log_signal.emit(f"⚠️ Cannot trigger {self.camera_name}: Camera not active")
-            self.trigger_completed_signal.emit("error", self.camera_name)
-            return False
-            
-        self.mutex.lock()
-        self.triggered_ai = True
-        self.mutex.unlock()
-        return True
-    
       
-    def _process_trigger(self):
-        """Process the triggered action on the current frame."""
-        if self.trigger_action == "capture":
-            # Save the current frame to file
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
-            
-            if self.last_frame is not None:
-                try:
-                    cv2.imwrite(filename, self.last_frame)
-                    self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
-                    self.trigger_completed_signal.emit(filename, self.camera_name)
-                except Exception as e:
-                    self.log_signal.emit(f"❌ Error saving image: {str(e)}")
-                    self.trigger_completed_signal.emit("error", self.camera_name)
-            else:
-                self.log_signal.emit(f"❌ No frame available to capture")
-                self.trigger_completed_signal.emit("error", self.camera_name)
-        else:
-            # Handle other actions here
-            self.log_signal.emit(f"⚠️ Unknown action: {self.trigger_action}")
-            self.trigger_completed_signal.emit("error", self.camera_name)
-            
-    def _process_ai(self):
+    def _process_trigger(self, trigger_action):
         """Process the triggered action on the current frame."""
         # Save the current frame to file
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
         
         if self.last_frame is not None:
-            try:
-                print(type(self.last_frame))
-                cv2.line(self.last_frame,(0,0),(511,511),(255,0,0),5)
-                cv2.imwrite(filename, self.last_frame)
-                self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
-                self.trigger_completed_signal.emit(filename, self.camera_name)
+            try:   
+                if trigger_action == "ai" and self.yolo_detector is not None:
+                    filename = f"{self.result_path}/{self.camera_name}_{timestamp}.jpg"
+                    
+                    # Run inference - now only returns cart_count
+                    _, detection_summary, cart_count, regions_status = self.yolo_detector.detect(
+                        self.last_frame, 
+                        filename
+                    )
+                    
+                    # Emit the cart count signal
+                    self.cart_count.emit(cart_count)
+                    
+                    # Log detection results
+                    if detection_summary:
+                        self.log_signal.emit(f"🤖 AI detection found: {detection_summary} in {self.camera_name}")
+                    else:
+                        self.log_signal.emit(f"🤖 No objects detected with confidence > 0.6 in {self.camera_name}")
+                    
+                    # Log the cart count value
+                    self.log_signal.emit(f"🔍 cart count for {self.camera_name}: {cart_count}")
+                    self.log_signal.emit(f"Regions of {self.camera_name}: {regions_status}")
+                    
+                    self.log_signal.emit(f"🤖 Detection results saved to: {filename}")
+                    
+                    # Include the cart count in the trigger_completed_signal
+                    # Format: "filename|cart_count"
+                    self.trigger_completed_signal.emit(f"{filename}|{cart_count}", self.camera_name)
+                
+                elif trigger_action == "capture":
+                    filename = f"{self.save_path}/{self.camera_name}_{timestamp}.jpg"
+                    cv2.imwrite(filename, self.last_frame)
+                    self.log_signal.emit(f"📸 Captured image from {self.camera_name}: {filename}")
+                    
+                    # For regular captures, emit 0 for cart_count
+                    self.cart_count.emit(0)
+                    
+                    # Include count=0 for regular captures
+                    self.trigger_completed_signal.emit(f"{filename}|0", self.camera_name)
+                    
             except Exception as e:
-                self.log_signal.emit(f"❌ Error saving image: {str(e)}")
+                self.log_signal.emit(f"❌ Error: {str(e)}")
+                # For errors, emit 0 for cart_count
+                self.cart_count.emit(0)
                 self.trigger_completed_signal.emit("error", self.camera_name)
         else:
-            self.log_signal.emit(f"❌ No frame available to capture")
+            self.log_signal.emit("❌ No frame available to capture")
+            # For errors, emit 0 for cart_count
+            self.cart_count.emit(0)
             self.trigger_completed_signal.emit("error", self.camera_name)
-        
+                  
+    

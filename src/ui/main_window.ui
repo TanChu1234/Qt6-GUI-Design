@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>1920</width>
-    <height>1080</height>
+    <height>1040</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Camera Management</string>
   </property>
   <property name="styleSheet">
    <string notr="true">/* Main Window Background */
@@ -22,181 +22,67 @@ QMainWindow {
 
 /* General Button Styling */
 QPushButton {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #007AFF, stop:1 #009FFF);
     border: none;
     padding: 12px 20px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    border-radius: 5px;
+ 	border-radius: 10px;
     color: white;
     min-width: 150px;
     text-align: left;
     padding-left: 10px;
 }
 
-/* Camera Page Button */
-QPushButton#camera_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #028A66, stop:1 #00B894);
-}
-
-QPushButton#camera_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #36C4A1, stop:1 #50E0B7);
-}
-
-/* Communication Page Button */
-QPushButton#tcp_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #007AFF, stop:1 #1AA9FF);
-}
-
-QPushButton#tcp_page:hover {
+/* Button Hover Effect */
+QPushButton:hover {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
                                 stop:0 #66BFFF, stop:1 #80D5FF);
 }
 
-/* Add Item Button */
-QPushButton#http_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #A000D7, stop:1 #D100FF);
-}
-
-QPushButton#http_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #C050F5, stop:1 #E080FF);
-}
-
-/* Add Item Button */
-QPushButton#model_page {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */
-}
-
-QPushButton#model_page:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */
-}
-/* Pressed Effect */
 QPushButton:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
-                                stop:0 #027055, stop:1 #00987A);
+                                stop:0 #007AFF, stop:1 #009FFF);
+}
+
+/* List Widgets */
+QWidget#widget {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                stop:0 #007AFF, stop:1 #009FFF);
+	border-radius: 10px;
+}
+QWidget#widget_2 {
+	background: none;
+	
+	border-radius: 10px;
 }
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="camera_page">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>30</y>
-      <width>211</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>180</width>
-      <height>80</height>
-     </size>
-    </property>
-    <property name="cursor">
-     <cursorShape>ArrowCursor</cursorShape>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="text">
-     <string>  CAMERA</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../asset/images/camera.png</normaloff>../asset/images/camera.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="tcp_page">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>30</y>
-      <width>211</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>180</width>
-      <height>80</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>  TCP</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../asset/images/communication.png</normaloff>../asset/images/communication.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="http_page">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>30</y>
-      <width>211</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>180</width>
-      <height>80</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>  HTTP</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../asset/images/http.png</normaloff>../asset/images/http.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>48</width>
-      <height>32</height>
-     </size>
-    </property>
-   </widget>
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>150</y>
-      <width>1841</width>
-      <height>911</height>
+      <x>250</x>
+      <y>130</y>
+      <width>1651</width>
+      <height>840</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>1315</width>
-      <height>870</height>
+      <height>800</height>
      </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>1651</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="frameShape">
      <enum>QFrame::NoFrame</enum>
@@ -208,33 +94,188 @@ QPushButton:pressed {
     <widget class="QWidget" name="page_3"/>
     <widget class="QWidget" name="page_2"/>
    </widget>
-   <widget class="QPushButton" name="model_page">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>30</y>
-      <width>211</width>
-      <height>80</height>
+      <x>30</x>
+      <y>131</y>
+      <width>191</width>
+      <height>622</height>
      </rect>
     </property>
-    <property name="minimumSize">
-     <size>
-      <width>180</width>
-      <height>80</height>
-     </size>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>30</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="dashboard_page">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>  DASH 
+  BOARD</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../asset/images/icons8-dashboard-100.png</normaloff>../asset/images/icons8-dashboard-100.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>36</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="camera_page">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>  CAMERA</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../asset/images/cam.png</normaloff>../asset/images/cam.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="tcp_page">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>-1</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>  TCP</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../asset/images/communication.png</normaloff>../asset/images/communication.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="http_page">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>  HTTP</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../asset/images/http.png</normaloff>../asset/images/http.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="model_page">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>  AI</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../asset/images/brain.png</normaloff>../asset/images/brain.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>38</width>
+         <height>38</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>771</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>36</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
     </property>
     <property name="text">
-     <string>  AI</string>
+     <string>CAMERA MANAGEMENT SYSTEM</string>
     </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../asset/images/brain.png</normaloff>../asset/images/brain.png</iconset>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>20</y>
+      <width>291</width>
+      <height>71</height>
+     </rect>
     </property>
-    <property name="iconSize">
-     <size>
-      <width>38</width>
-      <height>38</height>
-     </size>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>../asset/images/logo.png</pixmap>
     </property>
    </widget>
   </widget>

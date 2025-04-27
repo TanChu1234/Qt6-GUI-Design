@@ -1,0 +1,103 @@
+[2025-03-28 13:02:29] ❌ No configuration found for Camera
+[2025-03-28 13:02:29] 
+=== Camera Connection Summary ===
+[2025-03-28 13:02:29] 📊 Total Cameras: 30
+[2025-03-28 13:02:29] ✅ Successfully Connected: 29
+[2025-03-28 13:02:29]    Cameras: tan, Camera 2, Camera 3, Camera_work, home, Camera29, Camera53, Camera474, Camera 5, Camera05, hom23e, 8424, Camera3432, Camera59, Camera323, home323, nha43, phongka2, Camera435, Camera40, Camera35, home653, Camerag53, Camerah474, Camerai5, homehg, Camera79, home5f, user
+[2025-03-28 13:02:29] ⏩ Skipped Cameras: 1
+[2025-03-28 13:02:29]    Cameras: Camera
+[2025-03-28 13:02:29] 🔌 Connecting to tan at 192.168.1.21...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera 2 at 192.168.1.78...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera 3 at 192.168.3.5...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera_work at 192.168.3.17...
+[2025-03-28 13:02:29] 🔌 Connecting to home at 192.168.1.22...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera29 at 192.168.5.78...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera53 at 192.168.7.5...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera474 at 192.168.3.74...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera 5 at 192.168.3.69...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera05 at 192.168.2.32...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera3432 at 192.168.1.73...
+[2025-03-28 13:02:29] 🔌 Connecting to hom23e at 192.168.10.45...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera323 at 192.168.31.57...
+[2025-03-28 13:02:29] 🔌 Connecting to 8424 at 192.168.3.21...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera59 at 192.168.31.5...
+[2025-03-28 13:02:29] 🔌 Connecting to home323 at 192.168.12.59...
+[2025-03-28 13:02:29] 🔌 Connecting to phongka2 at 192.168.16.23...
+[2025-03-28 13:02:29] 🔌 Connecting to Camerah474 at 192.168.3.211...
+[2025-03-28 13:02:29] 🔌 Connecting to home653 at 192.168.10.27...
+[2025-03-28 13:02:29] 🔌 Connecting to Camerai5 at 192.168.3.155...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera435 at 192.168.3.33...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera40 at 192.168.5.75...
+[2025-03-28 13:02:29] 🔌 Connecting to homehg at 192.168.10.138...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera79 at 192.168.2.115...
+[2025-03-28 13:02:29] 🔌 Connecting to user at 192.168.249.217...
+[2025-03-28 13:02:29] 🔌 Connecting to Camera35 at 192.168.32.53...
+[2025-03-28 13:02:29] 🔌 Connecting to Camerag53 at 192.168.10.50...
+[2025-03-28 13:02:29] 🔌 Connecting to nha43 at 192.168.14.25...
+[2025-03-28 13:02:29] 🔌 Connecting to home5f at 192.168.10.200...
+[2025-03-28 13:03:13] ❌ Failed to open camera Camera_work
+[2025-03-28 13:03:13] ❌ Failed to connect to Camera_work (Timeout)
+[2025-03-28 13:03:19] Connecting to Camera_work...
+[2025-03-28 13:03:19] 🔌 Connecting to Camera_work at 192.168.3.17...
+[2025-03-28 13:03:59] ❌ Failed to open camera tan
+[2025-03-28 13:03:59] ❌ Failed to connect to tan (Timeout)
+[2025-03-28 13:04:05] ❌ Failed to open camera Camera 2
+[2025-03-28 13:04:05] ❌ Failed to connect to Camera 2 (Timeout)
+[2025-03-28 13:04:28] ✅ Connected to Camera_work
+[2025-03-28 13:04:40] ❌ Failed to open camera Camera29
+[2025-03-28 13:04:40] ❌ Failed to connect to Camera29 (Timeout)
+[2025-03-28 13:04:46] ❌ Failed to open camera Camera474
+[2025-03-28 13:04:46] ❌ Failed to connect to Camera474 (Timeout)
+[2025-03-28 13:04:51] ❌ Failed to open camera Camera05
+[2025-03-28 13:04:51] ❌ Failed to connect to Camera05 (Timeout)
+[2025-03-28 13:04:57] ❌ Failed to open camera hom23e
+[2025-03-28 13:04:57] ❌ Failed to connect to hom23e (Timeout)
+[2025-03-28 13:05:02] ❌ Failed to open camera 8424
+[2025-03-28 13:05:02] ❌ Failed to connect to 8424 (Timeout)
+[2025-03-28 13:05:08] ❌ Failed to open camera home323
+[2025-03-28 13:05:08] ❌ Failed to connect to home323 (Timeout)
+[2025-03-28 13:05:13] ❌ Failed to open camera Camerah474
+[2025-03-28 13:05:13] ❌ Failed to connect to Camerah474 (Timeout)
+[2025-03-28 13:05:19] ❌ Failed to open camera Camerai5
+[2025-03-28 13:05:19] ❌ Failed to connect to Camerai5 (Timeout)
+[2025-03-28 13:05:22] ❌ Failed to open camera Camera 3
+[2025-03-28 13:05:22] ❌ Failed to connect to Camera 3 (Timeout)
+[2025-03-28 13:05:24] ❌ Failed to open camera homehg
+[2025-03-28 13:05:24] ❌ Failed to connect to homehg (Timeout)
+[2025-03-28 13:05:30] ❌ Failed to open camera Camera79
+[2025-03-28 13:05:30] ❌ Failed to connect to Camera79 (Timeout)
+[2025-03-28 13:05:36] ❌ Failed to open camera Camera35
+[2025-03-28 13:05:36] ❌ Failed to connect to Camera35 (Timeout)
+[2025-03-28 13:05:41] ❌ Failed to open camera nha43
+[2025-03-28 13:05:41] ❌ Failed to connect to nha43 (Timeout)
+[2025-03-28 13:05:52] ❌ Failed to open camera Camera53
+[2025-03-28 13:05:52] ❌ Failed to connect to Camera53 (Timeout)
+[2025-03-28 13:05:58] ❌ Failed to open camera Camera323
+[2025-03-28 13:05:58] ❌ Failed to connect to Camera323 (Timeout)
+[2025-03-28 13:06:03] ❌ Failed to open camera phongka2
+[2025-03-28 13:06:03] ❌ Failed to connect to phongka2 (Timeout)
+[2025-03-28 13:06:09] ❌ Failed to open camera Camera435
+[2025-03-28 13:06:09] ❌ Failed to connect to Camera435 (Timeout)
+[2025-03-28 13:06:14] ❌ Failed to open camera user
+[2025-03-28 13:06:14] ❌ Failed to connect to user (Timeout)
+[2025-03-28 13:06:20] ❌ Failed to open camera home
+[2025-03-28 13:06:20] ❌ Failed to connect to home (Timeout)
+[2025-03-28 13:06:25] ❌ Failed to open camera Camera3432
+[2025-03-28 13:06:25] ❌ Failed to connect to Camera3432 (Timeout)
+[2025-03-28 13:06:31] ❌ Failed to open camera home653
+[2025-03-28 13:06:31] ❌ Failed to connect to home653 (Timeout)
+[2025-03-28 13:06:36] ❌ Failed to open camera Camerag53
+[2025-03-28 13:06:36] ❌ Failed to connect to Camerag53 (Timeout)
+[2025-03-28 13:06:42] ❌ Failed to open camera home5f
+[2025-03-28 13:06:42] ❌ Failed to connect to home5f (Timeout)
+[2025-03-28 13:06:47] ❌ Failed to open camera Camera59
+[2025-03-28 13:06:47] ❌ Failed to connect to Camera59 (Timeout)
+[2025-03-28 13:06:53] ❌ Failed to open camera Camera 5
+[2025-03-28 13:06:53] ❌ Failed to connect to Camera 5 (Timeout)
+[2025-03-28 13:06:58] ❌ Failed to open camera Camera40
+[2025-03-28 13:06:58] ❌ Failed to connect to Camera40 (Timeout)
+[2025-03-28 13:08:36] 🔌 Initiating connection for 30 cameras
+[2025-03-28 13:08:36] ❌ No configuration found for Camera
+[2025-03-28 13:08:36] 
+=== Camera Connection Summary ===
+[2025-03-28 13:08:36] 📊 Total Cameras: 30

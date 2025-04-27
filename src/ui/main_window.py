@@ -8,21 +8,20 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QMainWindow, QPushButton,
-    QSizePolicy, QStackedWidget, QStatusBar, QWidget)
+from PySide6.QtCore import (QCoreApplication,
+    QMetaObject, QRect,
+    QSize, Qt)
+from PySide6.QtGui import ( QCursor,
+    QFont, QIcon, QPixmap)
+from PySide6.QtWidgets import (QFrame, QLabel,
+    QPushButton, QStackedWidget, QStatusBar,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1920, 1080)
+        MainWindow.resize(1920, 1040)
         MainWindow.setStyleSheet(u"/* Main Window Background */\n"
 "QMainWindow {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, \n"
@@ -31,103 +30,51 @@ class Ui_MainWindow(object):
 "\n"
 "/* General Button Styling */\n"
 "QPushButton {\n"
+"	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+"                                stop:0 #007AFF, stop:1 #009FFF);\n"
 "    border: none;\n"
 "    padding: 12px 20px;\n"
-"    font-size: 24px;\n"
+"    font-size: 20px;\n"
 "    font-weight: bold;\n"
-"    border-radius: 5px;\n"
+" 	border-radius: 10px;\n"
 "    color: white;\n"
 "    min-width: 150px;\n"
 "    text-align: left;\n"
 "    padding-left: 10px;\n"
 "}\n"
 "\n"
-"/* Camera Page Button */\n"
-"QPushButton#camera_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #028A66, stop:1 #00B894);\n"
-"}\n"
-"\n"
-"QPushButton#camera_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #36C4A1, stop:1 #50E0B7);\n"
-"}\n"
-"\n"
-"/* Communication Page Button */\n"
-"QPushButton#tcp_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y"
-                        "2:0, \n"
-"                                stop:0 #007AFF, stop:1 #1AA9FF);\n"
-"}\n"
-"\n"
-"QPushButton#tcp_page:hover {\n"
+"/* Button Hover Effect */\n"
+"QPushButton:hover {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
 "                                stop:0 #66BFFF, stop:1 #80D5FF);\n"
 "}\n"
 "\n"
-"/* Add Item Button */\n"
-"QPushButton#http_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #A000D7, stop:1 #D100FF);\n"
-"}\n"
-"\n"
-"QPushButton#http_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #C050F5, stop:1 #E080FF);\n"
-"}\n"
-"\n"
-"/* Add Item Button */\n"
-"QPushButton#model_page {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #FFBF00, stop:1 #FFD700); /* Gold to Orange */\n"
-"}\n"
-"\n"
-"QPushButton#model_page:hover {\n"
-"    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                  "
-                        "              stop:0 #FFF44F, stop:1 #FFD700); /* Light Yellow to Gold */\n"
-"}\n"
-"/* Pressed Effect */\n"
 "QPushButton:pressed {\n"
 "    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
-"                                stop:0 #027055, stop:1 #00987A);\n"
+"                                stop:0 #007AFF, stop:1 #009FFF);\n"
+"}\n"
+"\n"
+"/* "
+                        "List Widgets */\n"
+"QWidget#widget {\n"
+"	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, \n"
+"                                stop:0 #007AFF, stop:1 #009FFF);\n"
+"	border-radius: 10px;\n"
+"}\n"
+"QWidget#widget_2 {\n"
+"	background: none;\n"
+"	\n"
+"	border-radius: 10px;\n"
 "}\n"
 "")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.camera_page = QPushButton(self.centralwidget)
-        self.camera_page.setObjectName(u"camera_page")
-        self.camera_page.setGeometry(QRect(40, 30, 211, 80))
-        self.camera_page.setMinimumSize(QSize(180, 80))
-        self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
-        self.camera_page.setLayoutDirection(Qt.LeftToRight)
-        icon = QIcon()
-        icon.addFile(u"src/asset/images/camera.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.camera_page.setIcon(icon)
-        self.camera_page.setIconSize(QSize(32, 32))
-        self.tcp_page = QPushButton(self.centralwidget)
-        self.tcp_page.setObjectName(u"tcp_page")
-        self.tcp_page.setGeometry(QRect(700, 30, 211, 80))
-        self.tcp_page.setMinimumSize(QSize(180, 80))
-        font = QFont()
-        font.setBold(True)
-        self.tcp_page.setFont(font)
-        icon1 = QIcon()
-        icon1.addFile(u"src/asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.tcp_page.setIcon(icon1)
-        self.tcp_page.setIconSize(QSize(32, 32))
-        self.http_page = QPushButton(self.centralwidget)
-        self.http_page.setObjectName(u"http_page")
-        self.http_page.setGeometry(QRect(480, 30, 211, 80))
-        self.http_page.setMinimumSize(QSize(180, 80))
-        icon2 = QIcon()
-        icon2.addFile(u"src/asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.http_page.setIcon(icon2)
-        self.http_page.setIconSize(QSize(48, 32))
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        self.stackedWidget.setGeometry(QRect(40, 150, 1841, 911))
-        self.stackedWidget.setMinimumSize(QSize(1315, 870))
+        self.stackedWidget.setGeometry(QRect(250, 130, 1651, 840))
+        self.stackedWidget.setMinimumSize(QSize(1315, 800))
+        self.stackedWidget.setMaximumSize(QSize(1651, 16777215))
+        self.stackedWidget.setStyleSheet(u"")
         self.stackedWidget.setFrameShape(QFrame.NoFrame)
         self.stackedWidget.setLineWidth(1)
         self.page = QWidget()
@@ -139,14 +86,80 @@ class Ui_MainWindow(object):
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
         self.stackedWidget.addWidget(self.page_2)
-        self.model_page = QPushButton(self.centralwidget)
-        self.model_page.setObjectName(u"model_page")
-        self.model_page.setGeometry(QRect(260, 30, 211, 80))
-        self.model_page.setMinimumSize(QSize(180, 80))
+        self.layoutWidget = QWidget(self.centralwidget)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.layoutWidget.setGeometry(QRect(30, 131, 191, 622))
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
+        self.verticalLayout.setSpacing(30)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.dashboard_page = QPushButton(self.layoutWidget)
+        self.dashboard_page.setObjectName(u"dashboard_page")
+        self.dashboard_page.setMinimumSize(QSize(180, 100))
+        icon = QIcon()
+        icon.addFile(u"../asset/images/icons8-dashboard-100.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.dashboard_page.setIcon(icon)
+        self.dashboard_page.setIconSize(QSize(48, 36))
+
+        self.verticalLayout.addWidget(self.dashboard_page)
+
+        self.camera_page = QPushButton(self.layoutWidget)
+        self.camera_page.setObjectName(u"camera_page")
+        self.camera_page.setMinimumSize(QSize(180, 100))
+        self.camera_page.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+        self.camera_page.setLayoutDirection(Qt.LeftToRight)
+        icon1 = QIcon()
+        icon1.addFile(u"../asset/images/cam.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.camera_page.setIcon(icon1)
+        self.camera_page.setIconSize(QSize(32, 32))
+
+        self.verticalLayout.addWidget(self.camera_page)
+
+        self.tcp_page = QPushButton(self.layoutWidget)
+        self.tcp_page.setObjectName(u"tcp_page")
+        self.tcp_page.setMinimumSize(QSize(180, 100))
+        font = QFont()
+        font.setBold(True)
+        self.tcp_page.setFont(font)
+        icon2 = QIcon()
+        icon2.addFile(u"../asset/images/communication.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.tcp_page.setIcon(icon2)
+        self.tcp_page.setIconSize(QSize(32, 32))
+
+        self.verticalLayout.addWidget(self.tcp_page)
+
+        self.http_page = QPushButton(self.layoutWidget)
+        self.http_page.setObjectName(u"http_page")
+        self.http_page.setMinimumSize(QSize(180, 100))
         icon3 = QIcon()
-        icon3.addFile(u"src/asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.model_page.setIcon(icon3)
+        icon3.addFile(u"../asset/images/http.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.http_page.setIcon(icon3)
+        self.http_page.setIconSize(QSize(48, 32))
+
+        self.verticalLayout.addWidget(self.http_page)
+
+        self.model_page = QPushButton(self.layoutWidget)
+        self.model_page.setObjectName(u"model_page")
+        self.model_page.setMinimumSize(QSize(180, 100))
+        icon4 = QIcon()
+        icon4.addFile(u"../asset/images/brain.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.model_page.setIcon(icon4)
         self.model_page.setIconSize(QSize(38, 38))
+
+        self.verticalLayout.addWidget(self.model_page)
+
+        self.label = QLabel(self.centralwidget)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(30, 30, 771, 61))
+        font1 = QFont()
+        font1.setPointSize(36)
+        font1.setBold(True)
+        self.label.setFont(font1)
+        self.label.setStyleSheet(u"color: white;")
+        self.label_2 = QLabel(self.centralwidget)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(1610, 20, 291, 71))
+        self.label_2.setPixmap(QPixmap(u"../asset/images/logo.png"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -158,10 +171,14 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Camera Management", None))
+        self.dashboard_page.setText(QCoreApplication.translate("MainWindow", u"  DASH \n"
+"  BOARD", None))
         self.camera_page.setText(QCoreApplication.translate("MainWindow", u"  CAMERA", None))
         self.tcp_page.setText(QCoreApplication.translate("MainWindow", u"  TCP", None))
         self.http_page.setText(QCoreApplication.translate("MainWindow", u"  HTTP", None))
         self.model_page.setText(QCoreApplication.translate("MainWindow", u"  AI", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"CAMERA MANAGEMENT SYSTEM", None))
+        self.label_2.setText("")
     # retranslateUi
 
